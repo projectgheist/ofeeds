@@ -1,0 +1,16 @@
+include includes/header
+include includes/nav
+.container
+	.row
+		.col-lg-offset-3.col-lg-12
+			h3 Add new RSS feed
+			form.form-inline
+				.form-group
+					input.form-control.typeahead#sn(type="text",placeholder="Enter new RSS")
+				button.btn(ng-click="sn()") Add
+	.row
+		.col-lg-12
+			p
+				.alert.alert-success.fade.in.hidden#as
+				.alert.alert-danger.fade.in.hidden#ad
+include includes/footer

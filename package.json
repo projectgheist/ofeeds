@@ -1,0 +1,35 @@
+{
+  "name": "OFeeds",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    "run": "node app.js"
+  },
+  "dependencies": {
+	"agenda": "*",
+	"express": "*",
+    "feedparser": "*",
+    "jade": "*",
+    "mongoose": "*",
+    "passport": "*",
+    "passport-local": "*",
+    "request": "*",
+    "rsvp": "*",
+    "shortid": "*"
+  },
+  "readmeFilename": "README.md",
+  "description": "",
+  "main": "app.js",
+  "devDependencies": {},
+  "repository": "",
+  "keywords": [
+    "nodejs"
+  ],
+  "author": "",
+  "license": "BSD",
+  "subdomain": "www.google.com",
+  "engines": {
+    "node": "0.8.x"
+  }
+}
