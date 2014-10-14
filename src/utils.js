@@ -15,10 +15,12 @@ exports.isUrl = function(url) {
 };
 
 exports.GetDBConnectionURL = function(obj) {
-    if (obj.username && obj.password) {
-        return obj.username + ":" + obj.password + "@" + obj.hostname + ":" + obj.port + "/" + obj.dbname;
+	if (process.env.OPENSHIFT_MONGODB_DB_URL) {
+		return process.env.OPENSHIFT_MONGODB_DB_URL + obj.dbname;
+    } else if (obj.username && obj.password) {
+        return "mongodb://" + obj.username + ":" + obj.password + "@" + obj.hostname + ":" + obj.port + "/" + obj.dbname;
     } else {
-        return obj.hostname + ":" + obj.port + "/" + obj.dbname;
+        return "mongodb://" + obj.hostname + ":" + obj.port + "/" + obj.dbname;
     }
 };
 

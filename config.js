@@ -1,3 +1,30 @@
+/** Application ip address
+ */
+module.exports.Dir = function() {
+	if (process.env.OPENSHIFT_REPO_DIR) {
+		return process.env.OPENSHIFT_REPO_DIR;
+	}
+	return __dirname + '/';
+};
+
+/** Application ip address
+ */
+module.exports.IpAddr = function() {
+	if (process.env.OPENSHIFT_NODEJS_IP) {
+		return process.env.OPENSHIFT_NODEJS_IP;
+	}
+	return '127.0.0.1';
+};
+
+/** Application port
+ */
+module.exports.Port = function() {
+	if (process.env.OPENSHIFT__PORT) {
+		return process.env.OPENSHIFT__PORT || 8080;
+	}
+	return process.env.PORT || 3000;
+};
+
 /** Store site title
  */
 module.exports.site = {
@@ -7,9 +34,9 @@ module.exports.site = {
 /** Mongo DB Credentials
  */
 module.exports.db = {
-	hostname: 'localhost',
-	port: '27017',
-	dbname: 'storageDB',
-	username: '',
-	password: ''
+	hostname: process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost',
+	port: process.env.OPENSHIFT_MONGODB_DB_PORT || '27017',
+	dbname: process.env.OPENSHIFT_APP_NAME || 'storageDB',
+	username: process.env.OPENSHIFT_MONGODB_DB_USERNAME || '',
+	password: process.env.OPENSHIFT_MONGODB_DB_PASSWORD || ''
 };
