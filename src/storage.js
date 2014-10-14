@@ -23,6 +23,9 @@ exports.connect = function(obj) {
     });
     db.once('open', function() {
         console.log('Connected to Mongo: '+obj.dbname+'!');
+		/** Cron jobs execution
+		 */
+		require('./cron').setup();
     });
     return db;
 };

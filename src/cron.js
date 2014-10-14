@@ -12,11 +12,11 @@ var fp = require('feedparser'),
 	
 var Agenda = require('agenda'),
 	ag = new Agenda({ db: { address: ut.GetDBConnectionURL(cf.db) } });
-	
-/*module.exports = function() {
+
+exports.setup = function() {
 	ag.every('* /5 * * * *', 'UpdateAllFeeds');
 	ag.start();
-};*/
+};
 
 function ContainerImages() {
 	this.small = '';
@@ -29,14 +29,14 @@ function ContainerImages() {
  */
 exports.FetchFeed = function(feed) {
 	// early escape if no feed is returned 
-	/*if (!feed ||
-		(feed.successfulCrawlTime !== undefined && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
-		console.log(["Fetch feed failed! (Updated less than", mm().diff(feed.successfulCrawlTime, 'minutes'), "minute(s) ago)"].join(" "));
+	if (!feed ||
+		(feed.successfulCrawlTime !== undefined && mm().diff(feed.successfulCrawlTime, 'minutes') <= 5)) { // feed was updated less then 2 minutes ago
+		console.log(["Fetch feed '",feed.feedURL,"' failed! (Updated less than", mm().diff(feed.successfulCrawlTime, 'minutes'), "minute(s) ago)"].join(" "));
 		return;
-	}*/
+	}
 	
 	console.log("\nFetch feed: " + feed.feedURL);
-	
+
 	return new rs.Promise(function(resolve, reject) {
 		// save found posts to array
 		var existingPosts = {};
@@ -52,9 +52,9 @@ exports.FetchFeed = function(feed) {
 		rq(feed.feedURL)
 		.pipe(new fp()) // fetch data from feed URL
 		.on('error', function(error) {
+			console.log("\tFeedparser: " + error);
 			// always handle errors
 			parseError = true;
-			console.log("\tFeedparser: " + error);
 		})
 		.on('meta', function(meta) {
 			feed.title = meta.title;
@@ -104,7 +104,6 @@ exports.FetchFeed = function(feed) {
 				}
 				
 				if (!existingPosts[guid]) {
-					console.log(data.title);
 					// create new post object with all previously extracted information
 					var post = new st.Post({
 						feed: feed,
@@ -147,12 +146,24 @@ exports.FetchFeed = function(feed) {
 	});
 };
 
+function UpdateAllFeeds(done) {
+	console.log('Update all feeds')
+	st
+	.all(st.Feed)		// retrieve all feeds
+	.populate('posts')	// replacing the specified paths in the document with document(s) from other collection(s)
+	.then(function(feeds) {
+		var a = [];
+		for (var i in feeds) {
+			a.push(exports.FetchFeed(feeds[i]));
+		}
+		rs.all(a).then(done); 
+	});
+};
+
 /*
  * function UpdateAllFeeds
  */
 ag.define('UpdateAllFeeds', function(job, done) {
-	fd
-	.findById(job.data.feedID) 	// db call
-	.populate('posts')			// db call 
-	.then(FetchFeed);
+	UpdateAllFeeds(done);
 });
+

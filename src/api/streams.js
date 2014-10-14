@@ -11,7 +11,6 @@ var app = module.exports = express();
  * @param feed: information related to the feed 
  */
 function formatPosts(posts, feed) {
-	console.log(posts);
 	// creates a new array with the posts 
     var items = posts.map(function(post) {
 		var tags = post.tags.map(function(tag) {
@@ -46,8 +45,6 @@ function formatPosts(posts, feed) {
             annotations: []
         };
     });
-	
-	console.log(items);
 	
     // TODO: atom output
     return {
@@ -98,11 +95,13 @@ app.get('/api/0/stream/contents/*', function(req, res) {
         limit: +req.query.n || 20,
         populate: 'feed'
     }).then(function(posts) {
+        var isFeed = (streams[0].type === 'feed');
+
         // Google Reader returns a 404 for unknown feeds
-        if (posts.length === 0 && streams[0].type === 'feed') {
+        if (posts.length === 0 && isFeed) {
 			return res.status(404).send('Feed not found!');
         }
-        var isFeed = (streams[0].type === 'feed');
+		
         var value = streams[0].value;
         var feed = posts[0] && posts[0].feed;
 		

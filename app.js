@@ -23,10 +23,6 @@ app.listen(app.get('port'), app.get('ipaddr'), function(){
  */
 db.connect(cf.db);
 
-/** Cron jobs execution
- */
-//require('./src/cron')();
-
 /** GET / POST Pages
  */
 require('./src/routes')(app); 
