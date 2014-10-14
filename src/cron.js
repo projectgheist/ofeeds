@@ -19,22 +19,23 @@ var Agenda = require('agenda'),
 };*/
 
 function ContainerImages() {
-	var small, large;
-	var other;
+	this.small = '';
+	this.large = '';
+	this.other = [];
 }
 
 /*
  * function FetchFeed
  */
 exports.FetchFeed = function(feed) {
-	console.log()
 	// early escape if no feed is returned 
-	if (!feed ||
-		(feed.successfulCrawlTime !== undefined && mm(feed.successfulCrawlTime).diff(mm(), 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
+	/*if (!feed ||
+		(feed.successfulCrawlTime !== undefined && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
+		console.log(["Fetch feed failed! (Updated less than", mm().diff(feed.successfulCrawlTime, 'minutes'), "minute(s) ago)"].join(" "));
 		return;
-	}
+	}*/
 	
-	console.log("\nFetch feed: " + feed.feedURL + "\n");
+	console.log("\nFetch feed: " + feed.feedURL);
 	
 	return new rs.Promise(function(resolve, reject) {
 		// save found posts to array
@@ -76,7 +77,7 @@ exports.FetchFeed = function(feed) {
 			// do something else, then do the next thing
 			var stream = this, 
 				data;
-			
+				
 			while (data = stream.read()) {
 				var guid = data.guid || data.link,
 					thumbnail_obj = new ContainerImages();
@@ -103,7 +104,9 @@ exports.FetchFeed = function(feed) {
 				}
 				
 				if (!existingPosts[guid]) {
-					var post = new Post({
+					console.log(data.title);
+					// create new post object with all previously extracted information
+					var post = new st.Post({
 						feed: feed,
 						guid: guid,
 						title: data.title,
@@ -117,13 +120,14 @@ exports.FetchFeed = function(feed) {
 						commentsURL: data.comments,
 						categories: data.categories
 					});
-					
+					// store in feeds table
 					feed.posts.push(post);
+					// store in posts table
 					posts.push(post.save());
 				}
 			}
 			
-			// TODO: check for updates to existing posts
+			// @todo: check for updates to existing posts
 		})
 		.on('end', function() {
 			// wait for posts to finish saving

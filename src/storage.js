@@ -3,13 +3,13 @@
 require('./mongoose-promise');
 
 var mg = require('mongoose'),
-    rsvp = require('rsvp'),
-    Promise = rsvp.Promise,
+    rs = require('rsvp'),
+    Promise = rs.Promise,
 	cf = require('../config'),
 	ut = require('./utils');
 
 /** function Connect
- * connect to the MongoDB
+ * creates a connection to the MongoDB
  */
 exports.connect = function(obj) {
 	// if database is already connected return
@@ -23,12 +23,6 @@ exports.connect = function(obj) {
     });
     db.once('open', function() {
         console.log('Connected to Mongo: '+obj.dbname+'!');
-		/*var demo_user = new exports.User({ 
-			username:'demo@openreader.com', 
-			password:'demo' 
-		});
-		demo_user.save(function(err, doc) {
-		});*/
     });
     return db;
 };
@@ -43,7 +37,7 @@ exports.all = function(model) {
 }
 
 exports.findOrCreate = function(model, item) {
-	// upsert: bool - creates the object if it doesn't exist. defaults to false.
+	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
     return model.findOneAndUpdate(item, {}, {upsert: true}); 
 };
 
@@ -51,7 +45,10 @@ exports.updateOrCreate = function(model, item, update) {
     return model.findOneAndUpdate(item, update, { upsert: true });
 };
 
-// !Should not be used for release version, used by the tests
+/** function dropDatabase
+ * Deletes the currently connected database and removes all records
+ * !Should not be used for release version, used by the tests
+ */
 exports.dropDatabase = function(callback) {
     if (!mongoose.connection) {
 		return callback(new Error('Not connected'));
@@ -59,7 +56,9 @@ exports.dropDatabase = function(callback) {
     mongoose.connection.db.dropDatabase(callback);
 };
 
-// Adds and removes tags from a subscription or post
+/** function editTags
+ * Adds and removes tags from a subscription or post
+ */
 exports.editTags = function(record, addTags, removeTags) {
     // optional parameter declaration
 	addTags || (addTags = []);
@@ -77,13 +76,15 @@ exports.editTags = function(record, addTags, removeTags) {
         });
     });
 	
-    return rsvp.all([add, remove]);
+	// returns a promise
+    return rs.all([add, remove]);
 };
 
 function getTags(tags) {
     if (tags && tags.length) {
         return exports.Tag.find({ $or: tags });
     }
+	// returns an empty promise
 	return new Promise(function(resolve, reject){ resolve([]); });
 }
 
@@ -96,7 +97,7 @@ function getTags(tags) {
 //   maxTime - the date of the newest item to include
 //   limit - the maximum number of items to return
 //   sort - the field to sort (see mongoose docs)
-exports.postsForStreams = function(streams, options) {
+exports.getPosts = function(streams, options) {
     if (!options)
         options = {};
 		
@@ -111,7 +112,7 @@ exports.postsForStreams = function(streams, options) {
 	
     // load the tags to include and exclude
     var includeTags, excludeTags;
-    return rsvp.all([getTags(tags), getTags(options.excludeTags)]).then(function(results) {
+    return rs.all([getTags(tags), getTags(options.excludeTags)]).then(function(results) {
         includeTags = results[0];
         excludeTags = results[1];
         		

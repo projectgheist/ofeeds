@@ -22,7 +22,7 @@ include includes/nav
 				.list-group
 					.list-group-item.list-group-item-success
 						h4 Feed subscriptions
-					a.list-group-item(href="/api/0/subscription/feed/{{sub.feedURL}}",ng-repeat="sub in subs")
+					a.list-group-item(href="/api/0/stream/contents/feed/{{sub.feedURL}}",ng-repeat="sub in subs")
 						| {{sub.title}}
 			.col-xs-8
 				.bs-callout

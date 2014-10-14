@@ -6,6 +6,63 @@
 
 var app = module.exports = express();
 
+/**
+ * @param posts: Array of posts to format
+ * @param feed: information related to the feed 
+ */
+function formatPosts(posts, feed) {
+	console.log(posts);
+	// creates a new array with the posts 
+    var items = posts.map(function(post) {
+		var tags = post.tags.map(function(tag) {
+			return tag.stringID;
+        });
+		
+        return {
+            id: post.longID,
+            title: post.title,
+            alternate: {
+                href: post.url,
+                type: 'text/html'
+            },
+            content: {
+                direction: 'ltr',
+                content: post.body,
+				images: post.images,
+            },
+            author: post.author,
+            published: (post.published / 1000) | 0,
+            updated: (post.updated / 1000) | 0,
+            categories: tags.concat(post.categories),
+            origin: {
+                streamId: post.feed.stringID,
+                title: post.feed.title,
+                htmlUrl: post.feed.siteURL
+            },
+            crawlTimeMsec: '' + (+post.feed.successfulCrawlTime),
+            timestampUsec: '' + (post.published * 1000),
+            likingUsers: [],
+            comments: [],
+            annotations: []
+        };
+    });
+	
+	console.log(items);
+	
+    // TODO: atom output
+    return {
+        direction: 'ltr',
+        id: feed.id,
+        title: feed.title,
+        description: feed.description,
+        continuation: feed.continuation,
+        self: [{ href: feed.self }],
+        alternate: feed.siteURL ? [{ href: feed.siteURL, type: 'text/html' }] : undefined,
+        updated: feed.updated / 1000 | 0,
+        items: items
+    };
+};
+
 app.get('/api/0/stream/contents/*', function(req, res) {
 	// validate input
     var streams = ut.parseParameters(req.params[0], undefined);
@@ -33,7 +90,7 @@ app.get('/api/0/stream/contents/*', function(req, res) {
         return res.status(400).send('InvalidTag');
 	*/	
     // load posts
-    db.postsForStreams(streams, {
+    db.getPosts(streams, {
         excludeTags: excludeTags,
         minTime: req.query.ot,
         maxTime: req.query.nt,
@@ -42,24 +99,25 @@ app.get('/api/0/stream/contents/*', function(req, res) {
         populate: 'feed'
     }).then(function(posts) {
         // Google Reader returns a 404 for unknown feeds
-        if (posts.length === 0 && streams[0].type === 'feed')
-			return res.status(404).send(FeedNotFound);
-        
+        if (posts.length === 0 && streams[0].type === 'feed') {
+			return res.status(404).send('Feed not found!');
+        }
         var isFeed = (streams[0].type === 'feed');
         var value = streams[0].value;
         var feed = posts[0] && posts[0].feed;
-        
-        // TODO: atom output
-        res.json(generateFeed(posts, {
-            id:           isFeed ? feed.stringID     : 'user/' + req.user.id + '/' + value.type + '/' + value.name,
+		
+		// @todo: atom output
+        res.json(formatPosts(posts, {
+            id:           isFeed ? feed.stringID     : 'user/' + (req.user.id || '-') + '/' + value.type + '/' + value.name,
             title:        isFeed ? feed.title        : value.name,
             description:  isFeed ? feed.description  : undefined,
             siteURL:      isFeed ? feed.siteURL      : undefined,
             updated:      isFeed ? feed.lastModified : Date.now(),
-            self:         utils.fullURL(req),
+            self:         ut.fullURL(req),
             continuation: 'TODO'
         }));
     }, function(err) {
         return res.status(500).send(err);
     });
 });
+

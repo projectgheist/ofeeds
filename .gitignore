@@ -1,0 +1,5 @@
+# ignore nodejs library modules
+/node_modules
+
+# ignore custom application launcher in Windows
+*.bat

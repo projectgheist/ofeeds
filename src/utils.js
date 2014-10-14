@@ -3,6 +3,10 @@
 var mg = require('mongoose'),
 	vd = require('validator');
 
+exports.fullURL = function(req) {
+    return req.protocol + '://' + req.headers.host + req.url;
+};
+
 exports.ref = function(type) {
     return {
         type: mg.Schema.Types.ObjectId,
