@@ -24,7 +24,7 @@ db.connect(config.db);
 
 /** Cron jobs execution
  */
-require('./src/cron')();
+//require('./src/cron')();
 
 /** GET / POST Pages
  */
@@ -32,10 +32,11 @@ require('./src/routes')(app);
 
 /** Include routes
  */
+app.use(require('./src/api/subscriptions'));
+app.use(require('./src/api/streams'));
+
 /*
 app.use(require('./src/api/user'));
-app.use(require('./src/api/subscription'));
-app.use(require('./src/api/stream'));
 app.use(require('./src/api/tag'));
 app.use(require('./src/api/preference'));
 */

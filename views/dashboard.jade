@@ -1,16 +1,61 @@
 include includes/header
 include includes/nav
 .container
-	.row
-		.col-lg-offset-3.col-lg-12
-			h3 Add new RSS feed
-			form.form-inline
-				.form-group
-					input.form-control.typeahead#sn(type="text",placeholder="Enter new RSS")
-				button.btn(ng-click="sn()") Add
-	.row
-		.col-lg-12
-			p
-				.alert.alert-success.fade.in.hidden#as
-				.alert.alert-danger.fade.in.hidden#ad
+	.row(ng-controller="AppFeeds")
+		.col-xs-offset-3.col-xs-6
+			h3(style="text-align:center") Add new RSS feed
+			hr
+			.row
+				form
+					.col-xs-9
+						.form-group
+							input.form-control.typeahead#nrss(type="text",placeholder="Enter new RSS")
+					.col-xs-3
+						button.btn.btn-primary.btn-block(ng-click="sbmt()") Add
+			.row
+				.col-xs-12
+					.alert.alert-success.fade.in.hidden#as
+					.alert.alert-danger.fade.in.hidden#ad
+			hr(style="margin-top:0")
+		.row
+			.col-xs-4
+				.list-group
+					.list-group-item.list-group-item-success
+						h4 Feed subscriptions
+					a.list-group-item(href="/api/0/subscription/feed/{{sub.feedURL}}",ng-repeat="sub in subs")
+						| {{sub.title}}
+			.col-xs-8
+				.bs-callout
+					.row
+						.col-xs-9
+							| Article title
+						.col-xs-3(style="text-align:right")
+							| Publication time
+				.bs-callout
+					.row
+						.col-xs-12
+							h2 Article title
+								small.pull-right Publication time
+					hr
+					.row
+						.col-xs-8
+							p 
+								a(href="#") [Feed subscription]
+								| &nbsp;by [Author name]
+						.col-xs-4
+							.btn-group.pull-right
+								button.btn.btn-default Unread
+								.btn-group
+									button.btn.btn-default Share
+									button.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
+										span.caret
+										span.sr-only Toggle Dropdown
+									ul.dropdown-menu
+										li
+											a(href="#") Twitter
+										li
+											a(href="#") Facebook
+										li.divider
+										li
+											a(href="#") Email
 include includes/footer

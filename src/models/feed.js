@@ -1,6 +1,6 @@
 var mongoose = require('mongoose'),
-	utils = require('../utils'),
-	shortId = require('shortid');
+	ut = require('../utils'),
+	sh = require('shortid');
 
 // A Feed containing posts, shared across all users
 var Feed = mongoose.Schema({
@@ -13,15 +13,15 @@ var Feed = mongoose.Schema({
     categories: [String],
     feedURL: { type: String, index: { unique: true }},
     siteURL: String,
-    posts: [utils.ref('Post')],
+    posts: [ut.ref('Post')],
     
     // tags and titles for individual users
     // a user is considered subscribed to a feed if there is a 
     // user/-/state/com.google/reading-list tag on the feed for that user
-    tags: [utils.ref('Tag')],
+    tags: [ut.ref('Tag')],
     numSubscribers: { type: Number, default: 0 },
     userTitles: { type: {}, default: {} },
-	sortID: { type: String, default: shortId.generate },
+	sortID: { type: String, default: sh.generate() },
     
     // fetcher metadata
     successfulCrawlTime: Date,

@@ -33,9 +33,18 @@ exports.connect = function(obj) {
     return db;
 };
 
+exports.all = function(model) {
+	return model.find({}, function(err,feeds) {
+		if (err) {
+			return false;
+		}
+		return feeds;
+	});
+}
+
 exports.findOrCreate = function(model, item) {
 	// upsert: bool - creates the object if it doesn't exist. defaults to false.
-    return model.findOneAndUpdate(item, {}, { upsert: true }); 
+    return model.findOneAndUpdate(item, {}, {upsert: true}); 
 };
 
 exports.updateOrCreate = function(model, item, update) {
@@ -75,8 +84,7 @@ function getTags(tags) {
     if (tags && tags.length) {
         return exports.Tag.find({ $or: tags });
     }
-    var promise = new Promise(function(resolve, reject){ resolve([]); });
-	return promise;
+	return new Promise(function(resolve, reject){ resolve([]); });
 }
 
 // Returns a list of posts for a list of streams (feeds and tags) as parsed
@@ -103,10 +111,7 @@ exports.postsForStreams = function(streams, options) {
 	
     // load the tags to include and exclude
     var includeTags, excludeTags;
-    return rsvp.all([
-        getTags(tags),
-        getTags(options.excludeTags)
-    ]).then(function(results) {
+    return rsvp.all([getTags(tags), getTags(options.excludeTags)]).then(function(results) {
         includeTags = results[0];
         excludeTags = results[1];
         		
@@ -148,10 +153,10 @@ exports.postsForStreams = function(streams, options) {
 };
 
 // export the modules
-exports.Feed = require('./models/feed');
-exports.Post = require('./models/post');
+exports.Feed 	= require('./models/feed');
+exports.Post 	= require('./models/post');
+exports.Tag 	= require('./models/tag');
 /*
 exports.User = require('./models/user');
-exports.Tag = require('./models/tag');
 exports.Preference = require('./models/preference');
 */

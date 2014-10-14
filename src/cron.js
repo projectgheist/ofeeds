@@ -2,39 +2,58 @@
  */
 var fp = require('feedparser'),
 	rq = require('request'),
+	rs = require('rsvp'),
 	sx = require("../node_modules/feedparser/node_modules/sax/lib/sax.js"),
 	cf = require('../config'),
 	st = require('./storage'),
 	ut = require('./utils'),
+	mm = require('moment'),
 	fd = st.Feed;
 	
 var Agenda = require('agenda'),
 	ag = new Agenda({ db: { address: ut.GetDBConnectionURL(cf.db) } });
+	
+/*module.exports = function() {
+	ag.every('* /5 * * * *', 'UpdateAllFeeds');
+	ag.start();
+};*/
 
-ag.define('UpdateFeeds', function(job, done) {
-	fd
-	.findById(job.data.feedID) 	// db call
-	.populate('posts')			// db call 
-	.then(function(feed) {
-		// early escape if no feed is returned 
-		if (!feed) return;
-		
+function ContainerImages() {
+	var small, large;
+	var other;
+}
+
+/*
+ * function FetchFeed
+ */
+exports.FetchFeed = function(feed) {
+	console.log()
+	// early escape if no feed is returned 
+	if (!feed ||
+		(feed.successfulCrawlTime !== undefined && mm(feed.successfulCrawlTime).diff(mm(), 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
+		return;
+	}
+	
+	console.log("\nFetch feed: " + feed.feedURL + "\n");
+	
+	return new rs.Promise(function(resolve, reject) {
 		// save found posts to array
 		var existingPosts = {};
 		feed.posts.forEach(function(post) {
 			existingPosts[post.guid] = post;
 		});
 
+		// pre-define variables
 		var parseError = false,
 			posts = [],
 			parser = sx.parser(false);
-			
+		
 		rq(feed.feedURL)
-		.pipe(new feedparser()) // getter
+		.pipe(new fp()) // fetch data from feed URL
 		.on('error', function(error) {
 			// always handle errors
 			parseError = true;
-			//console.log("\tFeedparser: " + error);
+			console.log("\tFeedparser: " + error);
 		})
 		.on('meta', function(meta) {
 			feed.title = meta.title;
@@ -109,18 +128,27 @@ ag.define('UpdateFeeds', function(job, done) {
 		.on('end', function() {
 			// wait for posts to finish saving
 			// then mark crawl success or failure
-			rsvp.all(posts).then(function() {
-				feed.successfulCrawlTime = new Date();
+			rs.all(posts).then(function() {
+				feed.successfulCrawlTime = new Date();			
+				feed.save();
+				resolve();
 			}, function(err) {
 				parser.removeAllListeners('article');
 				feed.failedCrawlTime = new Date();
 				feed.lastFailureWasParseFailure = parseError;
+				feed.save();
+				reject(err);
 			});
 		});
 	});
-});
-
-module.exports = function() {
-	ag.every('*/5 * * * *', 'UpdateFeeds');
-	ag.start();
 };
+
+/*
+ * function UpdateAllFeeds
+ */
+ag.define('UpdateAllFeeds', function(job, done) {
+	fd
+	.findById(job.data.feedID) 	// db call
+	.populate('posts')			// db call 
+	.then(FetchFeed);
+});
