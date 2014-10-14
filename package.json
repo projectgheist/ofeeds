@@ -16,7 +16,9 @@
     "passport-local": "*",
     "request": "*",
     "rsvp": "*",
-    "shortid": "*"
+    "shortid": "*",
+    "validator": "*",
+	"moment": "*"
   },
   "readmeFilename": "README.md",
   "description": "",
@@ -24,12 +26,13 @@
   "devDependencies": {},
   "repository": "",
   "keywords": [
-    "nodejs"
+    "nodejs",
+	"rss"
   ],
   "author": "",
   "license": "BSD",
   "subdomain": "www.google.com",
   "engines": {
-    "node": "0.8.x"
+    "node": "0.10.x"
   }
 }
