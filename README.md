@@ -21,21 +21,21 @@ Two quick start options are available:
 * [Download the latest release](https://github.com/projectgheist/ofeeds/archive/master.zip)
 * Clone the repo: `git clone https://github.com/projectgheist/ofeeds.git`
 
-## Installation
+### Installation
 * Install dependencies with 'npm install'
 * Start your MongoDB server with `mongod`
 * Start the server with `npm start`
-* Browse to localhost:3000
+* Browse to `localhost:3000`
 
-You can change the port, IP, database connection settings, ... inside the config file.
+Note: You can change the port, ip, database connection settings, ... inside the config file.
 
-## External libraries/frameworks used for frontend
+## External libraries/frameworks used for front-end
 * [Angular.JS](http://angularjs.org/)
 * [Bootstrap](http://getbootstrap.com)
 * [JQuery](http://jquery.com/)
 * [TypeAhead](https://github.com/twitter/typeahead.js/)
 
-Library dependencies:
+## Library dependencies:
 
 ## Copyright and license
 I haven't decided on a license yet.
