@@ -55,7 +55,6 @@ exports.parseParameters = function(obj,user) {
             }
         }
     }
-	console.log(obj);
     return obj;
 };
 
@@ -76,7 +75,6 @@ exports.parseFeeds = function(feeds) {
             
         feeds[i] = url;
     }
-    
     return feeds;
 };
 

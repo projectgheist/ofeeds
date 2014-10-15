@@ -19,8 +19,8 @@ module.exports.IpAddr = function() {
 /** Application port
  */
 module.exports.Port = function() {
-	if (process.env.OPENSHIFT__PORT) {
-		return process.env.OPENSHIFT__PORT || 8080;
+	if (process.env.OPENSHIFT_NODEJS_PORT) {
+		return process.env.OPENSHIFT_NODEJS_PORT || 8080;
 	}
 	return process.env.PORT || 3000;
 };

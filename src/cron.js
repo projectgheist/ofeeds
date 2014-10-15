@@ -147,6 +147,11 @@ exports.FetchFeed = function(feed) {
 };
 
 function UpdateAllFeeds(done) {
+	// needs to have a database connection
+    if (!mg.connection.db) {
+		console.log('Not connected to a database')
+		done();
+	}
 	console.log('Update all feeds')
 	st
 	.all(st.Feed)		// retrieve all feeds
