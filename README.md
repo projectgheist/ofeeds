@@ -15,12 +15,13 @@ For some working version of this repo, visit [not yet available](#).
 * [Node.JS](http://nodejs.org/)
 * [MongoDB](http://www.mongodb.org/)
 
-## Quick start / Installation
+## Quick start
 
 Two quick start options are available:
 * [Download the latest release](https://github.com/projectgheist/ofeeds/archive/master.zip)
-* Clone the repo: `git clone https://github.com/designmodo/Flat-UI.git`
+* Clone the repo: `git clone https://github.com/projectgheist/ofeeds.git`
 
+## Installation
 * Install dependencies with 'npm install'
 * Start your MongoDB server with `mongod`
 * Start the server with `npm start`
