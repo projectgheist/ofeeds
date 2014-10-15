@@ -13,7 +13,6 @@ var actions = {
         var feed = db.findOrCreate(db.Feed, {feedURL: url});
 		// wait for all results to return before continuing
         return rs.all([feed]).then(function(results) {
-			console.log("Processing feed");
 			// local ref to feed variable
             var feed = results[0];
             // If this feed was just added, start a high priority job to fetch it

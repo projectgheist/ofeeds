@@ -2,6 +2,7 @@
 	rs = require('rsvp'),
 	db = require('../storage'),
 	cr = require('../cron'),
+	mm = require('moment'),
 	ut = require('../utils');
 
 var app = module.exports = express();
@@ -30,8 +31,8 @@ function formatPosts(posts, feed) {
 				images: post.images,
             },
             author: post.author,
-            published: (post.published / 1000) | 0,
-            updated: (post.updated / 1000) | 0,
+            published: mm(post.published).format("h:mm:ss a") || 0,
+            updated: mm(post.updated).format("h:mm:ss a") || 0,
             categories: tags.concat(post.categories),
             origin: {
                 streamId: post.feed.stringID,

@@ -1,0 +1,6 @@
+.article.article-sm.bs-callout(ng-repeat="post in stream.items")
+	.row
+		.col-xs-9
+			| {{post.title}}
+		.col-xs-3(style="text-align:right")
+			| {{post.published}}
