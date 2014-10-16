@@ -6,7 +6,6 @@
  * On page load ready
  */
 jQuery(document).ready(function($) {
-	$('.article').flowtype();
 });
 
 var app = angular.module('webapp', [
@@ -27,13 +26,13 @@ AppService.factory('GetFeeds', ['$resource',
 
 AppService.factory('GetPosts', ['$resource',
 	function($resource) {
-		return $resource('/api/0/stream/contents/:params', {params:'@params'}, { query: {method:'GET', isArray:false} });
+		return $resource('/api/0/stream/contents/:type/:params', {type:'@type', params:'@params'}, { query: {method:'GET', isArray:false} });
 	}
 ]);
 
 AppService.factory('FeedSubmit', ['$resource',
 	function($resource) {
-		return $resource('/api/0/subscription/quickadd', {quickadd:'@quickadd'}, { query: {method:'POST'} });
+		return $resource('/api/0/subscription/search', {q:'@q'}, { query: {method:'POST'} });
 	}
 ]);
 
@@ -42,7 +41,7 @@ var AppFeeds = angular.module('AppFeeds', []);
 /**
  * App configuration
  */
-app.config(['$routeProvider', function($routeProvider) {
+app.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	$routeProvider
 	.when('/', {
 		templateUrl: '/templates/empty',
@@ -70,7 +69,7 @@ app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'FeedSubmit', 'Ge
 		// make sure it exists
 		if (u.val() !== undefined || u.val().trim().length > 0) {
 			// submit to server
-			FeedSubmit.save({quickadd:u.val()}, function() {
+			FeedSubmit.save({q:u.val()}, function() {
 				u.prop('disabled', false);
 				$scope.gtsubs();
 			}, function() {
@@ -88,16 +87,17 @@ app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'FeedSubmit', 'Ge
 		GetPosts.query(QueryParams,function(data) {
 			$scope.stream = data;
 		}, function(err) {
+			$scope.stream = [];
 		});
 	}
 	$scope.gtsubs();
 
-	var StreamParams = { params:'user/-/state/reading-list' };
+	var StreamParams = { type:'user', params:'/-/state/reading-list' };
 	if (Object.keys($routeParams).length > 0) {
-		var k = String($routeParams.type),
-			v = String($routeParams.param);
-		v = v.substring(0,v.length-1);
-		StreamParams.params = [k,v].join('/');
+		// don't URL encode the values of param as they get converted later on anyway
+		StreamParams.type = String($routeParams.type);
+		var v = String($routeParams.param);
+		StreamParams.params = v.substring(0,v.length-1);
 	}	
 	$scope.gtposts(StreamParams);
 }]);

@@ -35,7 +35,7 @@ exports.FetchFeed = function(feed) {
 		return;
 	}
 	
-	console.log("\nFetch feed: " + feed.feedURL);
+	console.log("\nFetch feed: " + decodeURIComponent(feed.feedURL));
 
 	return new rs.Promise(function(resolve, reject) {
 		// save found posts to array
@@ -49,7 +49,7 @@ exports.FetchFeed = function(feed) {
 			posts = [],
 			parser = sx.parser(false);
 		
-		rq(feed.feedURL)
+		rq(decodeURIComponent(feed.feedURL))
 		.pipe(new fp()) // fetch data from feed URL
 		.on('error', function(error) {
 			console.log("\tFeedparser: " + error);
@@ -66,7 +66,7 @@ exports.FetchFeed = function(feed) {
 			
 			feed.siteURL = meta.link;
 			if (meta.xmlurl) {
-				feed.feedURL = meta.xmlurl;
+				feed.feedURL = encodeURIComponent(meta.xmlurl);
 			}
 			switch (meta.cloud.type) {
 				case 'hub':      // pubsubhubbub supported
@@ -147,11 +147,6 @@ exports.FetchFeed = function(feed) {
 };
 
 function UpdateAllFeeds(done) {
-	// needs to have a database connection
-    if (!mg.connection.db) {
-		console.log('Not connected to a database')
-		done();
-	}
 	console.log('Update all feeds')
 	st
 	.all(st.Feed)		// retrieve all feeds
@@ -169,6 +164,11 @@ function UpdateAllFeeds(done) {
  * function UpdateAllFeeds
  */
 ag.define('UpdateAllFeeds', function(job, done) {
-	UpdateAllFeeds(done);
+	// needs to have a database connection
+    if (mg.connection.db) {
+		UpdateAllFeeds(done);
+	} else {
+		done();
+	}
 });
 

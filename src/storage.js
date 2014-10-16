@@ -108,7 +108,7 @@ exports.getPosts = function(streams, options) {
     var feeds = [], tags = [];
     streams.forEach(function(stream) {
         if (stream.type === 'feed')
-            feeds.push(stream.value);
+            feeds.push(encodeURIComponent(stream.value));
         else
             tags.push(stream.value);
     });
@@ -127,7 +127,7 @@ exports.getPosts = function(streams, options) {
             ]
         });
     }).then(function(feeds) {
-        // find posts by feed and tags, and filter by date
+		// find posts by feed and tags, and filter by date
         var query = exports.Post.find({
             $or: [
                 { feed: { $in: feeds }},

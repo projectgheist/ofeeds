@@ -7,10 +7,10 @@
 var app = module.exports = express();
 
 var actions = {
-    subscribe: function(ctx, url) {
-		console.log("Subscribe action: " + url);
+	search: function(ctx, url) {
+		console.log("Search action: " + url);
         // Find or create feed for this URL in the database
-        var feed = db.findOrCreate(db.Feed, {feedURL: url});
+        var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)});
 		// wait for all results to return before continuing
         return rs.all([feed]).then(function(results) {
 			// local ref to feed variable
@@ -19,10 +19,14 @@ var actions = {
             if (feed.numSubscribers === 0) {
 				return cr.FetchFeed(feed).then(function() {
 					console.log("Finish fetch");
+					return feed;
 				});
             }
-			return true;
+			return feed;
         });
+	},
+    subscribe: function(ctx, url) {
+		console.log("Subscribe action: " + url);
     }
 };
 
@@ -32,6 +36,30 @@ app.get('/api/0/subscription/list', function(req, res) {
 			return res.json(feeds);
 		});
 	}, function(err) {
+        res.status(500).send(err);
+    });
+});
+
+app.post('/api/0/subscription/search', function(req, res) {
+    /*
+	 * Check if URL
+	 */
+    if (!ut.isUrl(req.query.q)) {
+        return res.json({
+            query: req.query.quickadd,
+            numResults: 0
+        });
+    }
+    /*
+	 * Subscribe to URL
+	 */
+    actions.search(req, req.query.q).then(function(feed) {
+        res.json({
+            query: req.query.q,
+            numResults: 1,
+            streamId: 'feed/' + feed.feedURL
+        });
+    }, function(err) {
         res.status(500).send(err);
     });
 });

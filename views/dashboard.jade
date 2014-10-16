@@ -3,20 +3,20 @@ include includes/nav
 .container
 	.row(ng-controller="AppFeeds")
 		.col-xs-offset-3.col-xs-6
-			h3(style="text-align:center") Add new RSS feed
-			hr
-			.row
+			.well
+				h3(style="text-align:center") Add new RSS feed
+				hr
 				form
-					.col-xs-9
-						.form-group
-							input.form-control.typeahead#nrss(type="text",placeholder="Enter new RSS")
-					.col-xs-3
-						button.btn.btn-primary.btn-block(ng-click="sbmt()") Add
-			.row
-				.col-xs-12
-					.alert.alert-success.fade.in.hidden#as
-					.alert.alert-danger.fade.in.hidden#ad
-			hr(style="margin-top:0")
+					.form-group
+						.input-group
+							.form-control-wrapper
+								input.form-control.typeahead#nrss(type="text",placeholder="Enter new RSS")
+							span.input-group-btn
+								button.btn.btn-primary.btn-block(ng-click="sbmt()") Add
+				.row
+					.col-xs-12
+						.alert.alert-success.fade.in.hidden#as
+						.alert.alert-danger.fade.in.hidden#ad
 		.row
 			.col-xs-4
 				.list-group

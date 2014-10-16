@@ -62,11 +62,13 @@ function formatPosts(posts, feed) {
 };
 
 app.get('/api/0/stream/contents/*', function(req, res) {
+	console.log('stream/contents:\t' + req.url);
 	// validate input
     var streams = ut.parseParameters(req.params[0], undefined);
     if (!streams) {
         return res.status(400).send('InvalidStream');
     }
+	console.log(streams);
     // auth is not required for public streams (e.g. feeds)
     /*if (hasTagStreams(streams) && !utils.checkAuth(req, res))
         return;
