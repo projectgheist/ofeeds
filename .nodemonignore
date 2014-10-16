@@ -1,0 +1,10 @@
+# this is my ignore file with a nice comment at the top
+
+/node_modules/* # ignore all external submodules
+/public/*     	# static files
+/views/*     	# static files
+./README.md   	# a specific file
+*.css         	# ignore any CSS files
+*.ini         	# ignore any INI files
+*.json         	# ignore any JSON files
+*.gitignore    	# ignore any git ignore files
