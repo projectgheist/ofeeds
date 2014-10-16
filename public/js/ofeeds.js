@@ -92,7 +92,7 @@ app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'FeedSubmit', 'Ge
 	}
 	$scope.gtsubs();
 
-	var StreamParams = { type:'user', params:'/-/state/reading-list' };
+	var StreamParams = { type:'user', params:'-/state/reading-list' };
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway
 		StreamParams.type = String($routeParams.type);
