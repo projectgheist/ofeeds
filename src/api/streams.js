@@ -61,14 +61,12 @@ function formatPosts(posts, feed) {
     };
 };
 
-app.get('/api/0/stream/contents/*', function(req, res) {
-	console.log('stream/contents:\t' + req.url);
+app.get('/api/0/stream/contents*', function(req, res) {
 	// validate input
-    var streams = ut.parseParameters(req.params[0], undefined);
+    var streams = ut.parseParameters(req.params[0] || req.query, undefined);
     if (!streams) {
         return res.status(400).send('InvalidStream');
     }
-	console.log(streams);
     // auth is not required for public streams (e.g. feeds)
     /*if (hasTagStreams(streams) && !utils.checkAuth(req, res))
         return;
@@ -122,4 +120,3 @@ app.get('/api/0/stream/contents/*', function(req, res) {
         return res.status(500).send(err);
     });
 });
-

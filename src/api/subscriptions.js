@@ -41,7 +41,7 @@ app.get('/api/0/subscription/list', function(req, res) {
 });
 
 app.post('/api/0/subscription/search', function(req, res) {
-    /*
+   /*
 	 * Check if URL
 	 */
     if (!ut.isUrl(req.query.q)) {

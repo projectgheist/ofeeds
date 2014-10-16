@@ -106,12 +106,12 @@ exports.getPosts = function(streams, options) {
 		
     // separate streams by type
     var feeds = [], tags = [];
-    streams.forEach(function(stream) {
-        if (stream.type === 'feed')
-            feeds.push(encodeURIComponent(stream.value));
+    for (var i in streams) {
+      if (streams[i].type === 'feed')
+            feeds.push(encodeURIComponent(streams[i].value));
         else
-            tags.push(stream.value);
-    });
+            tags.push(streams[i].value);
+    };
 	
     // load the tags to include and exclude
     var includeTags, excludeTags;

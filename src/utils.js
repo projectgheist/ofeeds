@@ -29,16 +29,31 @@ exports.GetDBConnectionURL = function(obj) {
 };
 
 exports.parseParameters = function(obj,user) {
+	// if empty variable, return
 	if (!obj)
         return false;
-    
+
+	if (typeof obj === "object") {
+		for (var i in obj) {
+			if (!exports.isUrl(obj[i])) {
+				continue;
+			}
+			return [{ type: 'feed', value: obj[i] }];
+		}
+	}
+	
+	// remove '/' from start of string
+	if (typeof obj === "string" && obj.match('^\/')) {
+		obj = obj.substring(1,obj.length);
+	}
+	
 	// check if already an array, else make it an array
-    if (!Array.isArray(obj))
+    if (!Array.isArray(obj)) {
         obj = [obj];
+	}
 		
     for (var i = 0; i < obj.length; i++) {
-        var urls = exports.parseFeeds(obj[i])
-        
+        var urls = exports.parseFeeds(obj[i]);
         if (urls) {
             obj[i] = {
                 type: 'feed',

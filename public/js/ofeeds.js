@@ -26,7 +26,7 @@ AppService.factory('GetFeeds', ['$resource',
 
 AppService.factory('GetPosts', ['$resource',
 	function($resource) {
-		return $resource('/api/0/stream/contents/:type/:params', {type:'@type', params:'@params'}, { query: {method:'GET', isArray:false} });
+		return $resource('/api/0/stream/contents/', {type:'@type', params:'@params'}, { query: {method:'GET', isArray:false} });
 	}
 ]);
 
@@ -92,13 +92,15 @@ app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'FeedSubmit', 'Ge
 	}
 	$scope.gtsubs();
 
-	var StreamParams = { type:'user', params:'-/state/reading-list' };
+	var StreamParams = {};
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway
-		StreamParams.type = String($routeParams.type);
 		var v = String($routeParams.param);
+		StreamParams.type = String($routeParams.type);
 		StreamParams.params = v.substring(0,v.length-1);
-	}	
+	} else {
+		StreamParams = { type:'user', params:'-/state/reading-list' };
+	}
 	$scope.gtposts(StreamParams);
 }]);
 app.controller('AppPosts', function($scope) {
