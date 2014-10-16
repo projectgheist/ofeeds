@@ -33,6 +33,7 @@ Note: You can change the port, ip, database connection settings, ... inside the 
 
 * OAuth login and user accounts
 * Tag support
+* convert [Express](http://expressjs.com/) to [Koa](http://koajs.com/)
 * Layout redesign
 * Feed management
 * OPML importing/exporting
