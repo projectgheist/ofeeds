@@ -18,6 +18,9 @@ function formatPosts(posts, feed) {
 			return tag.stringID;
         });
 		
+		//console.log("// ----------------------------------------------------------------------------");
+		//console.log(post);
+		
         return {
             id: post.longID,
             title: post.title,
@@ -37,7 +40,7 @@ function formatPosts(posts, feed) {
             origin: {
                 streamId: post.feed.stringID,
                 title: post.feed.title,
-                htmlUrl: post.feed.siteURL
+                url: post.feed.siteURL
             },
             crawlTimeMsec: '' + (+post.feed.successfulCrawlTime),
             timestampUsec: '' + (post.published * 1000),

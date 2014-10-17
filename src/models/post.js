@@ -14,7 +14,7 @@ var Post = mg.Schema({
     summary: String,
     images: mg.Schema.Types.Mixed,
 	videos: [String],						// array of found video URLs
-	URL: String,							// URL to original post location
+	url: String,							// URL to original post location
     published: Date,						// post html markup
     updated: Date,
     author: String,							// author/writer of the post
