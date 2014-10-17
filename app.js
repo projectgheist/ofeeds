@@ -13,6 +13,12 @@ app.set('views', cf.Dir() + 'views');
 app.set('view engine', 'jade');
 app.use(express.static(cf.Dir() + 'public'));
 
+/** turn off console.log
+ */
+if (false) {
+	console.log = function() {};
+}
+
 /** GET / POST Pages
  */
 app.listen(app.get('port'), app.get('ipaddr'), function(){
