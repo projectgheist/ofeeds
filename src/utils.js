@@ -18,14 +18,19 @@ exports.isUrl = function(url) {
     return vd.isURL(url);
 };
 
-exports.GetDBConnectionURL = function(obj) {
+exports.GetDBConnectionURL = function(obj,noPrefix) {
+	var r = '';
 	if (process.env.OPENSHIFT_MONGODB_DB_URL) {
-		return process.env.OPENSHIFT_MONGODB_DB_URL + obj.dbname;
+		r = process.env.OPENSHIFT_MONGODB_DB_URL + obj.dbname;
     } else if (obj.username && obj.password) {
-        return "mongodb://" + obj.username + ":" + obj.password + "@" + obj.hostname + ":" + obj.port + "/" + obj.dbname;
+        r = "mongodb://" + obj.username + ":" + obj.password + "@" + obj.hostname + ":" + obj.port + "/" + obj.dbname;
     } else {
-        return "mongodb://" + obj.hostname + ":" + obj.port + "/" + obj.dbname;
+        r = "mongodb://" + obj.hostname + ":" + obj.port + "/" + obj.dbname;
     }
+	if (r) {
+		r = r.substring(10,r.length);
+	}
+	return r;
 };
 
 exports.parseParameters = function(obj,user) {

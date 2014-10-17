@@ -8,15 +8,45 @@ var fp = require('feedparser'),
 	st = require('./storage'),
 	ut = require('./utils'),
 	mm = require('moment'),
+	mg = require('mongoose'),
 	fd = st.Feed;
 	
 var Agenda = require('agenda'),
-	ag = new Agenda({ db: { address: ut.GetDBConnectionURL(cf.db) } });
+	ag = new Agenda({ db: { address: ut.GetDBConnectionURL(cf.db,true), collection: 'agendaJobs' }, processEvery: '3 minute', defaultLockLifetime: 90000 });
 
 exports.setup = function() {
-	ag.every('* /5 * * * *', 'UpdateAllFeeds');
+	console.log("// ----------------------------------------------------------------------------");
+	// purge all unreferenced jobs from db
+	ag.purge(function(err, numRemoved) {
+		console.log('Amount of unreferenced jobs removed: ' + numRemoved);
+	});
+
+	// clear all pre-existing 'UpdateAllFeeds' jobs
+	ag.cancel({name: 'UpdateAllFeeds'}, function(err, numRemoved) {
+		console.log("Amount of 'UpdateAllFeeds' jobs removed: " + numRemoved);
+	});
+
+	// set all jobs
+	ag.every('5 minutes','UpdateAllFeeds');
+
+	// set all jobs
+	UpdateAllFeeds();
+
+	// start cron jobs
 	ag.start();
 };
+
+/*
+ * function UpdateAllFeeds
+ */
+ag.define('UpdateAllFeeds', function(job, done) {
+	// needs to have a database connection
+	if (mg.connection.db) {
+		UpdateAllFeeds(done);
+	} else {
+		done();
+	}
+});
 
 function ContainerImages() {
 	this.small = '';
@@ -29,14 +59,14 @@ function ContainerImages() {
  */
 exports.FetchFeed = function(feed) {
 	// early escape if no feed is returned 
+	/*
 	if (!feed ||
 		(feed.successfulCrawlTime !== undefined && mm().diff(feed.successfulCrawlTime, 'minutes') <= 5)) { // feed was updated less then 2 minutes ago
-		console.log(["Fetch feed '",feed.feedURL,"' failed! (Updated less than", mm().diff(feed.successfulCrawlTime, 'minutes'), "minute(s) ago)"].join(" "));
-		return;
+		return new rs.Promise(function(resolve, reject) { 
+			resolve(["Fetch feed '",feed.feedURL,"' failed! (Updated less than ", mm().diff(feed.successfulCrawlTime, 'minutes'), " minute(s) ago)"].join("")); 
+		});
 	}
-	
-	console.log("\nFetch feed: " + decodeURIComponent(feed.feedURL));
-
+	*/
 	return new rs.Promise(function(resolve, reject) {
 		// save found posts to array
 		var existingPosts = {};
@@ -134,12 +164,13 @@ exports.FetchFeed = function(feed) {
 			rs.all(posts).then(function() {
 				feed.successfulCrawlTime = new Date();			
 				feed.save();
+				//console.log('feed sucessfully finished');
 				resolve();
 			}, function(err) {
-				parser.removeAllListeners('article');
 				feed.failedCrawlTime = new Date();
 				feed.lastFailureWasParseFailure = parseError;
 				feed.save();
+				//console('feed error finished');
 				reject(err);
 			});
 		});
@@ -147,7 +178,6 @@ exports.FetchFeed = function(feed) {
 };
 
 function UpdateAllFeeds(done) {
-	console.log('Update all feeds')
 	st
 	.all(st.Feed)		// retrieve all feeds
 	.populate('posts')	// replacing the specified paths in the document with document(s) from other collection(s)
@@ -156,19 +186,10 @@ function UpdateAllFeeds(done) {
 		for (var i in feeds) {
 			a.push(exports.FetchFeed(feeds[i]));
 		}
-		rs.all(a).then(done); 
+		rs.all(a).then(function() { 
+			done();
+		}, function(err) {
+			done();
+		}); 
 	});
 };
-
-/*
- * function UpdateAllFeeds
- */
-ag.define('UpdateAllFeeds', function(job, done) {
-	// needs to have a database connection
-    if (mg.connection.db) {
-		UpdateAllFeeds(done);
-	} else {
-		done();
-	}
-});
-
