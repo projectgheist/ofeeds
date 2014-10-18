@@ -45,14 +45,11 @@ var AppNav = angular.module('AppNav', []);
  * App configuration
  */
 app.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+	$locationProvider.html5Mode(true);
 	$routeProvider
-	.when('/', {
-		templateUrl: '/templates/empty',
-		controller: 'AppFeeds'
-	})
-	.when('/subscription/:type/:param*\/', {
+	.when('/subscription/:type/:value*\/', {
 		templateUrl: function(urlattr){
-			return '/templates/posts-expand';
+			return '/templates/posts-compact';
 		},
 		controller: 'AppFeeds'
 	});
@@ -101,7 +98,7 @@ app.directive('onLastRepeat', function() {
 	};
 });
 
-app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'GetPosts', function($scope, $http, $routeParams, GetPosts) {
+app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', 'GetPosts', function($scope, $http, $location, $routeParams, GetPosts) {
 	$scope.gtposts = function(QueryParams) {
 		GetPosts.query(QueryParams,function(data) {
 			$scope.stream = data;
@@ -111,15 +108,21 @@ app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'GetPosts', funct
 	}
 	$scope.$on('onRepeatLast', function(scope, element, attrs){
 	});
-	  
-	var StreamParams = {};
+	$scope.test = function(s) {
+		console.log(s);
+	}
+	var obj = {};
+	// if it has parameters
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway
-		var v = String($routeParams.param);
-		StreamParams.type = String($routeParams.type);
-		StreamParams.params = v.substring(0,v.length-1);
-	} else {
-		StreamParams = { type:'user', params:'/-/state/reading-list' };
+		var v = String($routeParams.value);
+		// store parameters
+		obj.type = String($routeParams.type);
+		obj.value = /\*(\/)*$/.test(v) ? v.substring(0,v.length-1) : v;
+		var idx = $location.path().search(obj.type) + obj.type.length;
+		// don't retrieve posts if we are already in the subscription/stream
+		if ($location.path().substring(idx,$location.path()) !== obj.value) {
+			$scope.gtposts(obj);
+		}
 	}
-	$scope.gtposts(StreamParams);
 }]);

@@ -7,18 +7,20 @@ include includes/nav
 			.alert.alert-danger.fade.in.hidden#ad
 	.row
 		.col-xs-4(ng-controller="AppNav")
-			div(data-spy="affix",data-offset-top="0",data-offset-bottom="200")
-				.list-group
+			#sa(data-spy="affix",data-offset-top="0")
+				.col-lg-12.list-group
 					.list-group-item.list-group-item-success
-						h4 Feed subscriptions
-					a.list-group-item(href="#/subscription/state/-/reading-list",ng-class="{ active: isActive('/state/-/reading-list')}",id='All') All
+						h3 Feed subscriptions
+					a.list-group-item(href="/subscription/user/reading-list",ng-class="{ active: isActive('/state/-/reading-list')}",id='All')
+						i.fa.fa-fw.fa-bars
+						| All
 					.line-separator
-					a.list-group-item(href="#/subscription/feed/{{sub.feedURL}}",ng-class="{ active: isActive('/feed/{{sub.feedURL}}')}",ng-repeat="sub in subs")
+					a.list-group-item(href="/subscription/feed/{{sub.feedURL}}",ng-class="{ active: isActive('/feed/{{sub.feedURL}}')}",ng-repeat="sub in subs")
 						| {{sub.title}}
 					.line-separator
-				button.btn.btn-primary(ng-click="gotoTop()")
-					i.fa.fa-angle-double-right
-					| &nbsp;Back to top
+				button.btn.btn-primary(href='',ng-click="gotoTop()")
+					i.fa.fa-fw.fa-angle-double-right
+					| Back to top
 		.col-xs-8(ng-controller="AppFeeds")
 			div#top(ng-view)
 				p Loading...
