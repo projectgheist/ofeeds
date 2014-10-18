@@ -3,12 +3,13 @@ nav.navbar.navbar-static-top.navbar-default
 		.navbar-header
 			a.navbar-brand(href='/') OFeeds
 		.navbar-collapse.collapse
-			form.navbar-form.navbar-left(ng-submit="sbmt()")
-				.form-controller-wrapper
-					input.form-control#nrss(type='text',placeholder='Search for feed url')
-					span.material-input
-			ul.nav.navbar-nav.navbar-right
-				li 
-					a(href="#")
-						i.fa.fa-fw.fa-power-off
-						| Logout
+			if user
+				form.navbar-form.navbar-left(ng-submit="sbmt()")
+					.form-controller-wrapper
+						input.form-control#nrss(type='text',placeholder='Search for feed url')
+						span.material-input
+				ul.nav.navbar-nav.navbar-right
+					li 
+						a(href="#")
+							i.fa.fa-fw.fa-power-off
+							| Logout

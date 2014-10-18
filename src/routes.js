@@ -29,6 +29,11 @@ ap.get("/", function(req, res) {
 		'config': cf.site
 	});
 });
+ap.get("/login", function(req, res) {
+	res.render('login', { 
+		'config': cf.site
+	});
+});
 ap.get("/subscription/*", function(req, res) {
 	res.render('dashboard', { 
 		'config': cf.site
