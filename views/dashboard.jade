@@ -16,10 +16,10 @@ include includes/nav
 					a.list-group-item(href="#/subscription/feed/{{sub.feedURL}}",ng-class="{ active: isActive('/feed/{{sub.feedURL}}')}",ng-repeat="sub in subs")
 						| {{sub.title}}
 					.line-separator
-				a.btn.btn-primary(href="#") 
+				button.btn.btn-primary(ng-click="gotoTop()")
 					i.fa.fa-angle-double-right
 					| &nbsp;Back to top
 		.col-xs-8(ng-controller="AppFeeds")
-			div(ng-view)
+			div#top(ng-view)
 				p Loading...
 include includes/footer

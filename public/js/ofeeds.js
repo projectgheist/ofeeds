@@ -58,7 +58,7 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 	});
 }]);
 
-app.controller('AppNav', ['$scope', '$http', '$location', 'GetFeeds', 'FeedSubmit', function($scope, $http, $location, GetFeeds, FeedSubmit) {
+app.controller('AppNav', ['$scope', '$http', '$location', '$anchorScroll', 'GetFeeds', 'FeedSubmit', function($scope, $http, $location, $anchorScroll, GetFeeds, FeedSubmit) {
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
 			$scope.subs = data;
@@ -82,6 +82,13 @@ app.controller('AppNav', ['$scope', '$http', '$location', 'GetFeeds', 'FeedSubmi
 				u.prop('disabled', false);
 			});
 		}
+	}
+	$scope.gotoTop = function() {
+        // set the location.hash to the id of
+        // the element you wish to scroll to.
+        $location.hash('top');
+        // call $anchorScroll()
+        $anchorScroll();
 	}
 	$scope.gtsubs();
 }]);
