@@ -67,7 +67,7 @@ function formatPosts(posts, feed) {
 app.get('/api/0/stream/contents*', function(req, res) {
 	// validate input
     var streams = ut.parseParameters(req.params[0] || req.query, undefined);
-    if (!streams) {
+	if (!streams) {
         return res.status(400).send('InvalidStream');
     }
     // auth is not required for public streams (e.g. feeds)
@@ -87,10 +87,10 @@ app.get('/api/0/stream/contents*', function(req, res) {
         return res.status(400).send('InvalidRank');
     
     var excludeTags = ut.parseTags(req.query.xt, req.user);
-    /*if (req.query.xt && !excludeTags)
+    if (req.query.xt && !excludeTags)
         return res.status(400).send('InvalidTag');
-	*/	
-    // load posts
+
+		// load posts
     db.getPosts(streams, {
         excludeTags: excludeTags,
         minTime: req.query.ot,
@@ -99,7 +99,8 @@ app.get('/api/0/stream/contents*', function(req, res) {
         limit: +req.query.n || 20,
         populate: 'feed'
     }).then(function(posts) {
-        var isFeed = (streams[0].type === 'feed');
+		
+		var isFeed = (streams[0].type === 'feed');
 
         // Google Reader returns a 404 for unknown feeds
         if (posts.length === 0 && isFeed) {

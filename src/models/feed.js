@@ -17,7 +17,7 @@ var Feed = mongoose.Schema({
     
     // tags and titles for individual users
     // a user is considered subscribed to a feed if there is a 
-    // user/-/state/com.google/reading-list tag on the feed for that user
+    // user/-/state/reading-list tag on the feed for that user
     tags: [ut.ref('Tag')],
     numSubscribers: { type: Number, default: 0 },
     userTitles: { type: {}, default: {} },

@@ -79,6 +79,9 @@ exports.FetchFeed = function(feed) {
 			posts = [],
 			parser = sx.parser(false);
 		
+		//console.log("// ----------------------------------------------------------------------------");
+		//console.log("Fetch: " + decodeURIComponent(feed.feedURL));
+		
 		rq(decodeURIComponent(feed.feedURL))
 		.pipe(new fp()) // fetch data from feed URL
 		.on('error', function(error) {
@@ -143,8 +146,8 @@ exports.FetchFeed = function(feed) {
 						summary: (data.summary !== data.description) ? data.summary : undefined,
 						images: thumbnail_obj,
 						url: data.link,
-						published: data.pubdate,
-						updated: data.date,
+						published: data.pubdate || mm(),
+						updated: data.date || mm(),
 						author: data.author,
 						commentsURL: data.comments,
 						categories: data.categories
