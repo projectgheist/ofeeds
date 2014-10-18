@@ -37,7 +37,7 @@ Feed.virtual('stringID').get(function() {
 // Gets the tags for a user, assuming they have already been populated
 Feed.methods.tagsForUser = function(user) {
     return this.tags.filter(function(tag) {
-        return tag.user == user.id && tag.type == 'label';
+        return (tag.user === user.id) && (tag.type === 'label');
     });
 };
 

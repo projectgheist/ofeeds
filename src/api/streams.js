@@ -66,7 +66,7 @@ function formatPosts(posts, feed) {
 
 app.get('/api/0/stream/contents*', function(req, res) {
 	// validate input
-    var streams = ut.parseParameters(req.params[0] || req.query, undefined);
+	var streams = ut.parseParameters(req.params[0] || req.query, undefined);
 	if (!streams) {
         return res.status(400).send('InvalidStream');
     }
@@ -90,7 +90,7 @@ app.get('/api/0/stream/contents*', function(req, res) {
     if (req.query.xt && !excludeTags)
         return res.status(400).send('InvalidTag');
 
-		// load posts
+	// load posts
     db.getPosts(streams, {
         excludeTags: excludeTags,
         minTime: req.query.ot,
@@ -99,7 +99,6 @@ app.get('/api/0/stream/contents*', function(req, res) {
         limit: +req.query.n || 20,
         populate: 'feed'
     }).then(function(posts) {
-		
 		var isFeed = (streams[0].type === 'feed');
 
         // Google Reader returns a 404 for unknown feeds
@@ -107,8 +106,8 @@ app.get('/api/0/stream/contents*', function(req, res) {
 			return res.status(404).send('Feed not found!');
         }
 		
-        var value = streams[0].value;
-        var feed = posts[0] && posts[0].feed;
+        var value = streams[0].value,
+			feed = posts[0] && posts[0].feed;
 		
 		// @todo: atom output
         res.json(formatPosts(posts, {

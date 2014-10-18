@@ -100,21 +100,24 @@ function getTags(tags) {
 //   limit - the maximum number of items to return
 //   sort - the field to sort (see mongoose docs)
 exports.getPosts = function(streams, options) {
-    if (!options)
-        options = {};
+	// use parameter or create empty object
+    options || (options = {});
 		
     // separate streams by type
     var feeds = [], tags = [];
     for (var i in streams) {
-      if (streams[i].type === 'feed')
+		if (streams[i].type === 'feed') {
             feeds.push(encodeURIComponent(streams[i].value));
-        else
+        } else { 
             tags.push(streams[i].value);
+		}
     };
-	
+
     // load the tags to include and exclude
     var includeTags, excludeTags;
     return rs.all([getTags(tags), getTags(options.excludeTags)]).then(function(results) {
+		console.log(results);
+		
         includeTags = results[0];
         excludeTags = results[1];
 

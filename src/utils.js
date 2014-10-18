@@ -14,10 +14,12 @@ exports.ref = function(type) {
     };
 };
 
+// check if the string is a url
 exports.isUrl = function(url) {
     return vd.isURL(url);
 };
 
+// returns a string that points to the database url
 exports.getDBConnectionURL = function(obj,noPrefix) {
 	var r = '';
 	if (process.env.OPENSHIFT_MONGODB_DB_URL) {
@@ -35,16 +37,16 @@ exports.getDBConnectionURL = function(obj,noPrefix) {
 
 exports.parseParameters = function(obj,user) {
 	// if empty variable, return
-	if (!obj)
+	if (!obj) {
         return false;
-
+	}
+	
+	// if obj is an object
 	if (typeof obj === "object") {
-		for (var i in obj) {
-			if (!exports.isUrl(obj[i])) {
-				continue;
-			}
-			return [{ type: 'feed', value: obj[i] }];
+		if (Object.keys(obj).length > 1) {
+			return [obj];
 		}
+        return false;
 	}
 	
 	// remove '/' from start of string
@@ -106,12 +108,12 @@ exports.parseTags = function(tags, user) {
         tags = [tags];
         
     for (var i = 0; i < tags.length; i++) {
+        // match 'user/<userId>/state/foo' and also 'user/-/state/foo'
         var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tags[i]);
-        
-        // allow user/<userId>/state/foo and also user/-/state/foo
-        if (!match || (/* @todo: re-enable: match[1] !== user.id && */match[1] !== '-'))
-            return null;
-            
+        if (!match || (/* @todo: re-enable: match[1] !== user.id && */match[1] !== '-')) {
+			return null;
+        }
+		console.log(match);
         tags[i] = {
             user: user,
             type: match[2],

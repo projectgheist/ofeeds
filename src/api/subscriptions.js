@@ -1,11 +1,13 @@
- var express = require('express'),
+var ex = require('express'),
 	rs = require('rsvp'),
 	db = require('../storage'),
 	cr = require('../cron'),
+	mm = require('moment'),
 	ut = require('../utils');
 
-var app = module.exports = express();
+var app = module.exports = ex();
 
+// @todo: functions need to be merged
 var actions = {
 	search: function(ctx, url) {
 		console.log("Search action: " + url);
@@ -14,19 +16,48 @@ var actions = {
 		// wait for all results to return before continuing
         return rs.all([feed]).then(function(results) {
 			// local ref to feed variable
-            var feed = results[0];
-            // If this feed was just added, start a high priority job to fetch it
-            if (feed.numSubscribers === 0) {
-				return cr.FetchFeed(feed).then(function() {
+            var f = results[0];
+            if ((!f.successfulCrawlTime || mm().diff(f.successfulCrawlTime, 'minutes') > 0) || 
+				f.numSubscribers === 0) { // if this feed doesn't have any subscribers
+				return cr.FetchFeed(f).then(function() {
 					console.log("Finish fetch");
-					return feed;
+					return f;
 				});
             }
-			return feed;
+			return f;
         });
 	},
     subscribe: function(ctx, url) {
 		console.log("Subscribe action: " + url);
+        // Find or create feed for this URL in the database
+        var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)});
+		// Find or create a tag to add this feed to the users reading-list
+		var tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/reading-list', ctx.user)[0]);
+		// wait for all results to return before continuing
+        return rs.all([feed,tag]).then(function(results) {
+			// local ref to feed
+            var f = results[0];
+            // if this feed doesn't have any subscribers, fetch the feed
+            if (f.numSubscribers === 0) {
+				return cr.FetchFeed(f).then(function() {
+					console.log("Finish fetch");
+					return results;
+				});
+            }
+			return results;
+        }).then(function(results) {
+ 			// local ref to feed and tag variable
+            var f = results[0],
+				t = results[1];
+			// Subscribe to the feed if the tag was not found
+            if (!~f.tags.indexOf(t.id)) {
+				// add tag to feed's tag list
+				f.tags.addToSet(t);
+				// increment subscriber count
+                f.numSubscribers++; 
+            }
+			return f;
+		});
     }
 };
 
@@ -41,18 +72,14 @@ app.get('/api/0/subscription/list', function(req, res) {
 });
 
 app.post('/api/0/subscription/search', function(req, res) {
-   /*
-	 * Check if URL
-	 */
+	// Check if URL
     if (!ut.isUrl(req.query.q)) {
         return res.json({
             query: req.query.quickadd,
             numResults: 0
         });
     }
-    /*
-	 * Subscribe to URL
-	 */
+	// creat or find URL in db
     actions.search(req, req.query.q).then(function(feed) {
         res.json({
             query: req.query.q,
@@ -74,9 +101,7 @@ app.post('/api/0/subscription/quickadd', function(req, res) {
 	}
 	*/
 		
-    /*
-	 * Check if URL
-	 */
+	// Check if URL
     if (!ut.isUrl(req.query.quickadd)) {
         return res.json({
             query: req.query.quickadd,
@@ -84,9 +109,7 @@ app.post('/api/0/subscription/quickadd', function(req, res) {
         });
     }
 
-    /*
-	 * Subscribe to URL
-	 */
+	// creat or find URL in db
     actions.subscribe(req, req.query.quickadd).then(function() {
         res.json({
             query: req.query.quickadd,
