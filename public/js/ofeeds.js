@@ -93,6 +93,14 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$anchorScroll', 'GetF
 	$scope.gtsubs();
 }]);
 
+app.directive('onLastRepeat', function() {
+	return function(scope, element, attrs) {
+		if (scope.$last) setTimeout(function(){
+			scope.$emit('onRepeatLast', element, attrs);
+		}, 1);
+	};
+});
+
 app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'GetPosts', function($scope, $http, $routeParams, GetPosts) {
 	$scope.gtposts = function(QueryParams) {
 		GetPosts.query(QueryParams,function(data) {
@@ -101,6 +109,9 @@ app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'GetPosts', funct
 			$scope.stream = [];
 		});
 	}
+	$scope.$on('onRepeatLast', function(scope, element, attrs){
+	});
+	  
 	var StreamParams = {};
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway

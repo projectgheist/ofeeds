@@ -5,7 +5,7 @@
 				h2 {{post.title}}
 			a(href="#/subscription/feed/{{post.origin.url}}") 
 				span.label.label-primary {{post.origin.title}}
-			span(ng-if='{{post.author}}') &nbsp;by {{post.author}}
+			span(ng-if='post.author') &nbsp;by {{post.author}}
 			.pull-right {{post.published}}
 	.row
 		.col-xs-12
@@ -26,6 +26,6 @@
 						li
 							a(href="#") Email
 	.row
-		.col-xs-12
+		.col-xs-12.article-content
 			p(ng-bind-html="post.content.content")
 	.line-separator
