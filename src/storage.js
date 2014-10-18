@@ -16,7 +16,7 @@ exports.connect = function(obj) {
     if (mg.connection.db) {
 		return;
 	}
-    mg.connect(ut.GetDBConnectionURL(cf.db));
+    mg.connect(ut.getDBConnectionURL(cf.db));
     var db = mg.connection;
     db.on('error', function(err) {
         console.log("MongoDB " + err);

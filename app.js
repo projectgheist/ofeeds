@@ -1,17 +1,15 @@
 /** Module dependencies
  */
-var express = require('express'),
+var ex = require('express'),
 	cf = require('./config'),
 	db = require('./src/storage'),
-	app = express();
+	ap = ex();
 
 /** Load configurations
  */
-app.set('port', cf.Port());
-app.set('ipaddr', cf.IpAddr());
-app.set('views', cf.Dir() + 'views');
-app.set('view engine', 'jade');
-app.use(express.static(cf.Dir() + 'public'));
+ap.set('views', cf.Dir() + 'views');
+ap.set('view engine', 'jade');
+ap.use(ex.static(cf.Dir() + 'public'));
 
 /** turn off console.log
  */
@@ -21,8 +19,8 @@ if (false) {
 
 /** GET / POST Pages
  */
-app.listen(app.get('port'), app.get('ipaddr'), function(){
-	console.log('%s: Node server started on %s:%d ...', Date(Date.now()), app.get('ipaddr'), app.get('port'));
+ap.listen(cf.Port(), cf.IpAddr(), function(){
+	console.log('%s: Node server started on %s:%d ...', Date(Date.now()), cf.IpAddr(), cf.Port());
 });
 
 /** startup database
@@ -31,12 +29,12 @@ db.connect(cf.db);
 
 /** GET / POST Pages
  */
-require('./src/routes')(app); 
+ap.use(require('./src/routes')); 
 
 /** Include routes
  */
-app.use(require('./src/api/subscriptions'));
-app.use(require('./src/api/streams'));
+ap.use(require('./src/api/subscriptions'));
+ap.use(require('./src/api/streams'));
 
 /*
 app.use(require('./src/api/user'));

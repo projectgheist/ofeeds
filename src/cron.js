@@ -12,7 +12,7 @@ var fp = require('feedparser'),
 	fd = st.Feed;
 	
 var Agenda = require('agenda'),
-	ag = new Agenda({ db: { address: ut.GetDBConnectionURL(cf.db,true), collection: 'agendaJobs' }, processEvery: '3 minute', defaultLockLifetime: 90000 });
+	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db,true), collection: 'agendaJobs' }, processEvery: '3 minute', defaultLockLifetime: 90000 });
 
 exports.setup = function() {
 	console.log("// ----------------------------------------------------------------------------");

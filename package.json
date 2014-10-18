@@ -8,7 +8,7 @@
   },
   "dependencies": {
 	"agenda": "*",
-	"koa": "*",
+	"express": "*",
     "feedparser": "*",
     "jade": "*",
     "mongoose": "*",

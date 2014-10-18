@@ -1,11 +1,10 @@
 /** Module dependencies
  */
 var ex = require('express'),
-	cf = require('../config');
-	
-var ap = ex();
+	cf = require('../config')
+	ap = module.exports = ex();
 
-/** home route */
+/** Parameter function */
 ap.param(function(name, fn) {
 	if (fn instanceof RegExp) {
 		return function(req, res, next, val){
@@ -20,22 +19,17 @@ ap.param(function(name, fn) {
 	}
 });
 
-/** home route */
+/** Parameter declarations */
 ap.param('uid', /^[0-9]+$/);
 ap.param('name', /^.*$/);
 
-/** Custom description
- */
-module.exports = function(app, passport) {
-
-	/** home route */
-	app.get("/", function(req, res) {
-		res.render('dashboard', { 
-			'config': cf.site
-		});
+/** home route */
+ap.get("/", function(req, res) {
+	res.render('dashboard', { 
+		'config': cf.site
 	});
-	/** home route */
-	app.get("/templates/:name", function(req, res) {
-		res.render('templates/' + req.params.name);
-	});
-};
+});
+/** templates route */
+ap.get("/templates/:name", function(req, res) {
+	res.render('templates/' + req.params.name);
+});

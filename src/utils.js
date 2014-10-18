@@ -18,7 +18,7 @@ exports.isUrl = function(url) {
     return vd.isURL(url);
 };
 
-exports.GetDBConnectionURL = function(obj,noPrefix) {
+exports.getDBConnectionURL = function(obj,noPrefix) {
 	var r = '';
 	if (process.env.OPENSHIFT_MONGODB_DB_URL) {
 		r = process.env.OPENSHIFT_MONGODB_DB_URL + obj.dbname;
