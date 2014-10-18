@@ -34,8 +34,8 @@ function formatPosts(posts, feed) {
 				images: post.images,
             },
             author: post.author,
-            published: mm(post.published).format("h:mm:ss a") || 0,
-            updated: mm(post.updated).format("h:mm:ss a") || 0,
+            published: (mm().diff(mm(post.published), 'days') <= 7 ? mm(post.published).fromNow() : mm(post.published).format("D MMM")) || 0,
+            updated: post.updated || 0,
             categories: tags.concat(post.categories),
             origin: {
                 streamId: post.feed.stringID,
