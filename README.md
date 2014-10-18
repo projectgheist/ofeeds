@@ -31,12 +31,15 @@ Note: You can change the port, ip, database connection settings, ... inside the 
 
 ## Todo
 
+* ~~Fix cron jobs not running at periodic intervals~~
 * OAuth login and user accounts
 * Tag support
-* convert [Express](http://expressjs.com/) to [Koa](http://koajs.com/)
 * Layout redesign
 * Feed management
 * OPML importing/exporting
+
+When Openshift updates their `Node` module to 0.11.9
+* Convert [Express](http://expressjs.com/) to [Koa](http://koajs.com/)
 
 ## External libraries/frameworks used for front-end
 * [Angular.JS](http://angularjs.org/)
