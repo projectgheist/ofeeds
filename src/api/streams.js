@@ -59,7 +59,7 @@ function formatPosts(posts, feed) {
         continuation: feed.continuation,
         self: { href: feed.self },
         alternate: feed.siteURL ? [{ href: feed.siteURL, type: 'text/html' }] : undefined,
-        updated: (feed.successfulCrawlTime / 1000) | 0,
+        updated: feed.updated,
         items: items
     };
 };

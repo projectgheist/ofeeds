@@ -163,12 +163,12 @@ exports.FetchFeed = function(feed) {
 			// wait for posts to finish saving
 			// then mark crawl success or failure
 			rs.all(posts).then(function() {
-				feed.successfulCrawlTime = new Date();			
+				feed.lastModified = feed.successfulCrawlTime = new Date();			
 				feed.save();
 				//console.log('feed sucessfully finished');
 				resolve();
 			}, function(err) {
-				feed.failedCrawlTime = new Date();
+				feed.lastModified = feed.failedCrawlTime = new Date();
 				feed.lastFailureWasParseFailure = parseError;
 				feed.save();
 				//console('feed error finished');
