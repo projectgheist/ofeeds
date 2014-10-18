@@ -11,7 +11,7 @@ var mg = require('mongoose'),
 /** function Connect
  * creates a connection to the MongoDB
  */
-exports.connect = function(obj) {
+exports.setup = function() {
 	// if database is already connected return
     if (mg.connection.db) {
 		return;
@@ -22,12 +22,11 @@ exports.connect = function(obj) {
         console.log("MongoDB " + err);
     });
     db.once('open', function() {
-        console.log('Connected to Mongo: '+obj.dbname+'!');
+        console.log('Connected to Mongo: '+cf.db.dbname+'!');
 		/** Cron jobs execution
 		 */
 		require('./cron').setup();
     });
-    return db;
 };
 
 exports.all = function(model) {

@@ -59,14 +59,12 @@ function ContainerImages() {
  */
 exports.FetchFeed = function(feed) {
 	// early escape if no feed is returned 
-	/*
 	if (!feed ||
 		(feed.successfulCrawlTime !== undefined && mm().diff(feed.successfulCrawlTime, 'minutes') <= 5)) { // feed was updated less then 2 minutes ago
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(["Fetch feed '",feed.feedURL,"' failed! (Updated less than ", mm().diff(feed.successfulCrawlTime, 'minutes'), " minute(s) ago)"].join("")); 
 		});
 	}
-	*/
 	return new rs.Promise(function(resolve, reject) {
 		// save found posts to array
 		var existingPosts = {};

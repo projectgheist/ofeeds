@@ -2,7 +2,6 @@
  */
 var ex = require('express'),
 	cf = require('./config'),
-	db = require('./src/storage'),
 	ap = ex();
 
 /** Load configurations
@@ -23,9 +22,9 @@ ap.listen(cf.Port(), cf.IpAddr(), function(){
 	console.log('%s: Node server started on %s:%d ...', Date(Date.now()), cf.IpAddr(), cf.Port());
 });
 
-/** startup database
+/** startup/connect to database
  */
-db.connect(cf.db);
+require('./src/storage').setup()
 
 /** GET / POST Pages
  */

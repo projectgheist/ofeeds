@@ -1,11 +1,11 @@
- var express = require('express'),
+var ex = require('express'),
 	rs = require('rsvp'),
 	db = require('../storage'),
 	cr = require('../cron'),
 	mm = require('moment'),
 	ut = require('../utils');
 
-var app = module.exports = express();
+var app = module.exports = ex();
 
 /**
  * @param posts: Array of posts to format
@@ -57,9 +57,9 @@ function formatPosts(posts, feed) {
         title: feed.title,
         description: feed.description,
         continuation: feed.continuation,
-        self: [{ href: feed.self }],
+        self: { href: feed.self },
         alternate: feed.siteURL ? [{ href: feed.siteURL, type: 'text/html' }] : undefined,
-        updated: feed.updated / 1000 | 0,
+        updated: (feed.successfulCrawlTime / 1000) | 0,
         items: items
     };
 };
