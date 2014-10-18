@@ -21,14 +21,13 @@ var Feed = mongoose.Schema({
     tags: [ut.ref('Tag')],
     numSubscribers: { type: Number, default: 0 },
     userTitles: { type: {}, default: {} },
-	sortID: { type: String, default: sh.generate() },
+	shortID: { type: String, default: sh.generate() },
     
     // fetcher metadata
     successfulCrawlTime: Date,
     failedCrawlTime: Date,
     lastFailureWasParseFailure: Boolean,
     lastModified: Date,
-    etag: String
 });
 
 Feed.virtual('stringID').get(function() {
