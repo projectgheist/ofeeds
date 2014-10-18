@@ -1,0 +1,39 @@
+.list-article-group
+	.row
+		.col-xs-12#map
+			#ma(data-spy="affix",data-offset-top="85")
+				nav.navbar.navbar-default
+					.navbar-header
+						a.navbar-brand(href="{{stream.self.href}}") {{stream.title}}
+					.collapse.navbar-collapse
+						ul.nav.navbar-nav.navbar-right
+							li
+								a(href='#',alt='Mark all as Read') 
+									i.fa.fa-fw.fa-check
+							li
+								a(href='#',alt='Refresh') 
+									i.fa.fa-fw.fa-refresh
+							li
+								a(href='#',alt='Options') 
+									i.fa.fa-fw.fa-ellipsis-v
+			.well
+				.row.list-group
+					.col-xs-6.list-group-item
+						.row-content
+							h4.list-group-item-heading Description
+							p.list-group-item-text {{stream.description}}
+					.col-xs-6.list-group-item
+						.row-content
+							h4.list-group-item-heading Update time
+							p.list-group-item-text {{stream.updated}}
+	.article.article-sm(ng-repeat="post in stream.items")
+		.col-xs-4
+			h3.text-overflow 
+				a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+			h4 {{post.published}} &nbsp;//&nbsp;
+				a(href='#') Expand post
+		.col-xs-2
+			a(href='{{post.alternate.href}}',target='_blank')
+				img(ng-src="{{post.content.images.small}}",style="max-width:100%;height:auto;margin-bottom:10px;")
+		.line-separator(ng-if="$odd")
+			.row

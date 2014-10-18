@@ -1,7 +1,7 @@
 nav.navbar.navbar-static-top.navbar-default
 	.container(ng-controller="AppNav")
 		.navbar-header
-			a.navbar-brand(href='/') OFeeds
+			a.navbar-brand(ng-href='/') OFeeds
 		.navbar-collapse.collapse
 			if user
 				form.navbar-form.navbar-left(ng-submit="sbmt()")
@@ -13,3 +13,9 @@ nav.navbar.navbar-static-top.navbar-default
 						a(href="#")
 							i.fa.fa-fw.fa-power-off
 							| Logout
+			else
+				ul.nav.navbar-nav.navbar-right
+					li 
+						a(ng-href="/login")
+							i.fa.fa-fw.fa-user
+							| Log in
