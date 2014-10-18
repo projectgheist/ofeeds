@@ -1,6 +1,14 @@
-.navbar.navbar-default.navbar-static-top(role='navigation')
-	.container
+nav.navbar.navbar-static-top.navbar-default
+	.container(ng-controller="AppNav")
 		.navbar-header
 			a.navbar-brand(href='/') OFeeds
 		.navbar-collapse.collapse
-			.nav.navbar-nav
+			form.navbar-form.navbar-left(ng-submit="sbmt()")
+				.form-controller-wrapper
+					input.form-control#nrss(type='text',placeholder='Search for feed url')
+					span.material-input
+			ul.nav.navbar-nav.navbar-right
+				li 
+					a(href="#")
+						i.fa.fa-power-off
+						| &nbsp;Logout

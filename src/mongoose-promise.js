@@ -1,7 +1,7 @@
-var mongoose = require('mongoose');
+var mg = require('mongoose');
 
 // wrap mongoose methods so they return promises
-mongoose.Query.prototype.then = function(done, fail) {
+mg.Query.prototype.then = function(done, fail) {
     return this.exec().then(done, fail);
 };
 
@@ -11,7 +11,7 @@ function wrap(obj, method) {
         if (arguments.length && typeof arguments[arguments.length - 1] === 'function')
             return old.apply(this, arguments);
             
-        var promise = new mongoose.Promise;
+        var promise = new mg.Promise;
         var args = Array.prototype.slice.call(arguments);
         
         args.push(function(err, result) {
@@ -23,17 +23,17 @@ function wrap(obj, method) {
     };
 }
 
-wrap(mongoose.Model.prototype, 'populate');
-wrap(mongoose.Model, 'create');
-wrap(mongoose.Model, 'populate');
-wrap(mongoose.Model.prototype, 'save');
-wrap(mongoose.Model.prototype, 'remove');
+wrap(mg.Model.prototype, 'populate');
+wrap(mg.Model, 'create');
+wrap(mg.Model, 'populate');
+wrap(mg.Model.prototype, 'save');
+wrap(mg.Model.prototype, 'remove');
 
 // mongoose's pre/post hooks overwrite the save and remove functions
 // so we have to wrap those again to return promises
 function hook(method) {
-	var fn = mongoose.Document.prototype[method];
-	mongoose.Document.prototype[method] = function(name) {
+	var fn = mg.Document.prototype[method];
+	mg.Document.prototype[method] = function(name) {
         var ret = fn.apply(this, arguments);
         var old = this[name];
         wrap(this, name);

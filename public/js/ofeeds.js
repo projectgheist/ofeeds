@@ -10,6 +10,8 @@ jQuery(document).ready(function($) {
 
 var app = angular.module('webapp', [
 	'ngRoute',
+	'ngSanitize',
+	'AppNav',
 	'AppFeeds',
 	'AppService'
 ]);
@@ -37,6 +39,7 @@ AppService.factory('FeedSubmit', ['$resource',
 ]);
 
 var AppFeeds = angular.module('AppFeeds', []);
+var AppNav = angular.module('AppNav', []);
 
 /**
  * App configuration
@@ -49,19 +52,22 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 	})
 	.when('/subscription/:type/:param*\/', {
 		templateUrl: function(urlattr){
-			return '/templates/posts-compact';
-		},
-		controller: 'AppFeeds'
-	})
-	.otherwise({
-		templateUrl: function(urlattr){
-			return '/templates/empty';
+			return '/templates/posts-expand';
 		},
 		controller: 'AppFeeds'
 	});
 }]);
 
-app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'FeedSubmit', 'GetFeeds', 'GetPosts', function($scope, $http, $routeParams, FeedSubmit, GetFeeds, GetPosts) {
+app.controller('AppNav', ['$scope', '$http', '$location', 'GetFeeds', 'FeedSubmit', function($scope, $http, $location, GetFeeds, FeedSubmit) {
+	$scope.gtsubs = function() {
+		GetFeeds.query(function(data) {
+			$scope.subs = data;
+		}, function(err) {
+		});
+	}	
+	$scope.isActive = function(viewLocation) { 
+		return ('/subscription'+decodeURIComponent(viewLocation)+'*/') === $location.path();
+	}
 	$scope.sbmt = function() {
 		// get url from text box
 		var u = $('#nrss');
@@ -77,12 +83,10 @@ app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'FeedSubmit', 'Ge
 			});
 		}
 	}
-	$scope.gtsubs = function() {
-		GetFeeds.query(function(data) {
-			$scope.subs = data;
-		}, function(err) {
-		});
-	}	
+	$scope.gtsubs();
+}]);
+
+app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'GetPosts', function($scope, $http, $routeParams, GetPosts) {
 	$scope.gtposts = function(QueryParams) {
 		GetPosts.query(QueryParams,function(data) {
 			$scope.stream = data;
@@ -90,8 +94,6 @@ app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'FeedSubmit', 'Ge
 			$scope.stream = [];
 		});
 	}
-	$scope.gtsubs();
-
 	var StreamParams = {};
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway
@@ -99,10 +101,7 @@ app.controller('AppFeeds', ['$scope', '$http', '$routeParams', 'FeedSubmit', 'Ge
 		StreamParams.type = String($routeParams.type);
 		StreamParams.params = v.substring(0,v.length-1);
 	} else {
-		StreamParams = { type:'user', params:'-/state/reading-list' };
+		StreamParams = { type:'user', params:'/-/state/reading-list' };
 	}
 	$scope.gtposts(StreamParams);
 }]);
-app.controller('AppPosts', function($scope) {
-	$scope.message = 'Contact us! JK. This is just a demo.';
-});

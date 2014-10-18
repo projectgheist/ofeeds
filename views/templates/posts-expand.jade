@@ -1,22 +1,23 @@
-.article.article-lg.bs-callout
+.article(ng-repeat="post in stream.items")
 	.row
 		.col-xs-12
-			h2 Article title
-				small.pull-right Publication time
-	hr
+			h2 
+				a(href='{{post.alternate.href}}',target='_blank')
+				| {{post.title}}
+			a(href="#/subscription/feed/{{post.origin.url}}") 
+				span.label.label-primary {{post.origin.title}}
+			span(ng-if='{{post.author}}') &nbsp;by {{post.author}}
+			.pull-right {{post.published}}
 	.row
-		.col-xs-8
-			p 
-				a(href="#") [Feed subscription]
-				| &nbsp;by [Author name]
-		.col-xs-4
+		.col-xs-12
 			.btn-group.pull-right
-				button.btn.btn-default Unread
+				button.btn.btn-default Mark as Unread
 				.btn-group
 					button.btn.btn-default Share
-					button.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
+					button.btn.btn-default.dropdown-toggle.withripple(data-toggle="dropdown")
 						span.caret
 						span.sr-only Toggle Dropdown
+						.ripple-wrapper
 					ul.dropdown-menu
 						li
 							a(href="#") Twitter
@@ -25,3 +26,7 @@
 						li.divider
 						li
 							a(href="#") Email
+	.row
+		.col-xs-12
+			p(ng-bind-html="post.content.content")
+	.line-separator

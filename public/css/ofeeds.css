@@ -1,3 +1,8 @@
+.line-separator {
+	margin: 10px 0;
+	border-bottom: 1px solid rgba(0,0,0,.1);
+}
+
 .form-group.input-group  {
 	margin-top: 5px;
 	margin-bottom: 5px;
@@ -25,6 +30,10 @@
 	-ms-backface-visibility:     hidden;
 	backface-visibility:         hidden; 
 	max-width:14px;
+}
+
+.list-group-item.active {
+	color: #428bca;
 }
 
 /* Side notes for calling out things

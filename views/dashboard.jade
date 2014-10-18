@@ -1,30 +1,25 @@
 include includes/header
 include includes/nav
 .container
-	.row(ng-controller="AppFeeds")
-		.col-xs-offset-3.col-xs-6
-			.well
-				h3(style="text-align:center") Add new RSS feed
-				hr
-				form
-					.form-group
-						.input-group
-							.form-control-wrapper
-								input.form-control.typeahead#nrss(type="text",placeholder="Enter new RSS")
-							span.input-group-btn
-								button.btn.btn-primary.btn-block(ng-click="sbmt()") Add
-				.row
-					.col-xs-12
-						.alert.alert-success.fade.in.hidden#as
-						.alert.alert-danger.fade.in.hidden#ad
-		.row
-			.col-xs-4
+	.row
+		.col-xs-12
+			.alert.alert-success.fade.in.hidden#as
+			.alert.alert-danger.fade.in.hidden#ad
+	.row
+		.col-xs-4(ng-controller="AppNav")
+			div(data-spy="affix",data-offset-top="0",data-offset-bottom="200")
 				.list-group
 					.list-group-item.list-group-item-success
 						h4 Feed subscriptions
-					a.list-group-item(href="#/subscription/feed/{{sub.feedURL}}",ng-repeat="sub in subs")
+					a.list-group-item(href="#/subscription/state/-/reading-list",ng-class="{ active: isActive('/state/-/reading-list')}",id='All') All
+					.line-separator
+					a.list-group-item(href="#/subscription/feed/{{sub.feedURL}}",ng-class="{ active: isActive('/feed/{{sub.feedURL}}')}",ng-repeat="sub in subs")
 						| {{sub.title}}
-			.col-xs-8
-				div(ng-view)
-					p Loading...
+					.line-separator
+				a.btn.btn-primary(href="#") 
+					i.fa.fa-angle-double-right
+					| &nbsp;Back to top
+		.col-xs-8(ng-controller="AppFeeds")
+			div(ng-view)
+				p Loading...
 include includes/footer
