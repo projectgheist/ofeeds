@@ -40,7 +40,7 @@ function formatPosts(posts, feed) {
             origin: {
                 streamId: post.feed.stringID,
                 title: post.feed.title,
-                url: post.feed.siteURL
+                url: post.feed.feedURL
             },
             crawlTimeMsec: '' + (+post.feed.successfulCrawlTime),
             timestampUsec: '' + (post.published * 1000),
