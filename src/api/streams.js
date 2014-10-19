@@ -115,7 +115,7 @@ app.get('/api/0/stream/contents*', function(req, res) {
             title:        isFeed ? feed.title        : value.name,
             description:  isFeed ? feed.description  : undefined,
             siteURL:      isFeed ? feed.siteURL      : undefined,
-            updated:      isFeed ? feed.lastModified : Date.now(),
+            updated:      mm(isFeed ? feed.lastModified : Date.now()).format('dddd, MMMM Do YYYY, h:mm:ss A'),
             self:         ut.fullURL(req),
             continuation: 'TODO'
         }));
