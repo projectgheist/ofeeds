@@ -10,12 +10,18 @@ nav.navbar.navbar-static-top.navbar-default
 						span.material-input
 				ul.nav.navbar-nav.navbar-right
 					li 
-						a(href="#")
+						a(href='')
 							i.fa.fa-fw.fa-power-off
 							| Logout
 			else
 				ul.nav.navbar-nav.navbar-right
-					li 
-						a(ng-href="/login")
+					li.dropdown
+						a.dropdown-toggle(href='',data-toggle='dropdown')
 							i.fa.fa-fw.fa-user
 							| Log in
+							span.caret
+						ul.dropdown-menu
+							li
+								a(href='/auth/google',target="_self")
+									i.fa.fa-google-plus.fa-fw
+									| Google+

@@ -159,10 +159,10 @@ exports.getPosts = function(streams, options) {
 };
 
 // export the modules
+exports.User 	= require('./models/user');
 exports.Feed 	= require('./models/feed');
 exports.Post 	= require('./models/post');
 exports.Tag 	= require('./models/tag');
 /*
-exports.User = require('./models/user');
 exports.Preference = require('./models/preference');
 */

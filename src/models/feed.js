@@ -1,9 +1,9 @@
-var mongoose = require('mongoose'),
+var mg = require('mongoose'),
 	ut = require('../utils'),
 	sh = require('shortid');
 
 // A Feed containing posts, shared across all users
-var Feed = mongoose.Schema({
+var Feed = mg.Schema({
     // feed metadata
     title: String,
     description: String,
@@ -52,8 +52,8 @@ Feed.methods.setTitleForUser = function(title, user) {
 };
 
 Feed.pre('remove', function(callback) {
-    var Post = mongoose.model('Post');
+    var Post = mg.model('Post');
     Post.where('_id').in(this.posts).remove(callback);
 });
 
-module.exports = mongoose.model('Feed', Feed);
+module.exports = mg.model('Feed', Feed);

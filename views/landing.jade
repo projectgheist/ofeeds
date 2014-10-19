@@ -1,0 +1,25 @@
+include includes/header
+.container-full
+	.row.v-offset
+		.col-xs-12.col-md-offset-4.col-md-4
+			.lead.text-center
+				h1 ofeeds
+				p A minimal RSS reader in Node.js
+	.row.v-offset
+		.col-xs-12.col-md-offset-4.col-md-4
+			form
+				.form-group
+					.form-control-wrapper.text-center
+						input.form-control.input-lg(type="text",placeholder="Try out a feed URL")
+						span.material-input.input-group-btn
+	.row.v-offset-half
+		.col-xs-12
+			.lead.text-center
+				p OR
+	.row.v-offset-half
+		.col-xs-12.col-md-offset-4.col-md-4
+			form.center-block
+				.form-group
+					a.btn.btn-primary.btn-lg.btn-block.btn-danger(href='/auth/google',target="_self")
+						i.fa.fa-google-plus.fa-fw
+						| Sign in with Google

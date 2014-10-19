@@ -46,7 +46,7 @@ module.exports.Google = function() {
 /** Store site title
  */
 module.exports.site = {
-	title: "OFeeds"
+	title: "ofeeds"
 };
 
 /** Mongo DB Credentials

@@ -9,11 +9,12 @@
   "dependencies": {
 	"agenda": "*",
 	"express": "*",
+	"express-session": "*",
     "feedparser": "*",
     "jade": "*",
     "mongoose": "*",
     "passport": "*",
-    "passport-google": "*",
+    "passport-google-oauth": "*",
     "request": "*",
     "rsvp": "*",
     "shortid": "*",

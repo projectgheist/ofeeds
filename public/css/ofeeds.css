@@ -1,3 +1,23 @@
+.v-offset {
+	margin-top: 7%;
+}
+
+.v-offset-half {
+	margin-top: 3%;
+}
+
+.text-center {
+	text-align: center;
+}
+/* webkit solution */
+.text-center ::-webkit-input-placeholder { 
+	text-align: center; 
+}
+/* mozilla solution */
+.text-center input:-moz-placeholder { 
+	text-align: center; 
+}
+
 .line-separator {
 	margin: 10px 0;
 	border-bottom: 1px solid rgba(0,0,0,.12);
@@ -10,6 +30,13 @@
 
 .panel > .table-bordered > thead > tr > th {
 	background-color:#f5f5f5;
+}
+
+.container-full {
+	margin: 0 auto;
+	width: 100%;
+	min-height: 100%;
+	overflow: hidden;
 }
 
 .rotate_text_90

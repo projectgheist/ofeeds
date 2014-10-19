@@ -32,7 +32,7 @@ Note: You can change the port, ip, database connection settings, ... inside the 
 ## Todo
 
 * ~~Fix cron jobs not running at periodic intervals~~
-* OAuth login and user accounts
+* ~~OAuth login and user accounts~~
 * Tag support
 * Layout redesign
 * Feed management
