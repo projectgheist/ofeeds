@@ -6,6 +6,29 @@
  * On page load ready
  */
 jQuery(document).ready(function($) {
+	var s = new Bloodhound({
+		datumTokenizer: function(d) { return d.Name; },
+		queryTokenizer: Bloodhound.tokenizers.whitespace,
+		limit: 10,
+		remote: {
+			url: "/api/0/subscription/list",
+			filter: function(a) { 
+				g_members_object = a; 
+				return a; 
+			}
+		}
+	});
+	s.initialize();
+	// prep typeahead
+	$('.typeahead').typeahead({
+		hint: true,
+		highlight: true,
+		minLength: 1
+	}, {
+		name: 'g_typeahead_members',
+		displayKey: 'Name',
+		source: s.ttAdapter()
+	});
 });
 
 var app = angular.module('webapp', [
@@ -114,6 +137,10 @@ app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', 'Get
 			}
 		});
 	});
+	
+	$scope.toggle = function(t) {
+		console.log(t);
+	}
 	
 	$scope.$watch(
 	  function () {

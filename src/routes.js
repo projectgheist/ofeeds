@@ -49,9 +49,15 @@ ap.get("/", function(req, res) {
 ap.get("/login", function(req, res) {
 	res.redirect('/');
 });
+/** logout route */
+ap.get("/logout", function(req, res) {
+	req.logout(); 
+	res.redirect('/'); 
+});
 ap.get("/dashboard", ensureAuth, function(req, res) {
 	res.render('dashboard', { 
-		'config': cf.site
+		'config': cf.site,
+		'user': req.user
 	});
 });
 ap.get("/subscription/*", function(req, res) {

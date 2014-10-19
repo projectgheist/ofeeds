@@ -18,8 +18,8 @@ app.get('/auth/google', pp.authenticate('google', { scope: 'https://www.googleap
 // the process by verifying the assertion.  If valid, the user will be
 // logged in.  Otherwise, authentication has failed.
 app.get('/auth/google/callback', 
-		pp.authenticate('google', { successRedirect: '/',
-									failureRedirect: '/login' }));
+		pp.authenticate('google', { successRedirect: '/dashboard',
+									failureRedirect: '/' }));
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -44,7 +44,12 @@ pp.use(new gs({
 	function(token, tokenSecret, profile, done) {
 		// asynchronous verification, for effect...
 		process.nextTick(function () {
-			return db.findOrCreate(db.User, {openID: accessToken}).then(function(user) {
+			return db.findOrCreate(db.User, {openID: profile.id}).then(function(user) {
+				// store retrieved info
+				user.provider 	= profile.provider;
+				user.email		= profile.emails[0].value;
+				user.name		= profile.displayName;
+				user.save();
 				return done(null, user);
 			}, function(err) {
 				return done(err);

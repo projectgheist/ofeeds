@@ -2,7 +2,7 @@
 
 Warning: This is work in progress and not usable/stable yet!
 
-OFeeds is a minimal RSS reader in NodeJS with a front end interface with as little external dependencies as possible.
+OFeeds is a minimal RSS reader in Node.js with a front end interface with as little external dependencies as possible.
 The internal storage of feeds is based of the Google Reader API, with some changes to make it clearer to understand.
 
 Uses [AngularJS](http://angularjs.org/), [Twitter Bootstrap](http://getbootstrap.com) and [Bootstrap Material Design Theme](https://github.com/FezVrasta/bootstrap-material-design) for the front-end interface, but this is optional.

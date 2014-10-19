@@ -16,12 +16,13 @@ include includes/nav
 						| All
 					.line-separator
 					a.list-group-item(href="/subscription/feed/{{sub.feedURL}}",ng-class="{ active: isActive('/feed/{{sub.feedURL}}')}",ng-repeat="sub in subs")
+						i.fa.fa-bookmark-o.fa-fw
 						| {{sub.title}}
 					.line-separator
 				button.btn.btn-primary(href='',ng-click="gotoTop()")
 					i.fa.fa-fw.fa-angle-double-right
 					| Back to top
 		.col-xs-8(ng-controller="AppFeeds")
-			div#top(ng-view)
+			div#feed(ng-view)
 				p Loading...
-include includes/footer
+include includes/js
