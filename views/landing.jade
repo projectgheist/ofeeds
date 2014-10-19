@@ -1,25 +1,29 @@
 include includes/header
 .container-full
-	.row.v-offset
+	.v-offset
+	.row
 		.col-xs-12.col-md-offset-4.col-md-4
 			.lead.text-center
 				h1(style="margin-left:-20px")
 					i.fa.fa-rss.fa-fw.fa-flip-horizontal
 					| ofeeds
 				p A minimal RSS reader in Node.js
-	.row.v-offset
-		.col-xs-12.col-md-offset-4.col-md-4
-			form
+	.v-offset
+	.row
+		.col-xs-offset-2.col-xs-8.col-md-offset-4.col-md-4
+			form.form-horizontal
 				.form-group
-					.form-control-wrapper.text-center
-						input.form-control.empty(type="text",placeholder='Try out a feed URL') 
+					label.control-label.col-lg-3.visible-lg Try out a feed URL
+					.col-xs-12.col-lg-9.form-control-wrapper.text-center
+						input.form-control.input-lg.empty(type="text",placeholder='example.feed.com/rss') 
 						span.material-input
-	.row.v-offset-half
-		.col-xs-12
-			.lead.text-center
-				p OR
-	.row.v-offset-half
-		.col-xs-12.col-md-offset-4.col-md-4
+	.v-offset-half
+	.row
+		.lead.text-center
+			p OR
+	.v-offset-half
+	.row
+		.col-xs-offset-2.col-xs-8.col-md-offset-4.col-md-4
 			form.center-block
 				.form-group
 					a.btn.btn-primary.btn-lg.btn-block.btn-danger(href='/auth/google',target="_self")
