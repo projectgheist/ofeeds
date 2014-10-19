@@ -42,14 +42,29 @@ Note: You can change the port, ip, database connection settings, ... inside the 
 When Openshift updates their `Node` module to 0.11.9
 * Convert [Express](http://expressjs.com/) to [Koa](http://koajs.com/)
 
-## External libraries/frameworks used for front-end
+## Library dependencies:
+
+### Front-end
+
 * [Angular.JS](http://angularjs.org/)
 * [Bootstrap](http://getbootstrap.com)
 * [Bootstrap Material Design Theme](https://github.com/FezVrasta/bootstrap-material-design)
 * [JQuery](http://jquery.com/)
 * [TypeAhead](https://github.com/twitter/typeahead.js/)
 
-## Library dependencies:
+### Back-end
+
+* [Agenda](https://github.com/rschmukler/agenda)
+* [Express](http://expressjs.com/)
+* [Feedparser](https://github.com/danmactough/node-feedparser)
+* [Jade](https://github.com/visionmedia/jade)
+* [Mongoose](http://mongoosejs.com/)
+* [Passportjs](http://passportjs.org/)
+* [Request](https://github.com/mikeal/request)
+* [RSVP](https://github.com/tildeio/rsvp.js)
+* [ShortID](https://github.com/dylang/shortid)
+* [Validator](https://github.com/chriso/validator.js)
+* [Momentjs](http://momentjs.com/)
 
 ## Copyright and license
 I haven't decided on a license yet.
