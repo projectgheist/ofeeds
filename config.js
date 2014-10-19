@@ -1,4 +1,13 @@
-/** Application ip address
+/** Application dns location/url
+ */
+module.exports.Url = function() {
+	if (process.env.OPENSHIFT_APP_DNS) {
+		return process.env.OPENSHIFT_APP_DNS;
+	}
+	return 'http://localhost:' + exports.Port();
+};
+
+/** Application directory on server
  */
 module.exports.Dir = function() {
 	if (process.env.OPENSHIFT_REPO_DIR) {
@@ -23,6 +32,15 @@ module.exports.Port = function() {
 		return process.env.OPENSHIFT_NODEJS_PORT || 8080;
 	}
 	return process.env.PORT || 3000;
+};
+
+/**
+ */
+module.exports.Google = function() {
+	return {
+		ClientID: '<Google application client id>',
+		ClientSecret: '<Google application client secret>'
+	};
 };
 
 /** Store site title
