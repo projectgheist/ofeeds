@@ -107,10 +107,23 @@ app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', 'Get
 		});
 	}
 	$scope.$on('onRepeatLast', function(scope, element, attrs){
+		// re-activate affix
+		$('#ma').affix({
+			offset: {
+				top: 85
+			}
+		});
 	});
-	$scope.test = function(s) {
-		console.log(s);
-	}
+	
+	$scope.$watch(
+	  function () {
+		return $('#ma').width() === $('#map').width();
+	  },
+	  function (n, o) {
+		$('#ma').width($('#map').width());
+	  }
+	)
+	
 	var obj = {};
 	// if it has parameters
 	if (Object.keys($routeParams).length > 0) {

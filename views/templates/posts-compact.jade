@@ -26,7 +26,7 @@
 						.row-content
 							h4.list-group-item-heading Update time
 							p.list-group-item-text {{stream.updated}}
-	.article.article-sm(ng-repeat="post in stream.items")
+	.article.article-sm(ng-repeat="post in stream.items",on-last-repeat='')
 		.row
 			a(href='',ng-click="test('test');")
 				.col-xs-9
