@@ -72,17 +72,18 @@ app.get('/api/0/subscription/list', function(req, res) {
 });
 
 app.post('/api/0/subscription/search', function(req, res) {
+	var u = decodeURIComponent(req.query.q);
 	// Check if URL
-    if (!ut.isUrl(req.query.q)) {
+    if (!ut.isUrl(u)) {
         return res.json({
-            query: req.query.quickadd,
+            query: u,
             numResults: 0
         });
     }
 	// creat or find URL in db
-    actions.search(req, req.query.q).then(function(feed) {
+    actions.search(req, u).then(function(feed) {
         res.json({
-            query: req.query.q,
+            query: u,
             numResults: 1,
             streamId: 'feed/' + feed.feedURL
         });
@@ -101,16 +102,17 @@ app.post('/api/0/subscription/quickadd', function(req, res) {
 	}
 	*/
 		
+	var u = decodeURIComponent(req.query.quickadd);
 	// Check if URL
-    if (!ut.isUrl(req.query.quickadd)) {
+    if (!ut.isUrl(u)) {
         return res.json({
-            query: req.query.quickadd,
+            query: u,
             numResults: 0
         });
     }
 
 	// creat or find URL in db
-    actions.subscribe(req, req.query.quickadd).then(function() {
+    actions.subscribe(req, u).then(function() {
         res.json({
             query: req.query.quickadd,
             numResults: 1,

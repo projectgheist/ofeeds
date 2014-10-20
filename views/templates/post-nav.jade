@@ -1,5 +1,5 @@
 .row
-	.col-xs-12#map
+	.col-xs-12
 		#ma(data-spy="affix",data-offset-top="85")
 			nav.navbar.navbar-default
 				.navbar-header
@@ -13,9 +13,9 @@
 							a(href='#',alt='Refresh') 
 								i.fa.fa-fw.fa-refresh
 						li
-							a(href='#',alt='Options') 
+							a(href='#stream-info',alt='Options',data-toggle="collapse",data-parent="#map") 
 								i.fa.fa-fw.fa-ellipsis-v
-		.well
+		.well.collapse#stream-info
 			.row.list-group
 				.col-xs-6.list-group-item
 					.row-content

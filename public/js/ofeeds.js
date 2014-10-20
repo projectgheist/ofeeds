@@ -88,6 +88,14 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$anchorScroll', 'GetF
 	$scope.isActive = function(viewLocation) { 
 		return ('/subscription'+decodeURIComponent(viewLocation)+'*/') === $location.path();
 	}
+	$scope.$watch(
+	  function () {
+		return $('#sa').width() === $('#sap').width();
+	  },
+	  function (n, o) {
+		$('#sa').width($('#sap').width());
+	  }
+	)
 	$scope.sbmt = function() {
 		// get url from text box
 		var u = $('#nrss');

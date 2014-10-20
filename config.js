@@ -2,7 +2,7 @@
  */
 module.exports.Url = function() {
 	if (process.env.OPENSHIFT_APP_DNS) {
-		return process.env.OPENSHIFT_APP_DNS;
+		return 'http://' + process.env.OPENSHIFT_APP_DNS;
 	}
 	return 'http://localhost:' + exports.Port();
 };

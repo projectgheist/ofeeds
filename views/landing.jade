@@ -1,5 +1,5 @@
 include includes/header
-.container-full
+.container-full(ng-controller="AppNav")
 	.v-offset
 		.row
 			.col-xs-offset-1.col-xs-10.col-md-offset-4.col-md-4
@@ -24,13 +24,13 @@ include includes/header
 								a.btn.btn-primary.btn-lg.btn-block.btn-danger(href='/auth/google',target="_self")
 									i.fa.fa-google-plus.fa-fw
 									| Google
-					.col-xs-12.col-lg-2
+					.col-xs-12.col-lg-1
 						.lead.text-center(style='margin-top:20px')
 							p -&nbsp;OR&nbsp;-
-					.col-xs-12.col-lg-5
+					.col-xs-12.col-lg-6
 						h3.text-center Fetch a feed
-						form
+						form(ng-submit="sbmt()")
 							.form-group
 								.form-control-wrapper.text-center
-									input.input-lg.form-control.empty.typeahead(type="text",placeholder='example.feed.com/rss') 
+									input.input-lg.form-control.empty.typeahead#nrss(type="text",placeholder='example.feed.com/rss') 
 									span.material-input

@@ -113,7 +113,6 @@ exports.parseTags = function(tags, user) {
         if (!match || (/* @todo: re-enable: match[1] !== user.id && */match[1] !== '-')) {
 			return null;
         }
-		console.log(match);
         tags[i] = {
             user: user,
             type: match[2],

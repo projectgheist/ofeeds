@@ -116,8 +116,6 @@ exports.getPosts = function(streams, options) {
     // load the tags to include and exclude
     var includeTags, excludeTags;
     return rs.all([getTags(tags), getTags(options.excludeTags)]).then(function(results) {
-		console.log(results);
-		
         includeTags = results[0];
         excludeTags = results[1];
 
