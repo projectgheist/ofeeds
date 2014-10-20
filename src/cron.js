@@ -57,16 +57,13 @@ function ContainerImages() {
  * function FetchFeed
  */
 exports.FetchFeed = function(feed) {
-	console.log(feed.feedURL);
 	// early escape if no feed is returned 
 	if (!feed ||
 		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 5)) { // feed was updated less then 2 minutes ago
-		console.log('Skip feed fetch!');
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(["Fetch feed '",feed.feedURL,"' failed! (Updated less than ", mm().diff(feed.successfulCrawlTime, 'minutes'), " minute(s) ago)"].join("")); 
 		});
 	}
-	console.log('Actually feed fetch!');
 	return new rs.Promise(function(resolve, reject) {
 		// save found posts to array
 		var existingPosts = {};
@@ -91,20 +88,23 @@ exports.FetchFeed = function(feed) {
 			parseError = true;
 		})
 		.on('meta', function(meta) {
-			feed.title = meta.title;
-			feed.description = meta.description;
-			feed.author = meta.author;
-			feed.language = meta.language;
-			feed.copywrite = meta.copywrite;
-			feed.categories = meta.categories;
-			feed.siteURL = meta.link;
-			if (meta.xmlurl) {
-				feed.feedURL = encodeURIComponent(meta.xmlurl);
-			}
-			switch (meta.cloud.type) {
-				case 'hub':      // pubsubhubbub supported
-				case 'rsscloud': // rsscloud supported
-			}
+			st.Feed.find({feedURL:encodeURIComponent(meta.xmlurl)}).then(function(of) {
+				if (of.length > 0 && of[0]) {
+					// override new feed with old feed
+					feed = of[0];
+				}
+				feed.title = meta.title;
+				feed.description = meta.description;
+				feed.author = meta.author;
+				feed.language = meta.language;
+				feed.copywrite = meta.copywrite;
+				feed.categories = meta.categories;
+				feed.siteURL = meta.link;
+				switch (meta.cloud.type) {
+					case 'hub':      // pubsubhubbub supported
+					case 'rsscloud': // rsscloud supported
+				}
+			});
 		})
 		.on('readable', function () {
 			// do something else, then do the next thing
@@ -122,7 +122,7 @@ exports.FetchFeed = function(feed) {
 				if (data.description !== null) {
 					parser.onopentag = function(tag) {
 						// Image tag found in description
-						if (tag.name === "IMG") {
+						if (tag.name === "IMG" && tag.attributes) {
 							// If image is specified as the thumbnail in the post, and no previous 
 							// thumbnail image was found, store as large thumbnail
 							if (tag.attributes.ALT === "thumbnail" && thumbnail_obj.large === "") {
@@ -155,7 +155,7 @@ exports.FetchFeed = function(feed) {
 					// store in feeds table
 					feed.posts.push(post);
 					// store in posts table
-					posts.push(post.save());
+					posts.push(post.save);
 				}
 			}
 			// @todo: check for updates to existing posts

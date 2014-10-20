@@ -17,14 +17,9 @@ var actions = {
         return rs.all([feed]).then(function(results) {
 			// local ref to feed variable
             var f = results[0];
-			// has not been successfully fetched OR last successful fetch was longer then 5 minutes ago
-            if ((!f.successfulCrawlTime || mm().diff(f.successfulCrawlTime, 'minutes') > 5)) {
-				return cr.FetchFeed(f).then(function() {
-					console.log("Finish fetch");
-					return f;
-				});
-            }
-			return f;
+			return cr.FetchFeed(f).then(function() {
+				return f;
+			});
         });
 	},
     subscribe: function(ctx, url) {
