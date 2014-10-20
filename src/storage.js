@@ -4,7 +4,7 @@ require('./mongoose-promise');
 
 var mg = require('mongoose'),
     rs = require('rsvp'),
-    Promise = rs.Promise,
+    pr = rs.Promise,
 	cf = require('../config'),
 	ut = require('./utils');
 
@@ -29,8 +29,9 @@ exports.setup = function() {
     });
 };
 
-exports.all = function(model) {
-	return model.find({}, function(err,feeds) {
+exports.all = function(model, query) {
+	console.log(query || {});
+	return model.find(query || {}, function(err,feeds) {
 		if (err) {
 			return false;
 		}
@@ -87,7 +88,7 @@ function getTags(tags) {
         return exports.Tag.find({ $or: tags });
     }
 	// returns an empty promise
-	return new Promise(function(resolve, reject){ resolve([]); });
+	return new pr(function(resolve, reject){ resolve([]); });
 }
 
 // Returns a list of posts for a list of streams (feeds and tags) as parsed

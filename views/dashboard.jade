@@ -19,7 +19,7 @@ include includes/nav
 						i.fa.fa-fw.fa-bars
 						| All
 					.line-separator
-					a.list-group-item(href="/subscription/feed/{{sub.feedURL}}",ng-class="{ active: isActive('/feed/{{sub.feedURL}}')}",ng-repeat="sub in subs")
+					a.list-group-item(href="/subscription/feed/{{sub.feedURL}}",ng-class="{ active: isActive('/feed/{{sub.feedURL}}')}",ng-repeat="sub in subs.subscriptions")
 						i.fa.fa-bookmark-o.fa-fw
 						| {{sub.title}}
 					.line-separator

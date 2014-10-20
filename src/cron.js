@@ -8,8 +8,7 @@ var fp = require('feedparser'),
 	st = require('./storage'),
 	ut = require('./utils'),
 	mm = require('moment'),
-	mg = require('mongoose'),
-	fd = st.Feed;
+	mg = require('mongoose');
 	
 var Agenda = require('agenda'),
 	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db,true), collection: 'agendaJobs' }, processEvery: '3 minute', defaultLockLifetime: 90000 });
@@ -58,32 +57,36 @@ function ContainerImages() {
  * function FetchFeed
  */
 exports.FetchFeed = function(feed) {
+	console.log(feed.feedURL);
 	// early escape if no feed is returned 
 	if (!feed ||
-		(feed.successfulCrawlTime !== undefined && mm().diff(feed.successfulCrawlTime, 'minutes') <= 5)) { // feed was updated less then 2 minutes ago
+		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 5)) { // feed was updated less then 2 minutes ago
+		console.log('Skip feed fetch!');
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(["Fetch feed '",feed.feedURL,"' failed! (Updated less than ", mm().diff(feed.successfulCrawlTime, 'minutes'), " minute(s) ago)"].join("")); 
 		});
 	}
+	console.log('Actually feed fetch!');
 	return new rs.Promise(function(resolve, reject) {
 		// save found posts to array
 		var existingPosts = {};
+		// loop all posts in feed
 		feed.posts.forEach(function(post) {
+			// create map with guid
 			existingPosts[post.guid] = post;
 		});
-
+		
 		// pre-define variables
 		var parseError = false,
 			posts = [],
 			parser = sx.parser(false);
 		
-		//console.log("// ----------------------------------------------------------------------------");
-		//console.log("Fetch: " + decodeURIComponent(feed.feedURL));
-		
 		rq(decodeURIComponent(feed.feedURL))
 		.pipe(new fp()) // fetch data from feed URL
 		.on('error', function(error) {
-			console.log("\tFeedparser: " + error);
+			console.log("// ----------------------------------------------------------------------------");
+			console.log("Feedparser: " + error);
+			console.log("on\t" + decodeURIComponent(feed.feedURL));
 			// always handle errors
 			parseError = true;
 		})
@@ -94,7 +97,6 @@ exports.FetchFeed = function(feed) {
 			feed.language = meta.language;
 			feed.copywrite = meta.copywrite;
 			feed.categories = meta.categories;
-			
 			feed.siteURL = meta.link;
 			if (meta.xmlurl) {
 				feed.feedURL = encodeURIComponent(meta.xmlurl);
@@ -110,7 +112,7 @@ exports.FetchFeed = function(feed) {
 				data;
 				
 			while (data = stream.read()) {
-				var guid = data.guid || data.link,
+				var guid = (data.guid || data.link),
 					thumbnail_obj = new ContainerImages();
 					
 				// Store orignal thumbnail url
@@ -156,24 +158,27 @@ exports.FetchFeed = function(feed) {
 					posts.push(post.save());
 				}
 			}
-			
 			// @todo: check for updates to existing posts
 		})
 		.on('end', function() {
-			// wait for posts to finish saving
-			// then mark crawl success or failure
-			rs.all(posts).then(function() {
-				feed.lastModified = feed.successfulCrawlTime = new Date();			
-				feed.save();
-				//console.log('feed sucessfully finished');
-				resolve();
-			}, function(err) {
-				feed.lastModified = feed.failedCrawlTime = new Date();
-				feed.lastFailureWasParseFailure = parseError;
-				feed.save();
-				//console('feed error finished');
-				reject(err);
-			});
+			if (parseError) {
+				reject('Feed parse error!');
+			} else {
+				// wait for posts to finish saving
+				// then mark crawl success or failure
+				rs.all(posts).then(function() {
+					feed.lastModified = feed.successfulCrawlTime = new Date();			
+					feed.save();
+					//console.log('feed sucessfully finished');
+					resolve();
+				}, function(err) {
+					feed.lastModified = feed.failedCrawlTime = new Date();
+					feed.lastFailureWasParseFailure = parseError;
+					feed.save();
+					//console('feed error finished');
+					reject(err);
+				});
+			}
 		});
 	});
 };

@@ -17,10 +17,6 @@ function formatPosts(posts, feed) {
 		var tags = post.tags.map(function(tag) {
 			return tag.stringID;
         });
-		
-		//console.log("// ----------------------------------------------------------------------------");
-		//console.log(post);
-		
         return {
             id: post.longID,
             title: post.title,
@@ -57,9 +53,9 @@ function formatPosts(posts, feed) {
         title: feed.title,
         description: feed.description,
         continuation: feed.continuation,
-        self: { href: feed.self },
+        self: { href: feed.self }, // url to current fetch call
         alternate: feed.siteURL ? [{ href: feed.siteURL, type: 'text/html' }] : undefined,
-        updated: feed.updated,
+        updated: feed.updated, // update time of the feed
         items: items
     };
 };

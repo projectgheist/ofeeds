@@ -78,13 +78,20 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 	});
 }]);
 
-app.controller('AppNav', ['$scope', '$http', '$location', '$anchorScroll', 'GetFeeds', 'FeedSubmit', function($scope, $http, $location, $anchorScroll, GetFeeds, FeedSubmit) {
+app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anchorScroll', 'GetFeeds', 'FeedSubmit', 'GetPosts', function($scope, $http, $location, $routeParams, $anchorScroll, GetFeeds, FeedSubmit, GetPosts) {
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
 			$scope.subs = data;
 		}, function(err) {
 		});
 	}	
+	$scope.gtposts = function(QueryParams) {
+		GetPosts.query(QueryParams,function(data) {
+			$scope.stream = data;
+		}, function(err) {
+			$scope.stream = [];
+		});
+	}
 	$scope.isActive = function(viewLocation) { 
 		return ('/subscription'+decodeURIComponent(viewLocation)+'*/') === $location.path();
 	}
@@ -99,13 +106,15 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$anchorScroll', 'GetF
 	$scope.sbmt = function() {
 		// get url from text box
 		var u = $('#nrss');
+		// disable the input
 		u.prop('disabled', true);
 		// make sure it exists
 		if (u.val() !== undefined || u.val().trim().length > 0) {
 			// submit to server
 			FeedSubmit.save({q:u.val()}, function() {
 				u.prop('disabled', false);
-				$scope.gtsubs();
+				// render feed to main section
+				$scope.gtposts({'feed':u.val()});
 			}, function() {
 				u.prop('disabled', false);
 			});
@@ -117,48 +126,8 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$anchorScroll', 'GetF
         $location.hash('top');
         // call $anchorScroll()
         $anchorScroll();
-	}
+	}	
 	$scope.gtsubs();
-}]);
-
-app.directive('onLastRepeat', function() {
-	return function(scope, element, attrs) {
-		if (scope.$last) setTimeout(function(){
-			scope.$emit('onRepeatLast', element, attrs);
-		}, 1);
-	};
-});
-
-app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', 'GetPosts', function($scope, $http, $location, $routeParams, GetPosts) {
-	$scope.gtposts = function(QueryParams) {
-		GetPosts.query(QueryParams,function(data) {
-			$scope.stream = data;
-		}, function(err) {
-			$scope.stream = [];
-		});
-	}
-	$scope.$on('onRepeatLast', function(scope, element, attrs){
-		// re-activate affix
-		$('#ma').affix({
-			offset: {
-				top: 85
-			}
-		});
-	});
-	
-	$scope.toggle = function(t) {
-		console.log(t);
-	}
-	
-	$scope.$watch(
-	  function () {
-		return $('#ma').width() === $('#map').width();
-	  },
-	  function (n, o) {
-		$('#ma').width($('#map').width());
-	  }
-	)
-	
 	var obj = {};
 	// if it has parameters
 	if (Object.keys($routeParams).length > 0) {
@@ -173,4 +142,36 @@ app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', 'Get
 			$scope.gtposts(obj);
 		}
 	}
+}]);
+
+app.directive('onLastRepeat', function() {
+	return function(scope, element, attrs) {
+		if (scope.$last) setTimeout(function(){
+			scope.$emit('onRepeatLast', element, attrs);
+		}, 1);
+	};
+});
+
+app.controller('AppFeeds', ['$scope', '$http', '$location', function($scope, $http, $location) {
+	$scope.$on('onRepeatLast', function(scope, element, attrs){
+		// re-activate affix
+		$('#ma').affix({
+			offset: {
+				top: 85
+			}
+		});
+	});
+	
+	$scope.toggle = function(t) {
+		console.log(t);
+	}
+	
+	$scope.$watch(
+		function () {
+			return $('#ma').width() === $('#map').width();
+		},
+		function (n, o) {
+			$('#ma').width($('#map').width());
+		}
+	)
 }]);
