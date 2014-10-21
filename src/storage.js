@@ -30,7 +30,6 @@ exports.setup = function() {
 };
 
 exports.all = function(model, query) {
-	console.log(query || {});
 	return model.find(query || {}, function(err,feeds) {
 		if (err) {
 			return false;
@@ -45,7 +44,7 @@ exports.findOrCreate = function(model, item) {
 };
 
 exports.updateOrCreate = function(model, item, update) {
-    return model.findOneAndUpdate(item, update, { upsert: true });
+    return model.findOneAndUpdate(item, update, {upsert: true});
 };
 
 /** function dropDatabase
@@ -53,10 +52,10 @@ exports.updateOrCreate = function(model, item, update) {
  * !Should not be used for release version, used by the tests
  */
 exports.dropDatabase = function(callback) {
-    if (!mongoose.connection) {
+    if (!mg.connection) {
 		return callback(new Error('Not connected'));
     }  
-    mongoose.connection.db.dropDatabase(callback);
+    mg.connection.db.dropDatabase(callback);
 };
 
 /** function editTags
@@ -114,7 +113,7 @@ exports.getPosts = function(streams, options) {
 		}
     };
 
-    // load the tags to include and exclude
+	// load the tags to include and exclude
     var includeTags, excludeTags;
     return rs.all([getTags(tags), getTags(options.excludeTags)]).then(function(results) {
         includeTags = results[0];

@@ -43,6 +43,7 @@ exports.parseParameters = function(obj,user) {
 	
 	// if obj is an object
 	if (typeof obj === "object") {
+		// needs at least 2 keys [type,value]
 		if (Object.keys(obj).length > 1) {
 			return [obj];
 		}

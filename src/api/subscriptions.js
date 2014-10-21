@@ -105,11 +105,11 @@ app.get('/api/0/subscription/list', function(req, res) {
 app.post('/api/0/subscription/search', function(req, res) {
 	var u = decodeURIComponent(req.query.q);
 	// creat or find URL in db
-    actions.search(req, req.query.q).then(function(feed) {
+    actions.search(req, req.query.q).then(function(feeds) {
         res.json({
             query: u,
-            numResults: 1,
-            streamId: 'feed/' + u
+            numResults: feeds.length,
+            streams: [{type:'feed',value: feeds[0].feedURL}]
         });
     }, function(err) {
         res.status(500).send(err);

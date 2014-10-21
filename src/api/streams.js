@@ -96,7 +96,6 @@ app.get('/api/0/stream/contents*', function(req, res) {
         populate: 'feed'
     }).then(function(posts) {
 		var isFeed = (streams[0].type === 'feed');
-
         // Google Reader returns a 404 for unknown feeds
         if (posts.length === 0 && isFeed) {
 			return res.status(404).send('Feed not found!');
