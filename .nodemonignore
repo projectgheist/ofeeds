@@ -1,5 +1,6 @@
 # this is my ignore file with a nice comment at the top
 
+/.git/*			# ignore all git changes
 /node_modules/* # ignore all external submodules
 /public/*     	# static files
 /views/*     	# static files
