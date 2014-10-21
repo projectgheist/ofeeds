@@ -11,16 +11,15 @@ var app = module.exports = ex();
 var actions = {
 	search: function(ctx, url) {
 		console.log("Search action: " + url);
+		var u = encodeURIComponent(url);
         // Find or create feed for this URL in the database
-        var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)});
-		// wait for all results to return before continuing
-        return rs.all([feed]).then(function(results) {
-			// local ref to feed variable
-            var f = results[0];
-			return cr.FetchFeed(f).then(function() {
-				return f;
-			});
-        });
+		return db.Feed.find({ $or: [{title: {$regex: u, $options: 'i'}, feedURL: {$regex: u, $options: 'i'}}] }).limit(5).then(function(rslt0) {
+			if (rslt0.length > 0) {
+				return rslt0;
+			} else if (ut.isUrl(url)) {
+				return db.findOrCreate(db.Feed, {feedURL: u}).then(cr.FetchFeed).then(function(f) { return [f]; });
+			}
+		});
 	},
     subscribe: function(ctx, url) {
 		console.log("Subscribe action: " + url);
@@ -58,6 +57,13 @@ var actions = {
 
 // lists all of the feeds a user is subscribed to
 app.get('/api/0/subscription/list', function(req, res) {
+	rs.all([db.all(db.Feed)]).then(function(results) {
+		results.forEach(function(feeds) {
+			return res.json(feeds);
+		});
+	}, function(err) {
+        res.status(500).send(err);
+    });
 /*
 	var c;
 	if (req.query.q) {
@@ -68,7 +74,7 @@ app.get('/api/0/subscription/list', function(req, res) {
 	}
 	*/
 	// Find feeds the user is subscribed to
-	console.log(req.user.feeds);
+	/*console.log(req.user.feeds);
 	if (!req.user || !req.user.feeds) {
 		res.status(500).send('User feed not defined!');
 	} else {
@@ -92,21 +98,14 @@ app.get('/api/0/subscription/list', function(req, res) {
 		}, function(err) {
 			res.status(500).send(err);
 		});
-	}
+	}*/
 });
 
+// search for feeds and preview them before adding them to their account
 app.post('/api/0/subscription/search', function(req, res) {
 	var u = decodeURIComponent(req.query.q);
-	// Check if URL
-    if (!ut.isUrl(u)) {
-        return res.json({
-            query: u,
-            numResults: 0
-        });
-    }
 	// creat or find URL in db
     actions.search(req, req.query.q).then(function(feed) {
-		console.log(feed);
         res.json({
             query: u,
             numResults: 1,
