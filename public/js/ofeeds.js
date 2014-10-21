@@ -6,7 +6,7 @@
  * On page load ready
  */
 jQuery(document).ready(function($) {
-	var s = new Bloodhound({
+	/*var s = new Bloodhound({
 		datumTokenizer: function(d) { return d.Name; },
 		queryTokenizer: Bloodhound.tokenizers.whitespace,
 		limit: 10,
@@ -28,7 +28,7 @@ jQuery(document).ready(function($) {
 		name: 'g_typeahead_members',
 		displayKey: 'Name',
 		source: s.ttAdapter()
-	});
+	});*/
 });
 
 var app = angular.module('webapp', [
@@ -87,8 +87,10 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anch
 	}	
 	$scope.gtposts = function(QueryParams) {
 		GetPosts.query(QueryParams,function(data) {
+			console.log(data);
 			$scope.stream = data;
 		}, function(err) {
+			console.log(err);
 			$scope.stream = [];
 		});
 	}
@@ -96,12 +98,12 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anch
 		return ('/subscription'+decodeURIComponent(viewLocation)+'*/') === $location.path();
 	}
 	$scope.$watch(
-	  function () {
-		return $('#sa').width() === $('#sap').width();
-	  },
-	  function (n, o) {
-		$('#sa').width($('#sap').width());
-	  }
+		function () {
+			return $('#sa').width() === $('#sap').width();
+		},
+		function (n, o) {
+			$('#sa').width($('#sap').width());
+		}
 	)
 	$scope.sbmt = function() {
 		// get url from text box
@@ -111,10 +113,10 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anch
 		// make sure it exists
 		if (u.val() !== undefined || u.val().trim().length > 0) {
 			// submit to server
-			FeedSubmit.save({q:u.val()}, function() {
+			FeedSubmit.save({q:u.val()}, function(r) {
 				u.prop('disabled', false);
 				// render feed to main section
-				$scope.gtposts({'feed':u.val()});
+				$scope.gtposts({'type':r.results[0].type,'value':r.results[0].value});
 			}, function() {
 				u.prop('disabled', false);
 			});
@@ -126,7 +128,7 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anch
         $location.hash('top');
         // call $anchorScroll()
         $anchorScroll();
-	}	
+	}
 	$scope.gtsubs();
 	var obj = {};
 	// if it has parameters
