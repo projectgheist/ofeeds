@@ -21,7 +21,7 @@ var Feed = mg.Schema({
     tags: [ut.ref('Tag')],
     numSubscribers: { type: Number, default: 0 },
     userTitles: { type: {}, default: {} },
-	shortID: { type: String, default: sh.generate() },
+	shortID: { type: String, default: sh.generate },
     
     // fetcher metadata
     successfulCrawlTime: Date,

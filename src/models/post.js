@@ -8,7 +8,7 @@ var mg = require('mongoose'),
 // User specific tags stored here to avoid having separate post records for each user
 var Post = mg.Schema({
     feed: ut.ref('Feed'),
-    guid: String,
+    guid: String,							// unique post identifier for this feed
     title: String, 							// post title
     body: String,							// post html markup
     summary: String,

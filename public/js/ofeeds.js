@@ -114,9 +114,10 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anch
 		if (u.val() !== undefined || u.val().trim().length > 0) {
 			// submit to server
 			FeedSubmit.save({q:u.val()}, function(r) {
+				console.log(r);
 				u.prop('disabled', false);
 				// render feed to main section
-				$scope.gtposts({'type':r.results[0].type,'value':r.results[0].value});
+				$scope.gtposts({'type':r.streams[0].type,'value':r.streams[0].value});
 			}, function() {
 				u.prop('disabled', false);
 			});

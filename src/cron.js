@@ -28,9 +28,6 @@ exports.setup = function() {
 	// set all jobs
 	ag.every('5 minutes','UpdateAllFeeds');
 
-	// set all jobs
-	UpdateAllFeeds();
-
 	// start cron jobs
 	ag.start();
 };
@@ -61,20 +58,15 @@ exports.FetchFeed = function(feed) {
 	if (!feed ||
 		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 5)) { // feed was updated less then 2 minutes ago
 		return new rs.Promise(function(resolve, reject) { 
-			resolve(["Fetch feed '",feed.feedURL,"' failed! (Updated less than ", mm().diff(feed.successfulCrawlTime, 'minutes'), " minute(s) ago)"].join("")); 
+			//console.log(["Fetch feed '",feed.feedURL,"' failed! (Updated less than ", mm().diff(feed.successfulCrawlTime, 'minutes'), " minute(s) ago)"].join(""));
+			resolve(feed); 
 		});
 	}
+	console.log('FetchFeed : ' + decodeURIComponent(feed.feedURL));
 	return new rs.Promise(function(resolve, reject) {
-		// save found posts to array
-		var existingPosts = {};
-		// loop all posts in feed
-		feed.posts.forEach(function(post) {
-			// create map with guid
-			existingPosts[post.guid] = post;
-		});
-		
 		// pre-define variables
 		var parseError = false,
+			postInfo = [],
 			posts = [],
 			parser = sx.parser(false);
 		
@@ -88,23 +80,22 @@ exports.FetchFeed = function(feed) {
 			parseError = true;
 		})
 		.on('meta', function(meta) {
-			st.Feed.find({feedURL:encodeURIComponent(meta.xmlurl)}).then(function(of) {
-				if (of.length > 0 && of[0]) {
-					// override new feed with old feed
-					feed = of[0];
-				}
-				feed.title = meta.title;
-				feed.description = meta.description;
-				feed.author = meta.author;
-				feed.language = meta.language;
-				feed.copywrite = meta.copywrite;
-				feed.categories = meta.categories;
-				feed.siteURL = meta.link;
-				switch (meta.cloud.type) {
-					case 'hub':      // pubsubhubbub supported
-					case 'rsscloud': // rsscloud supported
-				}
-			});
+			/*if (meta.xmlurl) {
+				feed.feedURL = meta.xmlurl;
+			}*/
+
+			feed.siteURL = meta.link;
+			feed.title = meta.title;
+			feed.description = meta.description;
+			feed.author = meta.author;
+			feed.language = meta.language;
+			feed.copywrite = meta.copywrite;
+			feed.categories = meta.categories;
+			
+			switch (meta.cloud.type) {
+				case 'hub':      // pubsubhubbub supported
+				case 'rsscloud': // rsscloud supported
+			}
 		})
 		.on('readable', function () {
 			// do something else, then do the next thing
@@ -112,7 +103,7 @@ exports.FetchFeed = function(feed) {
 				data;
 				
 			while (data = stream.read()) {
-				var guid = (data.guid || data.link),
+				var guid = data.guid || data.link,
 					thumbnail_obj = new ContainerImages();
 					
 				// Store orignal thumbnail url
@@ -136,27 +127,10 @@ exports.FetchFeed = function(feed) {
 					parser.write(data.description.toString("utf8")).end();
 				}
 				
-				if (!existingPosts[guid]) {
-					// create new post object with all previously extracted information
-					var post = new st.Post({
-						feed: feed,
-						guid: guid,
-						title: data.title,
-						body: data.description,
-						summary: (data.summary !== data.description) ? data.summary : undefined,
-						images: thumbnail_obj,
-						url: data.link,
-						published: data.pubdate || mm(),
-						updated: data.date || mm(),
-						author: data.author,
-						commentsURL: data.comments,
-						categories: data.categories
-					});
-					// store in feeds table
-					feed.posts.push(post);
-					// store in posts table
-					posts.push(post.save);
-				}
+				// add image data to storage object
+				data.images = thumbnail_obj;
+				// store copy of data in array
+				postInfo.push(data);
 			}
 			// @todo: check for updates to existing posts
 		})
@@ -164,13 +138,37 @@ exports.FetchFeed = function(feed) {
 			if (parseError) {
 				reject('Feed parse error!');
 			} else {
+				var np = function(d) {
+					return new rs.Promise(function(rslv,rjct) {
+						st.findOrCreate(st.Post, {'feed': d.feed, 'guid': (d.guid || d.link)}).then(function(r) {
+							r.title 		= d.title;
+							r.body			= d.description,
+							r.summary		= (d.summary !== d.description) ? d.summary : undefined,
+							r.images		= d.images,
+							r.url			= d.link,
+							r.published		= d.pubdate || mm(),
+							r.updated 		= d.date || mm(),
+							r.author		= d.author,
+							r.commentsURL	= d.comments,
+							r.categories 	= d.categories
+							r.save();
+							//
+							feed.posts.addToSet(r);
+							//
+							rslv(r);
+						}, rjct);
+					});
+				};
+				posts = postInfo.map(function(i) {
+					return np(i);
+				});
 				// wait for posts to finish saving
 				// then mark crawl success or failure
 				rs.all(posts).then(function() {
 					feed.lastModified = feed.successfulCrawlTime = new Date();			
 					feed.save();
 					//console.log('feed sucessfully finished');
-					resolve();
+					resolve(feed);
 				}, function(err) {
 					feed.lastModified = feed.failedCrawlTime = new Date();
 					feed.lastFailureWasParseFailure = parseError;
