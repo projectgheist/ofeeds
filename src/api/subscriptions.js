@@ -13,11 +13,13 @@ var actions = {
 		console.log("Search action: " + url);
 		var u = encodeURIComponent(url);
         // Find or create feed for this URL in the database
-		return db.Feed.find({ $or: [{title: {$regex: u, $options: 'i'}, feedURL: {$regex: u, $options: 'i'}}] }).limit(5).then(function(rslt0) {
+		return db.Feed.find({ $or: [{title: {$regex: u}}, {feedURL: {$regex: u}}] }).limit(6).then(function(rslt0) {
 			if (rslt0.length > 0) {
 				return rslt0;
 			} else if (ut.isUrl(url)) {
 				return db.findOrCreate(db.Feed, {feedURL: u}).then(cr.FetchFeed).then(function(f) { return [f]; });
+			} else {
+				return false;
 			}
 		});
 	},
@@ -106,13 +108,15 @@ app.post('/api/0/subscription/search', function(req, res) {
 	var u = decodeURIComponent(req.query.q);
 	// creat or find URL in db
     actions.search(req, req.query.q).then(function(feeds) {
-        res.json({
-            query: u,
-            numResults: feeds.length,
-            streams: [{type:'feed',value: feeds[0].feedURL}]
-        });
-    }, function(err) {
-        res.status(500).send(err);
+		if (feeds) {
+			res.json({
+				query: u,
+				numResults: feeds.length,
+				streams: [{type:'feed',value: feeds[0].feedURL}]
+			});
+		} else {
+			res.status(500).send('Feed not found!');
+		}
     });
 });
 
