@@ -58,31 +58,30 @@ exports.FetchFeed = function(feed) {
 	if (!feed ||
 		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 5)) { // feed was updated less then 2 minutes ago
 		return new rs.Promise(function(resolve, reject) { 
-			//console.log(["Fetch feed '",feed.feedURL,"' failed! (Updated less than ", mm().diff(feed.successfulCrawlTime, 'minutes'), " minute(s) ago)"].join(""));
 			resolve(feed); 
 		});
 	}
-	console.log('FetchFeed : ' + decodeURIComponent(feed.feedURL));
+	
 	return new rs.Promise(function(resolve, reject) {
 		// pre-define variables
 		var parseError = false,
 			postInfo = [],
 			posts = [],
 			parser = sx.parser(false);
-		
-		rq(decodeURIComponent(feed.feedURL))
+
+		rq.get(decodeURIComponent(feed.feedURL))
 		.pipe(new fp()) // fetch data from feed URL
 		.on('error', function(error) {
 			console.log("// ----------------------------------------------------------------------------");
 			console.log("Feedparser: " + error);
-			console.log("on\t" + decodeURIComponent(feed.feedURL));
+			console.log("\ton '" + decodeURIComponent(feed.feedURL) + "'");
 			// always handle errors
 			parseError = true;
 		})
 		.on('meta', function(meta) {
-			/*if (meta.xmlurl) {
-				feed.feedURL = meta.xmlurl;
-			}*/
+			//if (meta.xmlurl) {
+			//	feed.feedURL = meta.xmlurl;
+			//}
 
 			feed.siteURL = meta.link;
 			feed.title = meta.title;
