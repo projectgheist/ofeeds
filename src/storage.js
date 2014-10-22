@@ -130,7 +130,7 @@ exports.getPosts = function(streams, options) {
 		// find posts by feed and tags, and filter by date
         var query = exports.Post.find({
             $or: [
-                { feed: { $in: feeds }},
+                { feed: { $in: rfeeds }},
                 { tags: { $in: includeTags }}
             ],
             tags: { $nin: excludeTags },

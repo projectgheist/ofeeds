@@ -78,7 +78,20 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 	});
 }]);
 
-app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anchorScroll', 'GetFeeds', 'FeedSubmit', 'GetPosts', function($scope, $http, $location, $routeParams, $anchorScroll, GetFeeds, FeedSubmit, GetPosts) {
+app.factory('StreamBasket', function() {
+    var stream = {};
+    var myBasketService = {};
+
+    myBasketService.addItem = function(item) {
+        stream = item;
+    };
+    myBasketService.items = function() {
+        return stream;
+    };
+
+    return myBasketService;
+});
+app.controller('AppNav', ['$rootScope', '$scope', '$http', '$location', '$routeParams', '$anchorScroll', 'GetFeeds', 'FeedSubmit', 'GetPosts', 'StreamBasket', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetFeeds, FeedSubmit, GetPosts, StreamBasket) {
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
 			$scope.subs = data;
@@ -87,7 +100,8 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anch
 	}	
 	$scope.gtposts = function(QueryParams) {
 		GetPosts.query(QueryParams,function(data) {
-			$scope.stream = data;
+			StreamBasket.addItem(data);
+			$rootScope.$broadcast('RenderStream', 'your value');
 		}, function(err) {
 			$scope.stream = [];
 		});
@@ -152,7 +166,7 @@ app.directive('onLastRepeat', function() {
 	};
 });
 
-app.controller('AppFeeds', ['$scope', '$http', '$location', function($scope, $http, $location) {
+app.controller('AppFeeds', ['$scope', '$http', '$location', 'StreamBasket', function($scope, $http, $location, StreamBasket) {
 	$scope.$on('onRepeatLast', function(scope, element, attrs){
 		// re-activate affix
 		$('#ma').affix({
@@ -161,7 +175,9 @@ app.controller('AppFeeds', ['$scope', '$http', '$location', function($scope, $ht
 			}
 		});
 	});
-	
+	$scope.$on('RenderStream', function(response) {
+		$scope.stream = StreamBasket.items();
+	});
 	$scope.toggle = function(t) {
 		console.log(t);
 	}
