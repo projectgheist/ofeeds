@@ -87,10 +87,8 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anch
 	}	
 	$scope.gtposts = function(QueryParams) {
 		GetPosts.query(QueryParams,function(data) {
-			console.log(data);
 			$scope.stream = data;
 		}, function(err) {
-			console.log(err);
 			$scope.stream = [];
 		});
 	}
@@ -114,7 +112,6 @@ app.controller('AppNav', ['$scope', '$http', '$location', '$routeParams', '$anch
 		if (u.val() !== undefined || u.val().trim().length > 0) {
 			// submit to server
 			FeedSubmit.save({q:u.val()}, function(r) {
-				console.log(r);
 				u.prop('disabled', false);
 				// render feed to main section
 				$scope.gtposts({'type':r.streams[0].type,'value':r.streams[0].value});

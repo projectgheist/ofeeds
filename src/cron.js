@@ -129,6 +129,8 @@ exports.FetchFeed = function(feed) {
 				
 				// add image data to storage object
 				data.images = thumbnail_obj;
+				// link in feed
+				data.feed = feed;
 				// store copy of data in array
 				postInfo.push(data);
 			}
@@ -142,15 +144,17 @@ exports.FetchFeed = function(feed) {
 					return new rs.Promise(function(rslv,rjct) {
 						st.findOrCreate(st.Post, {'feed': d.feed, 'guid': (d.guid || d.link)}).then(function(r) {
 							r.title 		= d.title;
-							r.body			= d.description,
-							r.summary		= (d.summary !== d.description) ? d.summary : undefined,
-							r.images		= d.images,
-							r.url			= d.link,
-							r.published		= d.pubdate || mm(),
-							r.updated 		= d.date || mm(),
-							r.author		= d.author,
-							r.commentsURL	= d.comments,
-							r.categories 	= d.categories
+							r.body			= d.description;
+							r.summary		= (d.summary !== d.description) ? d.summary : undefined;
+							r.images		= d.images;
+							r.url			= d.link;
+							r.published		= d.pubdate || mm();
+							r.updated 		= d.date || mm();
+							r.author		= d.author;
+							r.commentsURL	= d.comments;
+							r.categories 	= d.categories;
+							r.feed			= d.feed;
+							r.guid			= (d.guid || d.link);
 							r.save();
 							//
 							feed.posts.addToSet(r);

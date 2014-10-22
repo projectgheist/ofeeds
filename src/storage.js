@@ -107,7 +107,7 @@ exports.getPosts = function(streams, options) {
     var feeds = [], tags = [];
     for (var i in streams) {
 		if (streams[i].type === 'feed') {
-            feeds.push(encodeURIComponent(streams[i].value));
+            feeds.push(streams[i].value);
         } else { 
             tags.push(streams[i].value);
 		}
@@ -126,8 +126,7 @@ exports.getPosts = function(streams, options) {
                 { tags: { $in: includeTags, $nin: excludeTags }}
             ]
         });
-    }).then(function(feeds) {
-		console.log(feeds);
+    }).then(function(rfeeds) {
 		// find posts by feed and tags, and filter by date
         var query = exports.Post.find({
             $or: [
@@ -140,12 +139,12 @@ exports.getPosts = function(streams, options) {
                 $lt: new Date((1000 * options.maxTime) || Date.now())
             }
         });
-
+		
         if (options.limit)
             query.limit(options.limit);
             
         if (options.sort)
-            query.sort(options.sort);
+			query.sort(options.sort);
             
         if (options.count)
             query.count();
