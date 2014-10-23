@@ -1,31 +1,32 @@
 include includes/header
 include includes/nav
-.container
+.container#m(ng-controller="AppFeeds")
 	.row
 		.col-xs-12
 			.alert.alert-success.fade.in.hidden#as
 			.alert.alert-danger.fade.in.hidden#ad
 	.row
-		.col-xs-4#sap(ng-controller="AppNav")
+		.col-xs-4#sap
 			#sa(data-spy="affix",data-offset-top="0")
-				.col-lg-12.list-group
-					.list-group-item
-						form(ng-submit="sbmt()")
-							.form-group
-								.form-control-wrapper
-									input.input-lg.form-control.empty#nrss(type="text",placeholder='example.feed.com/rss') 
-									span.material-input
-					a.list-group-item(href="/subscription/user/reading-list",ng-class="{ active: isActive('/state/-/reading-list')}",id='All')
-						i.fa.fa-fw.fa-bars
-						| All
-					.line-separator
-					a.list-group-item(href="/subscription/feed/{{sub.feedURL}}",ng-class="{ active: isActive('/feed/{{sub.feedURL}}')}",ng-repeat="sub in subs.subscriptions")
-						i.fa.fa-bookmark-o.fa-fw
-						| {{sub.title}}
-					.line-separator
+				.col-lg-12
+					form
+						.form-group
+							.form-control-wrapper
+								input.input-lg.form-control.typeahead#nrss(type="text",placeholder='example.feed.com/rss') 
+								span.material-input
+					.list-group
+						a.list-group-item(href="/subscription/user/reading-list",ng-class="{ active: isActive('/state/-/reading-list')}",id='All')
+							i.fa.fa-fw.fa-bars
+							| All
+						.line-separator
+						a.list-group-item(href="/subscription/feed/{{sub.feedURL}}",ng-class="{ active: isActive('/feed/{{sub.feedURL}}')}",ng-repeat="sub in subs.subscriptions")
+							i.fa.fa-bookmark-o.fa-fw
+							| {{sub.title}}
+						.line-separator
 				button.btn.btn-primary(href='',ng-click="gotoTop()")
 					i.fa.fa-fw.fa-angle-double-right
 					| Back to top
-		.col-xs-8#map(ng-controller="AppFeeds",ng-view)
-			p Loading...
+		.col-xs-8#map
+			div(ng-view='')
+				p Loading...
 include includes/js

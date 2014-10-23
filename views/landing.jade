@@ -1,5 +1,5 @@
 include includes/header
-.container-full
+.container-full(ng-controller="AppFeeds")
 	.v-offset
 		.row
 			.col-xs-offset-1.col-xs-10.col-md-offset-4.col-md-4
@@ -16,7 +16,7 @@ include includes/header
 							| &nbsp;
 							a.github-button(href="https://github.com/projectgheist",data-count-href="/projectgheist/followers",data-count-api="/users/projectgheist#followers") Follow @projectgheist
 							script(async,defer,id="github-bjs",src="https://buttons.github.io/buttons.js")
-				.row(ng-controller="AppNav")
+				.row
 					.col-xs-12.col-lg-5
 						h3.text-center Sign in
 						form.center-block

@@ -103,16 +103,16 @@ app.get('/api/0/subscription/list', function(req, res) {
 });
 
 // search for feeds and preview them before adding them to their account
-app.post('/api/0/subscription/search', function(req, res) {
+app.get('/api/0/subscription/search', function(req, res) {
 	var u = decodeURIComponent(req.query.q);
 	// creat or find URL in db
     actions.search(req, req.query.q).then(function(feeds) {
 		if (feeds) {
-			res.json({
-				query: u,
-				numResults: feeds.length,
-				streams: [{type:'feed',value: feeds[0].feedURL}]
-			});
+			var vs = [];
+			for (var i in feeds) {
+				vs.push({type:'feed',value:feeds[i].feedURL,title:feeds[i].title});
+			};
+			res.json(vs);
 		} else {
 			res.status(500).send('Feed not found!');
 		}

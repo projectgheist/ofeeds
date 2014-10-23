@@ -41,15 +41,6 @@ exports.parseParameters = function(obj,user) {
         return false;
 	}
 	
-	// if obj is an object
-	if (typeof obj === "object") {
-		// needs at least 2 keys [type,value]
-		if (Object.keys(obj).length > 1) {
-			return [obj];
-		}
-        return false;
-	}
-	
 	// remove '/' from start of string
 	if (typeof obj === "string" && obj.match('^\/')) {
 		obj = obj.substring(1,obj.length);

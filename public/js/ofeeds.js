@@ -1,40 +1,44 @@
 /**
  * Global variables
  */
+var ta = [];
 
 /**
  * On page load ready
  */
 jQuery(document).ready(function($) {
-	/*var s = new Bloodhound({
-		datumTokenizer: function(d) { return d.Name; },
+	var sb = new Bloodhound({
+		datumTokenizer: function(d) { console.log(d); return Bloodhound.tokenizers.whitespace(d.title); },
 		queryTokenizer: Bloodhound.tokenizers.whitespace,
-		limit: 10,
 		remote: {
-			url: "/api/0/subscription/list",
-			filter: function(a) { 
-				g_members_object = a; 
+			url: '/api/0/subscription/search?q=',
+			replace: function () {
+				var q = '/api/0/subscription/search?q=';
+				if ($('#nrss').val()) {
+					q += encodeURIComponent($('#nrss').val());
+				}
+				return q;
+			},
+			filter: function(a) {
+				ta = a;
 				return a; 
 			}
 		}
 	});
-	s.initialize();
+	sb.initialize();
 	// prep typeahead
-	$('.typeahead').typeahead({
-		hint: true,
-		highlight: true,
-		minLength: 1
-	}, {
-		name: 'g_typeahead_members',
-		displayKey: 'Name',
-		source: s.ttAdapter()
-	});*/
+	$('.typeahead').typeahead(null, {
+		name: 'sb', // identifier
+		displayKey: 'title', // name of value to check against
+		source: sb.ttAdapter()
+	}).on('typeahead:selected', function(obj, datum) {
+		angular.element($('#m')).scope().gotosub(datum);
+	});
 });
 
 var app = angular.module('webapp', [
 	'ngRoute',
 	'ngSanitize',
-	'AppNav',
 	'AppFeeds',
 	'AppService'
 ]);
@@ -62,7 +66,6 @@ AppService.factory('FeedSubmit', ['$resource',
 ]);
 
 var AppFeeds = angular.module('AppFeeds', []);
-var AppNav = angular.module('AppNav', []);
 
 /**
  * App configuration
@@ -70,28 +73,29 @@ var AppNav = angular.module('AppNav', []);
 app.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	$locationProvider.html5Mode(true);
 	$routeProvider
+	.when('/stream/:value*\/', {
+		templateUrl: function(urlattr) {
+			return '/templates/posts-compact';
+		},
+		controller: 'AppFeeds'
+	})
 	.when('/subscription/:type/:value*\/', {
-		templateUrl: function(urlattr){
+		templateUrl: function(urlattr) {
 			return '/templates/posts-compact';
 		},
 		controller: 'AppFeeds'
 	});
 }]);
 
-app.factory('StreamBasket', function() {
-    var stream = {};
-    var myBasketService = {};
-
-    myBasketService.addItem = function(item) {
-        stream = item;
-    };
-    myBasketService.items = function() {
-        return stream;
-    };
-
-    return myBasketService;
+app.directive('onLastRepeat', function() {
+	return function(scope, element, attrs) {
+		if (scope.$last) setTimeout(function(){
+			scope.$emit('onRepeatLast', element, attrs);
+		}, 1);
+	};
 });
-app.controller('AppNav', ['$rootScope', '$scope', '$http', '$location', '$routeParams', '$anchorScroll', 'GetFeeds', 'FeedSubmit', 'GetPosts', 'StreamBasket', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetFeeds, FeedSubmit, GetPosts, StreamBasket) {
+
+app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', '$anchorScroll', 'GetFeeds', 'FeedSubmit', 'GetPosts', function($scope, $http, $location, $routeParams, $anchorScroll, GetFeeds, FeedSubmit, GetPosts) {
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
 			$scope.subs = data;
@@ -100,10 +104,8 @@ app.controller('AppNav', ['$rootScope', '$scope', '$http', '$location', '$routeP
 	}	
 	$scope.gtposts = function(QueryParams) {
 		GetPosts.query(QueryParams,function(data) {
-			StreamBasket.addItem(data);
-			$rootScope.$broadcast('RenderStream', 'your value');
+			$scope.stream = data;
 		}, function(err) {
-			$scope.stream = [];
 		});
 	}
 	$scope.isActive = function(viewLocation) { 
@@ -117,22 +119,9 @@ app.controller('AppNav', ['$rootScope', '$scope', '$http', '$location', '$routeP
 			$('#sa').width($('#sap').width());
 		}
 	)
-	$scope.sbmt = function() {
-		// get url from text box
-		var u = $('#nrss');
-		// disable the input
-		u.prop('disabled', true);
-		// make sure it exists
-		if (u.val() !== undefined || u.val().trim().length > 0) {
-			// submit to server
-			FeedSubmit.save({q:u.val()}, function(r) {
-				u.prop('disabled', false);
-				// render feed to main section
-				$scope.gtposts({'type':r.streams[0].type,'value':r.streams[0].value});
-			}, function() {
-				u.prop('disabled', false);
-			});
-		}
+	$scope.gotosub = function(obj) {
+		$scope.gtposts(obj);
+		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
 	}
 	$scope.gotoTop = function() {
         // set the location.hash to the id of
@@ -142,13 +131,13 @@ app.controller('AppNav', ['$rootScope', '$scope', '$http', '$location', '$routeP
         $anchorScroll();
 	}
 	$scope.gtsubs();
-	var obj = {};
 	// if it has parameters
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway
 		var v = String($routeParams.value);
 		// store parameters
-		obj.type = String($routeParams.type);
+		var obj = {};
+		obj.type = String($routeParams.type) || 'feed';
 		obj.value = /\*(\/)*$/.test(v) ? v.substring(0,v.length-1) : v;
 		var idx = $location.path().search(obj.type) + obj.type.length;
 		// don't retrieve posts if we are already in the subscription/stream
@@ -156,17 +145,6 @@ app.controller('AppNav', ['$rootScope', '$scope', '$http', '$location', '$routeP
 			$scope.gtposts(obj);
 		}
 	}
-}]);
-
-app.directive('onLastRepeat', function() {
-	return function(scope, element, attrs) {
-		if (scope.$last) setTimeout(function(){
-			scope.$emit('onRepeatLast', element, attrs);
-		}, 1);
-	};
-});
-
-app.controller('AppFeeds', ['$scope', '$http', '$location', 'StreamBasket', function($scope, $http, $location, StreamBasket) {
 	$scope.$on('onRepeatLast', function(scope, element, attrs){
 		// re-activate affix
 		$('#ma').affix({
@@ -175,13 +153,6 @@ app.controller('AppFeeds', ['$scope', '$http', '$location', 'StreamBasket', func
 			}
 		});
 	});
-	$scope.$on('RenderStream', function(response) {
-		$scope.stream = StreamBasket.items();
-	});
-	$scope.toggle = function(t) {
-		console.log(t);
-	}
-	
 	$scope.$watch(
 		function () {
 			return $('#ma').width() === $('#map').width();

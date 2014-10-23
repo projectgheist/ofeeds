@@ -61,8 +61,15 @@ function formatPosts(posts, feed) {
 };
 
 app.get('/api/0/stream/contents*', function(req, res) {
+	var streams = [];
 	// validate input
-	var streams = ut.parseParameters(req.params[0] || req.query, undefined);
+	if (req.params[0]) {
+		streams = ut.parseParameters(req.params[0], req.user);
+	} else if (req.query) {
+		for (var i in req.query) {
+			streams.push(req.query[i]);
+		}
+	}
 	if (!streams) {
         return res.status(400).send('InvalidStream');
     }
