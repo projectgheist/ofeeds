@@ -69,7 +69,7 @@ exports.FetchFeed = function(feed) {
 			posts = [],
 			parser = sx.parser(false);
 
-		// !NOTE: set header as some websites will give 'Forbidden 403' errors, if not set
+		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
 		rq.get(decodeURIComponent(feed.feedURL),{headers:{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}})
 		.pipe(new fp()) // fetch data from feed URL
 		.on('error', function(error) {

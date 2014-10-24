@@ -66,8 +66,12 @@ app.get('/api/0/stream/contents*', function(req, res) {
 	if (req.params[0]) {
 		streams = ut.parseParameters(req.params[0], req.user);
 	} else if (req.query) {
-		for (var i in req.query) {
-			streams.push(req.query[i]);
+		if (Array.isArray(req.query)) {
+			for (var i in req.query) {
+				streams.push(req.query[i]);
+			}
+		} else {
+			streams.push(req.query);
 		}
 	}
 	if (!streams) {
