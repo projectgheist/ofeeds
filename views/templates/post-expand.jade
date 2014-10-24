@@ -1,0 +1,39 @@
+.row
+	.col-xs-12
+		.pull-left
+			h2
+				a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+			a(href="#/subscription/feed/{{post.origin.url}}") 
+				span.label.label-primary {{post.origin.title}}
+			span(ng-if='post.author') &nbsp;by {{post.author}}
+		.pull-right
+			p(style='text-align:right') {{post.published}}
+			.btn-group
+				button.btn.btn-default Mark as Unread
+				.btn-group
+					button.btn.btn-default
+						i.fa.fa-share-alt
+					button.btn.btn-default.dropdown-toggle.withripple(data-toggle="dropdown")
+						span.caret
+						span.sr-only Toggle Dropdown
+						.ripple-wrapper
+					ul.dropdown-menu
+						li
+							a(href="#") 
+								i.fa.fa-fw.fa-twitter
+								| Twitter
+						li
+							a(href="#") 
+								i.fa.fa-fw.fa-facebook
+								| Facebook
+						li.divider
+						li
+							a(href="#") 
+								i.fa.fa-fw.fa-envelope
+								| E-mail
+		.clearfix
+		.line-separator
+.row
+	.col-xs-12.article-content
+		p(ng-bind-html="post.content.content")
+		.line-separator

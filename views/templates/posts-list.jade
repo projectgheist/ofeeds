@@ -1,0 +1,4 @@
+include post-nav
+.list-article-group
+	.article(ng-repeat='post in stream.items',post-expand='post',id='{{post.id}}')
+		include post-compact

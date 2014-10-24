@@ -18,7 +18,7 @@ function formatPosts(posts, feed) {
 			return tag.stringID;
         });
         return {
-            id: post.longID,
+            id: post.shortID,
             title: post.title,
             alternate: {
                 href: post.url,

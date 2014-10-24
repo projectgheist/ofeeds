@@ -39,6 +39,7 @@ jQuery(document).ready(function($) {
 var app = angular.module('webapp', [
 	'ngRoute',
 	'ngSanitize',
+	'ngResource',
 	'AppFeeds',
 	'AppService'
 ]);
@@ -46,7 +47,7 @@ var app = angular.module('webapp', [
 /**
  * Other
  */
-var AppService = angular.module('AppService', ['ngResource']);
+var AppService = angular.module('AppService', []);
 AppService.factory('GetFeeds', ['$resource',
 	function($resource) {
 		return $resource('/api/0/subscription/list', {}, { query: {method:'GET', isArray:true} });
@@ -81,7 +82,7 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 	})
 	.when('/subscription/:type/:value*\/', {
 		templateUrl: function(urlattr) {
-			return '/templates/posts-compact';
+			return '/templates/posts-list';
 		},
 		controller: 'AppFeeds'
 	});
@@ -94,7 +95,7 @@ app.directive('onLastRepeat', function() {
 		}, 1);
 	};
 });
-
+	
 app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', '$anchorScroll', 'GetFeeds', 'FeedSubmit', 'GetPosts', function($scope, $http, $location, $routeParams, $anchorScroll, GetFeeds, FeedSubmit, GetPosts) {
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
@@ -119,6 +120,11 @@ app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', '$an
 			$('#sa').width($('#sap').width());
 		}
 	)
+	$scope.toggle = function(id) {
+		var v = $(String(['#',id].join('')));
+		v.hide();
+		$(['<div id="',String(['#',id].join('')),"\" ng-include src=\"/templates/empty\" onload=\"post\" />"].join('')).insertAfter(v);
+	};
 	$scope.gotosub = function(obj) {
 		$scope.gtposts(obj);
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
