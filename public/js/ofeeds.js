@@ -36,11 +36,30 @@ jQuery(document).ready(function($) {
 	});
 });
 
+// single keys
+/** Move to article below (previous) in stream
+ */
+Mousetrap.bind('j', function() {
+	angular.element($('#ma')).scope().next();
+});
+
+/** Move to article above (next) in stream
+ */
+Mousetrap.bind('k', function() { 
+	angular.element($('#ma')).scope().prev();
+});
+
+/** Open article in new tab/window from stream
+ */
+Mousetrap.bind('v', function() {
+	window.open(g_contentView.exp.$el.attr("data-target"), '_blank');
+	window.focus();
+});
+
 var app = angular.module('webapp', [
 	'ngRoute',
 	'ngSanitize',
 	'ngResource',
-	'AppFeeds',
 	'AppService'
 ]);
 
@@ -66,8 +85,6 @@ AppService.factory('FeedSubmit', ['$resource',
 	}
 ]);
 
-var AppFeeds = angular.module('AppFeeds', []);
-
 /**
  * App configuration
  */
@@ -76,18 +93,17 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 	$routeProvider
 	.when('/stream/:value*\/', {
 		templateUrl: function(urlattr) {
-			return '/templates/posts-compact';
+			return '/templates/posts-list';
 		},
-		controller: 'AppFeeds'
+		controller: 'AppStream'
 	})
 	.when('/subscription/:type/:value*\/', {
 		templateUrl: function(urlattr) {
 			return '/templates/posts-list';
 		},
-		controller: 'AppFeeds'
+		controller: 'AppStream'
 	});
 }]);
-
 app.directive('onLastRepeat', function() {
 	return function(scope, element, attrs) {
 		if (scope.$last) setTimeout(function(){
@@ -95,20 +111,91 @@ app.directive('onLastRepeat', function() {
 		}, 1);
 	};
 });
-	
-app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', '$anchorScroll', 'GetFeeds', 'FeedSubmit', 'GetPosts', function($scope, $http, $location, $routeParams, $anchorScroll, GetFeeds, FeedSubmit, GetPosts) {
+app.directive('article', function() {
+	return {
+		restrict: 'AE',
+		link: function(scope, element, attrs) {
+		},
+		template: '<article ng-include="\'/templates/post-compact\'" />'
+	}
+});
+app.controller('AppStream', function($scope, $http, $location, $routeParams, $anchorScroll, GetPosts) {
+	$scope.gotoTop = function() {
+        // set the location.hash to the id of
+        // the element you wish to scroll to.
+        $location.hash('top');
+        // call $anchorScroll()
+        $anchorScroll();
+	}
+	$scope.gtposts = function(QueryParams) {
+		GetPosts.query(QueryParams,function(data) {
+			$scope.stream = data;
+			for (var i in $scope.stream.items) {
+				$scope.stream.items[i].template = '/templates/post-compact';
+			}
+		}, function(err) {
+		});
+	}
+	$scope.next = function() {
+		if (!$scope.cp && $scope.stream.items.length > 0) {
+			$scope.expand($scope.stream.items[0]);
+		} else {
+			var p = angular.element($('#'+$scope.cp.id).next()).scope();
+			if (p) {
+				$scope.toggle(p.post);
+			}
+		}
+	}
+	$scope.prev = function() {
+		if (!$scope.cp && $scope.stream.items.length > 0) {
+			$scope.expand($scope.stream.items[0]);
+		} else {
+			var p = angular.element($('#'+$scope.cp.id).prev()).scope();
+			if (p) {
+				$scope.toggle(p.post);
+			}
+		}
+	}
+	$scope.expand = function(p) {
+		p.template = '/templates/post-expand';
+		$scope.cp = p;
+		if ($scope.$root.$$phase != '$apply' && $scope.$root.$$phase != '$digest') {
+			$scope.$apply();
+		}
+	}
+	$scope.toggle = function(p) {
+		// make previous expanded post small again
+		if ($scope.cp && $scope.cp != p) {
+			$scope.cp.template = '/templates/post-compact';
+		}
+		// store current expanded post
+		if (p.template === '/templates/post-expand') {
+			p.template = '/templates/post-compact';
+		} else {
+			$scope.expand(p);
+		}
+	}
+	// if it has parameters
+	if (Object.keys($routeParams).length > 0) {
+		// don't URL encode the values of param as they get converted later on anyway
+		var v = String($routeParams.value);
+		// store parameters
+		var obj = {};
+		// set type
+		obj.type = String($routeParams.type) || 'feed';
+		// remove trailing '*/' otherwise use normal url
+		obj.value = /\*(\/)*$/.test(v) ? v.substring(0,v.length-1) : v;
+		// retrieve posts
+		$scope.gtposts(obj);
+	}
+});
+app.controller('AppFeeds', function($scope, $http, $location, GetFeeds, FeedSubmit) {
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
 			$scope.subs = data;
 		}, function(err) {
 		});
 	}	
-	$scope.gtposts = function(QueryParams) {
-		GetPosts.query(QueryParams,function(data) {
-			$scope.stream = data;
-		}, function(err) {
-		});
-	}
 	$scope.isActive = function(viewLocation) { 
 		return ('/subscription'+decodeURIComponent(viewLocation)+'*/') === $location.path();
 	}
@@ -120,14 +207,11 @@ app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', '$an
 			$('#sa').width($('#sap').width());
 		}
 	)
-	$scope.toggle = function(id) {
-		var v = $(String(['#',id].join('')));
-		v.hide();
-		$(['<div id="',String(['#',id].join('')),"\" ng-include src=\"/templates/empty\" onload=\"post\" />"].join('')).insertAfter(v);
-	};
 	$scope.gotosub = function(obj) {
-		$scope.gtposts(obj);
+		// go to subscription local url
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
+		// call '$apply' oteherwise angular doesn't recognize that the url has changed
+		$scope.$apply();
 	}
 	$scope.gotoTop = function() {
         // set the location.hash to the id of
@@ -135,21 +219,6 @@ app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', '$an
         $location.hash('top');
         // call $anchorScroll()
         $anchorScroll();
-	}
-	$scope.gtsubs();
-	// if it has parameters
-	if (Object.keys($routeParams).length > 0) {
-		// don't URL encode the values of param as they get converted later on anyway
-		var v = String($routeParams.value);
-		// store parameters
-		var obj = {};
-		obj.type = String($routeParams.type) || 'feed';
-		obj.value = /\*(\/)*$/.test(v) ? v.substring(0,v.length-1) : v;
-		var idx = $location.path().search(obj.type) + obj.type.length;
-		// don't retrieve posts if we are already in the subscription/stream
-		if ($location.path().substring(idx,$location.path()) !== obj.value) {
-			$scope.gtposts(obj);
-		}
 	}
 	$scope.$on('onRepeatLast', function(scope, element, attrs){
 		// re-activate affix
@@ -167,4 +236,4 @@ app.controller('AppFeeds', ['$scope', '$http', '$location', '$routeParams', '$an
 			$('#ma').width($('#map').width());
 		}
 	)
-}]);
+});

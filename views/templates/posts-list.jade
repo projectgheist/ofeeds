@@ -1,4 +1,4 @@
 include post-nav
 .list-article-group
-	.article(ng-repeat='post in stream.items',post-expand='post',id='{{post.id}}')
-		include post-compact
+	.article(ng-repeat='post in stream.items',ng-click="toggle(post)",id='{{post.id}}')
+		div(ng-include="post.template")

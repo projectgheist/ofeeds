@@ -26,7 +26,7 @@ include includes/nav
 				button.btn.btn-primary(href='',ng-click="gotoTop()")
 					i.fa.fa-fw.fa-angle-double-right
 					| Back to top
-		.col-xs-8#map
+		.col-xs-8#map(ng-controller="AppStream")
 			div(ng-view='')
 				p Loading...
 include includes/js
