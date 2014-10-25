@@ -51,6 +51,7 @@ When Openshift updates their `Node` module to 0.11.9
 * [Bootstrap Material Design Theme](https://github.com/FezVrasta/bootstrap-material-design)
 * [JQuery](http://jquery.com/)
 * [TypeAhead](https://github.com/twitter/typeahead.js/)
+* [ngInfiniteScroll](http://binarymuse.github.io/ngInfiniteScroll/)
 * [Mousetrap](http://craig.is/killing/mice)
 
 ### Back-end

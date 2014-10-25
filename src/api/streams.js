@@ -39,7 +39,7 @@ function formatPosts(posts, feed) {
                 url: post.feed.feedURL
             },
             crawlTimeMsec: '' + (+post.feed.successfulCrawlTime),
-            timestampUsec: '' + (post.published * 1000),
+            timestampUsec: post.published.getTime(),
             likingUsers: [],
             comments: [],
             annotations: []
@@ -74,6 +74,7 @@ app.get('/api/0/stream/contents*', function(req, res) {
 			streams.push(req.query);
 		}
 	}
+
 	if (!streams) {
         return res.status(400).send('InvalidStream');
     }

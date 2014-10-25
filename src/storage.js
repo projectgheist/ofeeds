@@ -135,8 +135,8 @@ exports.getPosts = function(streams, options) {
             ],
             tags: { $nin: excludeTags },
             published: {
-                $gte: new Date((1000 * options.minTime) || 0),
-                $lt: new Date((1000 * options.maxTime) || Date.now())
+                $gte: new Date(parseInt(options.minTime) || 0),
+                $lt: new Date(parseInt(options.maxTime) || Date.now())
             }
         });
 		

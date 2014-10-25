@@ -60,6 +60,7 @@ var app = angular.module('webapp', [
 	'ngRoute',
 	'ngSanitize',
 	'ngResource',
+	'infinite-scroll',
 	'AppService'
 ]);
 
@@ -127,15 +128,32 @@ app.controller('AppStream', function($scope, $http, $location, $routeParams, $an
         // call $anchorScroll()
         $anchorScroll();
 	}
-	$scope.gtposts = function(QueryParams) {
-		GetPosts.query(QueryParams,function(data) {
-			$scope.stream = data;
+	$scope.gtposts = function() {
+		GetPosts.query($scope.params,function(data) {
+			if (!data || data.items <= 0) {
+				return;
+			}
+			if ($scope.stream && $scope.stream.title === data.title) {
+				$scope.stream.items = $scope.stream.items.concat(data.items);
+			} else {
+				$scope.stream = data;
+			}
 			for (var i in $scope.stream.items) {
 				$scope.stream.items[i].template = '/templates/post-compact';
 			}
 		}, function(err) {
 		});
 	}
+	$scope.loadMore = function() {
+		if (!$scope.stream) {
+			return;
+		}
+		// last post update time
+		var t = $scope.stream.items[$scope.stream.items.length-1].timestampUsec;
+		$scope.params.nt = t;
+		// retrieve posts
+		$scope.gtposts();		
+	};
 	$scope.next = function() {
 		if (!$scope.cp && $scope.stream.items.length > 0) {
 			$scope.expand($scope.stream.items[0]);
@@ -179,14 +197,14 @@ app.controller('AppStream', function($scope, $http, $location, $routeParams, $an
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway
 		var v = String($routeParams.value);
-		// store parameters
-		var obj = {};
+		// declare variable
+		$scope.params = {};
 		// set type
-		obj.type = String($routeParams.type) || 'feed';
+		$scope.params.type = String($routeParams.type) || 'feed';
 		// remove trailing '*/' otherwise use normal url
-		obj.value = /\*(\/)*$/.test(v) ? v.substring(0,v.length-1) : v;
+		$scope.params.value = /\*(\/)*$/.test(v) ? v.substring(0,v.length-1) : v;
 		// retrieve posts
-		$scope.gtposts(obj);
+		$scope.gtposts();
 	}
 });
 app.controller('AppFeeds', function($scope, $http, $location, GetFeeds, FeedSubmit) {
