@@ -1,4 +1,4 @@
 include post-nav
 .list-article-group(infinite-scroll='loadMore()',infinite-scroll-distance='2')
-	.article(ng-repeat='post in stream.items',ng-click="toggle(post)",id='{{post.id}}')
+	.article(ng-repeat='post in stream.items',ng-click="toggle(post)",id='{{post.id}}',on-last-repeat='')
 		div(ng-include="post.template")

@@ -193,6 +193,22 @@ app.controller('AppStream', function($scope, $http, $location, $routeParams, $an
 			$scope.expand(p);
 		}
 	}
+	$scope.$on('onRepeatLast', function(scope, element, attrs){
+		// re-activate affix
+		$('#ma').affix({
+			offset: {
+				top: 85
+			}
+		});
+	});
+	$scope.$watch(
+		function () {
+			return $('#ma').width() === $('#map').width();
+		},
+		function (n, o) {
+			$('#ma').width($('#map').width());
+		}
+	)
 	// if it has parameters
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway
@@ -238,20 +254,4 @@ app.controller('AppFeeds', function($scope, $http, $location, GetFeeds, FeedSubm
         // call $anchorScroll()
         $anchorScroll();
 	}
-	$scope.$on('onRepeatLast', function(scope, element, attrs){
-		// re-activate affix
-		$('#ma').affix({
-			offset: {
-				top: 85
-			}
-		});
-	});
-	$scope.$watch(
-		function () {
-			return $('#ma').width() === $('#map').width();
-		},
-		function (n, o) {
-			$('#ma').width($('#map').width());
-		}
-	)
 });
