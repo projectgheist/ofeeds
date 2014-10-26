@@ -76,8 +76,17 @@ exports.FetchFeed = function(feed) {
 			console.log("// ----------------------------------------------------------------------------");
 			console.log("Feedparser: " + error);
 			console.log("\ton '" + decodeURIComponent(feed.feedURL) + "'");
-			// always handle errors
-			parseError = true;
+			// check if we could get the feed before
+			if (!feed.lastModified) {
+				// remove feed from db
+				feed.remove();
+				// return error
+				reject(error);
+				return false;
+			} else {
+				// always handle errors
+				parseError = true;
+			}
 		})
 		.on('meta', function(meta) {
 			//if (meta.xmlurl) {
@@ -108,7 +117,6 @@ exports.FetchFeed = function(feed) {
 					
 				// Store orignal thumbnail url
 				thumbnail_obj.small = (data.image !== undefined) ? data.image.url : undefined;
-				
 				// Retrieve all the images from the post description
 				if (data.description !== null) {
 					parser.onopentag = function(tag) {
@@ -125,8 +133,7 @@ exports.FetchFeed = function(feed) {
 					}
 					// Parse the post description for image/video tags
 					parser.write(data.description.toString("utf8")).end();
-				}
-				
+				}				
 				// add image data to storage object
 				data.images = thumbnail_obj;
 				// link in feed
