@@ -45,19 +45,12 @@ function formatPosts(posts, feed) {
             annotations: []
         };
     });
+
+	feed.self = 	{ href: feed.self }; // url to current api fetch call
+	feed.alternate = feed.siteURL ? [{ href: feed.siteURL, type: 'text/html' }] : undefined;
+	feed.items = 	items;
 	
-    // TODO: atom output
-    return {
-        direction: 'ltr',
-        id: feed.id,
-        title: feed.title,
-        description: feed.description,
-        continuation: feed.continuation,
-        self: { href: feed.self }, // url to current fetch call
-        alternate: feed.siteURL ? [{ href: feed.siteURL, type: 'text/html' }] : undefined,
-        updated: feed.updated, // update time of the feed
-        items: items
-    };
+    return feed;
 };
 
 app.get('/api/0/stream/contents*', function(req, res) {
@@ -107,25 +100,28 @@ app.get('/api/0/stream/contents*', function(req, res) {
         limit: +req.query.n || 20,
         populate: 'feed'
     }).then(function(posts) {
-		var isFeed = (streams[0].type === 'feed');
-        // Google Reader returns a 404 for unknown feeds
-        if (posts.length === 0 && isFeed) {
-			return res.status(404).send('Feed not found!');
-        }
-		
-        var value = streams[0].value,
-			feed = posts[0] && posts[0].feed;
-		
-		// @todo: atom output
-        res.json(formatPosts(posts, {
-            id:           isFeed ? feed.stringID     : 'user/' + (req.user.id || '-') + '/' + value.type + '/' + value.name,
-            title:        isFeed ? feed.title        : value.name,
-            description:  isFeed ? feed.description  : undefined,
-            siteURL:      isFeed ? feed.siteURL      : undefined,
-            updated:      mm(isFeed ? feed.lastModified : Date.now()).format('dddd, MMMM Do YYYY, h:mm:ss A'),
-            self:         ut.fullURL(req),
-            continuation: 'TODO'
-        }));
+		var isFeed 	= (streams[0].type === 'feed'), // boolean: TRUE if feed
+			value 	= streams[0].value,				// string: site URL
+			feedFound = (isFeed && posts.length > 0 && posts[0]), 	// boolean: TRUE if feed object
+			feed 	= feedFound ? posts[0].feed : undefined, 		// reference to feed db obj
+			feedObj = {
+				id:           	encodeURIComponent(feedFound ? feed.stringID     : ('user/' + (req.user.id || '-') + '/' + streams[0].type + '/' + value)),
+				title:        	feedFound ? feed.title        : value,
+				description:	feedFound ? feed.description  : '',
+				direction: 		'ltr',
+				siteURL:      	feedFound ? feed.siteURL      : value,
+				updated:      	mm(feedFound ? feed.lastModified : Date.now()).format('dddd, MMMM Do YYYY, h:mm:ss A'),
+				self:         	ut.fullURL(req),
+				continuation: 	'TODO'
+			};
+			
+        if (!feedFound) {
+			// Google Reader returns 404 response, we need a valid json response for infinite scrolling
+			res.json(feedObj);
+        } else {
+			// @todo: atom output
+			res.json(formatPosts(posts, feedObj));
+		}
     }, function(err) {
         return res.status(500).send(err);
     });
