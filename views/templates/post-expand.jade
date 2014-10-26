@@ -9,10 +9,13 @@
 		.pull-right
 			p(style='text-align:right') {{post.published}}
 			.btn-group
-				button.btn.btn-default Mark as Unread
+				button.btn.btn-default(ng-click="toggle(post)")
+					i.fa.fa-fw.fa-chevron-up
+				button.btn.btn-default
+					i.fa.fa-fw.fa-eye
 				.btn-group
 					button.btn.btn-default
-						i.fa.fa-share-alt
+						i.fa.fa-fw.fa-share-alt
 					button.btn.btn-default.dropdown-toggle.withripple(data-toggle="dropdown")
 						span.caret
 						span.sr-only Toggle Dropdown
