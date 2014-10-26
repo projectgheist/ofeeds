@@ -93,22 +93,24 @@ exports.parseFeeds = function(feeds) {
 };
 
 exports.parseTags = function(tags, user) {
-    if (!tags)
+ 	// if empty variable, return
+	if (!tags) {
         return null;
-        
-    if (!Array.isArray(tags))
+    }
+	// check if already an array, else make it an array
+    if (!Array.isArray(tags)) {
         tags = [tags];
-        
+    }
     for (var i = 0; i < tags.length; i++) {
         // match 'user/<userId>/state/foo' and also 'user/-/state/foo'
         var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tags[i]);
-        if (!match || (/* @todo: re-enable: match[1] !== user.id && */match[1] !== '-')) {
+        if (!match || (match[1] !== user.id && match[1] !== '-')) {
 			return null;
         }
         tags[i] = {
-            user: user,
-            type: match[2],
-            name: match[3]
+            user: user,		// reference to user db object
+            type: match[2],	// string: state or label
+            name: match[3]	// string: url 
         };
     }
     

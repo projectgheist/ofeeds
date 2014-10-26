@@ -34,10 +34,7 @@ var actions = {
             var f = results[0];
             // if this feed doesn't have any subscribers, fetch the feed
             if (f.numSubscribers === 0) {
-				return cr.FetchFeed(f).then(function() {
-					console.log("Finish fetch");
-					return results;
-				});
+				return cr.FetchFeed(f);
             }
 			return results;
         }).then(function(results) {
