@@ -1,8 +1,8 @@
 include includes/header
-.container-full(ng-controller="AppFeeds")
+.container(ng-controller="AppStream")
 	.v-offset
 		.row
-			.col-xs-offset-1.col-xs-10.col-md-offset-4.col-md-4
+			.col-xs-offset-1.col-xs-10.col-md-offset-3.col-md-6
 				.well
 					.lead.text-center
 						h1(style="margin-left:-20px")
@@ -27,10 +27,14 @@ include includes/header
 					.col-xs-12.col-lg-1
 						.lead.text-center(style='margin-top:20px')
 							p -&nbsp;OR&nbsp;-
-					.col-xs-12.col-lg-6
+					.col-xs-12.col-lg-6(ng-controller="AppStream")
 						h3.text-center Fetch a feed
-						form(ng-submit="sbmt()")
+						form
 							.form-group
-								.form-control-wrapper.text-center
-									input.input-lg.form-control.empty.typeahead#nrss(type='text',placeholder='example.feed.com/rss') 
+								.form-control-wrapper
+									input.input-lg.form-control.typeahead#nrss(type="text",placeholder='example.feed.com/rss') 
 									span.material-input
+		.row
+			.col-xs-12#map
+				div(ng-view='')
+include includes/js

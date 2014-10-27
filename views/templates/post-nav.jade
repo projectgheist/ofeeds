@@ -6,12 +6,13 @@
 					a.navbar-brand(href='/subscription/{{stream.id}}') {{stream.title}}
 				.collapse.navbar-collapse
 					ul.nav.navbar-nav.navbar-right
-						li(ng-if='stream.subscribed')
-							a(href='',alt='Mark all as Read') 
-								i.fa.fa-fw.fa-check
-						li.btn-success(ng-if='!stream.subscribed')
-							a(href='',alt='Subscribe',ng-click='sbmt()') 
-								i.fa.fa-fw.fa-plus
+						if user
+							li.btn-success(ng-if='!stream.subscribed')
+								a(href='',alt='Subscribe',ng-click='sbmt()') 
+									i.fa.fa-fw.fa-plus
+							li(ng-if='stream.subscribed')
+								a(href='',alt='Mark all as Read') 
+									i.fa.fa-fw.fa-check
 						li
 							a(href='#',alt='Refresh') 
 								i.fa.fa-fw.fa-refresh
@@ -33,3 +34,6 @@
 					.row-content
 						h4.list-group-item-heading Update time
 						p.list-group-item-text {{stream.updated}}
+					.row-content
+						p
+							button.btn.btn-primary(ng-click='delt()') Delete feed

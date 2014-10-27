@@ -32,7 +32,11 @@ jQuery(document).ready(function($) {
 		displayKey: 'title', // name of value to check against
 		source: sb.ttAdapter()
 	}).on('typeahead:selected', function(obj, datum) {
-		angular.element($('#m')).scope().gotosub(datum);
+		if ($('#m').length) {
+			angular.element($('#m')).scope().gotosub(datum);
+		} else {
+			angular.element($('#map')).scope().gotostream(datum);
+		}
 	});
 });
 
@@ -141,6 +145,12 @@ app.directive('ngInclude', function() {
     };
 });
 app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, FeedSubmit) {
+	$scope.gotostream = function(obj) {
+		// go to subscription local url
+		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
+		// call '$apply' oteherwise angular doesn't recognize that the url has changed
+		$scope.$apply();
+	}
 	$scope.gotoTop = function() {
         $scope.scrollto('top');
 	}
@@ -148,6 +158,9 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
         // set the location.hash to the id of
         // the element you wish to scroll to.
         //$location.hash(id);
+	}
+	$scope.delt = function() {
+		
 	}
 	$scope.sbmt = function() {
 		FeedSubmit.save({q: $scope.stream.feedURL},function(data) {
@@ -226,26 +239,33 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			$scope.expand(p);
 		}
 	}
-	$scope.$on('onRepeatLast', function(scope, element, attrs){
-		// make all links open in a new tab
-		$(".article-content a").each(function() {
-			$(this).attr("target","_blank");
-		});
-		// re-activate affix
+	// re-activate affix
+	$scope.setaffix = function() {
+		var o = $('#map').position().top;
+		$(window).off('.affix');
+		$('#ma').removeData('bs.affix').removeClass('affix affix-top affix-bottom');
 		$('#ma').affix({
 			offset: {
-				top: 85
+				top: o
 			}
 		});
-	});
+	}
 	$scope.$watch(
 		function () {
 			return $('#ma').width() === $('#map').width();
 		},
 		function (n, o) {
 			$('#ma').width($('#map').width());
+			$scope.setaffix();
 		}
 	)
+	$scope.$on('onRepeatLast', function(scope, element, attrs){
+		// make all links open in a new tab
+		$(".article-content a").each(function() {
+			$(this).attr("target","_blank");
+		});
+		$scope.setaffix();
+	});
 	// if it has parameters
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway

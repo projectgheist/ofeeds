@@ -56,7 +56,7 @@ function formatPosts(feed, posts, tags, obj) {
 			break;
 		}
 	}
-    return obj;
+   return obj;
 };
 
 app.get('/api/0/stream/contents*', function(req, res) {
@@ -126,10 +126,14 @@ app.get('/api/0/stream/contents*', function(req, res) {
 			// Google Reader returns 404 response, we need a valid json response for infinite scrolling
 			res.json(obj);
         } else {
-			var r = ut.parseTags('user/-/state/reading-list', req.user)[0];
-			return db.Tag.find(r).then(function(tags) {
-				res.json(formatPosts(feed, posts, tags, obj))
-			});
+			if (req.user) {
+				var r = ut.parseTags('user/-/state/reading-list', req.user)[0];
+				return db.Tag.find(r).then(function(tags) {
+					res.json(formatPosts(feed, posts, tags, obj))
+				});
+			} else {
+				res.json(formatPosts(feed, posts, [], obj))
+			}
 		}
     }, function(err) {
         return res.status(500).send(err);

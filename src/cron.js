@@ -26,7 +26,7 @@ exports.setup = function() {
 	});
 
 	// set all jobs
-	ag.every('5 minutes','UpdateAllFeeds');
+	ag.every('15 minutes','UpdateAllFeeds');
 
 	// start cron jobs
 	ag.start();
