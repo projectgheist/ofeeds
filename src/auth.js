@@ -37,9 +37,9 @@ pp.deserializeUser(function(obj, done) {
 });
 
 pp.use(new gs({
-		clientID: cf.Google().ClientID,
-		clientSecret: cf.Google().ClientSecret,
-		callbackURL: cf.Url() + '/auth/google/callback'
+		clientID: 		cf.Google().ClientID,
+		clientSecret: 	cf.Google().ClientSecret,
+		callbackURL: 	cf.Url() + '/auth/google/callback'
 	},
 	function(token, tokenSecret, profile, done) {
 		// asynchronous verification, for effect...
@@ -49,6 +49,7 @@ pp.use(new gs({
 				user.provider 	= profile.provider;
 				user.email		= profile.emails[0].value;
 				user.name		= profile.displayName;
+				// store in db
 				user.save();
 				return done(null, user);
 			}, function(err) {

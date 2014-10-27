@@ -2,6 +2,7 @@
  */
 var ex = require('express'),
 	cf = require('../config'),
+	ut = require('./utils'),
 	ap = module.exports = ex();
 
 /** Parameter function */
@@ -18,7 +19,6 @@ ap.param(function(name, fn) {
 		}
 	}
 });
-
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
@@ -50,7 +50,7 @@ ap.get("/login", function(req, res) {
 	res.redirect('/');
 });
 /** logout route */
-ap.get("/logout", function(req, res) {
+ap.get("/logout", ensureAuth, function(req, res) {
 	req.logout(); 
 	res.redirect('/'); 
 });
@@ -60,7 +60,7 @@ ap.get("/dashboard", ensureAuth, function(req, res) {
 		'user': req.user
 	});
 });
-ap.get("/subscription/*", function(req, res) {
+ap.get("/subscription/*", ensureAuth, function(req, res) {
 	res.render('dashboard', { 
 		'config': cf.site
 	});

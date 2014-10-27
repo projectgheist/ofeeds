@@ -16,14 +16,18 @@ var actions = {
 			if (rslt0.length > 0) {
 				return rslt0;
 			} else if (ut.isUrl(url)) {
-				return db.findOrCreate(db.Feed, {feedURL: u}).then(cr.FetchFeed).then(function(f) { return [f]; });
+				return db.findOrCreate(db.Feed, {feedURL: u}).then(cr.FetchFeed).then(function(f) { 
+					// update db
+					f.save();
+					// return feed in array form
+					return [f]; 
+				});
 			} else {
 				return false;
 			}
 		});
 	},
     subscribe: function(ctx, url) {
-		console.log("Subscribe action: " + url);
         // Find or create feed for this URL in the database
         var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)});
 		// Find or create a tag to add this feed to the users reading-list
@@ -34,7 +38,9 @@ var actions = {
             var f = results[0];
             // if this feed doesn't have any subscribers, fetch the feed
             if (f.numSubscribers === 0) {
-				return cr.FetchFeed(f);
+				return cr.FetchFeed(f).then(function(n) { 
+					return [n,results[1]]; 
+				});
             }
 			return results;
         }).then(function(results) {
@@ -48,6 +54,9 @@ var actions = {
 				// increment subscriber count
                 f.numSubscribers++; 
             }
+			// update db
+			f.save();
+			// return feed
 			return f;
 		});
     }
@@ -55,48 +64,40 @@ var actions = {
 
 // lists all of the feeds a user is subscribed to
 app.get('/api/0/subscription/list', function(req, res) {
-	rs.all([db.all(db.Feed)]).then(function(results) {
-		results.forEach(function(feeds) {
-			return res.json(feeds);
-		});
-	}, function(err) {
-        res.status(500).send(err);
-    });
-/*
-	var c;
-	if (req.query.q) {
-		var u = decodeURIComponent(req.query.q);
-		c = {feedURL: {$in:feeds}};
-	} else {
-        res.status(500).send('');
-	}
-	*/
-	// Find feeds the user is subscribed to
-	/*console.log(req.user.feeds);
-	if (!req.user || !req.user.feeds) {
+    /** Check auth
+	 */
+	if (!req.isAuthenticated()) {
 		res.status(500).send('User feed not defined!');
 	} else {
-		req.user.feeds.then(function(feeds) {
-			var subscriptions = feeds.map(function(feed) {
-				var categories = feed.tagsForUser(req.user).map(function(tag) {
+		// get tag for getting all feeds the user is subscribed to
+		var r = ut.parseTags('user/-/state/reading-list', req.user)[0];
+		return db.Tag.findOne(r).then(function(results) {
+			// no feeds returned
+			if (!results) {
+				return [];
+			}
+			return db.Feed.find({tags:results});
+		}).then(function(feeds) {
+			var s = feeds.map(function(f) {
+				var categories = f.tagsForUser(req.user).map(function(tag) {
 					return {
 						id: tag.stringID,
 						label: tag.name
 					};
 				});
 				return {
-					id: 'feed/' + feed.feedURL,
-					title: feed.titleForUser(req.user),
-					firstitemmsec: 0, // TODO
-					shortid: feed.shortID,
-					categories: categories
+					id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
+					title: 			f.titleForUser(req.user),
+					unreadcount: 	0, // TODO
+					shortid: 		f.shortID,
+					categories: 	categories
 				};
 			});
-			return res.json({subscriptions: subscriptions});
+			return res.json(s);
 		}, function(err) {
 			res.status(500).send(err);
 		});
-	}*/
+	}
 });
 
 // search for feeds and preview them before adding them to their account
@@ -117,16 +118,12 @@ app.get('/api/0/subscription/search', function(req, res) {
 });
 
 app.post('/api/0/subscription/quickadd', function(req, res) {
-    /*
-	 * Check auth
+    /** Check auth
 	 */
-	 /*
-	if (!ut.checkAuth(req, res, true)) {
+	if (!req.isAuthenticated()) {
         return;
 	}
-	*/
-		
-	var u = decodeURIComponent(req.query.quickadd);
+	var u = decodeURIComponent(req.query.q);
 	// Check if URL
     if (!ut.isUrl(u)) {
         return res.json({
@@ -134,9 +131,10 @@ app.post('/api/0/subscription/quickadd', function(req, res) {
             numResults: 0
         });
     }
-
 	// creat or find URL in db
-    actions.subscribe(req, req.query.quickadd).then(function() {
+    actions
+	.subscribe(req, req.query.q)
+	.then(function(feed) {
         res.json({
             query: u,
             numResults: 1,

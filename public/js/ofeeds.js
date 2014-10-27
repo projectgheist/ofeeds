@@ -70,19 +70,19 @@ var app = angular.module('webapp', [
 var AppService = angular.module('AppService', []);
 AppService.factory('GetFeeds', ['$resource',
 	function($resource) {
-		return $resource('/api/0/subscription/list', {}, { query: {method:'GET', isArray:true} });
+		return $resource('/api/0/subscription/list', {}, {query:{method:'GET',isArray:true}});
 	}
 ]);
 
 AppService.factory('GetPosts', ['$resource',
 	function($resource) {
-		return $resource('/api/0/stream/contents/', {type:'@type', params:'@params'}, { query: {method:'GET', isArray:false} });
+		return $resource('/api/0/stream/contents/', {type:'@type', params:'@params'}, {query:{method:'GET',isArray:false}});
 	}
 ]);
 
 AppService.factory('FeedSubmit', ['$resource',
 	function($resource) {
-		return $resource('/api/0/subscription/search', {q:'@q'}, { query: {method:'POST'} });
+		return $resource('/api/0/subscription/quickadd', {q:'@q'}, {query:{method:'POST'}});
 	}
 ]);
 
@@ -98,7 +98,7 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 		},
 		controller: 'AppStream'
 	})
-	.when('/subscription/:type/:value*\/', {
+	.when('/subscription/:type/:value', {
 		templateUrl: function(urlattr) {
 			return '/templates/posts-list';
 		},
@@ -120,20 +120,50 @@ app.directive('article', function() {
 		template: '<article ng-include="\'/templates/post-compact\'" />'
 	}
 });
-app.controller('AppStream', function($scope, $http, $location, $routeParams, $anchorScroll, GetPosts) {
+app.directive('ngInclude', function() {
+    return {
+        restrict: 'A',
+		link: {
+			post: function(scope, element, attrs){
+				// retrieve stream
+				var s = scope.$parent.$parent;
+				if (s.cp) {
+					s.scrollto(s.cp.id);
+				}
+				// make all links open in a new tab
+				var o = $('.article-content').find('a');
+				//.each(function() {
+					//console.log($(this));
+					//$(this).attr("target","_blank");
+				//});
+			}
+        }
+    };
+});
+app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, FeedSubmit) {
 	$scope.gotoTop = function() {
+        $scope.scrollto('top');
+	}
+	$scope.scrollto = function(id) {
         // set the location.hash to the id of
         // the element you wish to scroll to.
-        $location.hash('top');
-        // call $anchorScroll()
-        $anchorScroll();
+        //$location.hash(id);
 	}
+	$scope.sbmt = function() {
+		FeedSubmit.save({q: $scope.stream.feedURL},function(data) {
+			$scope.stream.subscribed = true;
+			$rootScope.$broadcast('updateSubs');
+		}, function(err) {
+		});
+	}	
 	$scope.gtposts = function() {
 		GetPosts.query($scope.params,function(data) {
-			if (!data || data.items <= 0) {
+			if (!data || !data.items || data.items.length <= 0) {
 				return;
 			}
-			if ($scope.stream && $scope.stream.title === data.title) {
+			if ($scope.stream && $scope.stream.title === data.title &&
+				data.items[0].title !== $scope.stream.items[$scope.stream.items.length-1].title &&
+				data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec) {
 				$scope.stream.items = $scope.stream.items.concat(data.items);
 			} else {
 				$scope.stream = data;
@@ -145,14 +175,17 @@ app.controller('AppStream', function($scope, $http, $location, $routeParams, $an
 		});
 	}
 	$scope.loadMore = function() {
-		if (!$scope.stream) {
+		if (!$scope.stream || !$scope.stream.items ||
+			$scope.stream.items.length <= 0) {
 			return;
 		}
 		// last post update time
 		var t = $scope.stream.items[$scope.stream.items.length-1].timestampUsec;
-		$scope.params.nt = t;
-		// retrieve posts
-		$scope.gtposts();		
+		if (t !== $scope.params.nt) {
+			$scope.params.nt = t;
+			// retrieve posts
+			$scope.gtposts();
+		}
 	};
 	$scope.next = function() {
 		if (!$scope.cp && $scope.stream.items.length > 0) {
@@ -194,6 +227,10 @@ app.controller('AppStream', function($scope, $http, $location, $routeParams, $an
 		}
 	}
 	$scope.$on('onRepeatLast', function(scope, element, attrs){
+		// make all links open in a new tab
+		$(".article-content a").each(function() {
+			$(this).attr("target","_blank");
+		});
 		// re-activate affix
 		$('#ma').affix({
 			offset: {
@@ -223,15 +260,20 @@ app.controller('AppStream', function($scope, $http, $location, $routeParams, $an
 		$scope.gtposts();
 	}
 });
-app.controller('AppFeeds', function($scope, $http, $location, GetFeeds, FeedSubmit) {
+app.controller('AppFeeds', function($scope, $http, $location, GetFeeds) {
+	$scope.$on("updateSubs", function(event, args) {
+		$scope.gtsubs();
+	});
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
 			$scope.subs = data;
 		}, function(err) {
 		});
 	}	
-	$scope.isActive = function(viewLocation) { 
-		return ('/subscription'+decodeURIComponent(viewLocation)+'*/') === $location.path();
+	$scope.isActive = function(str) {
+		var s = str.substring('feed%2F'.length,str.length),
+			a = new RegExp(decodeURIComponent(s));
+		return a.test($location.path());
 	}
 	$scope.$watch(
 		function () {
@@ -254,4 +296,5 @@ app.controller('AppFeeds', function($scope, $http, $location, GetFeeds, FeedSubm
         // call $anchorScroll()
         $anchorScroll();
 	}
+	$scope.gtsubs();
 });

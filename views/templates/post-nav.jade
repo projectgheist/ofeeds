@@ -6,9 +6,12 @@
 					a.navbar-brand(href='/subscription/{{stream.id}}') {{stream.title}}
 				.collapse.navbar-collapse
 					ul.nav.navbar-nav.navbar-right
-						li
-							a(href='#',alt='Mark all as Read') 
+						li(ng-if='stream.subscribed')
+							a(href='',alt='Mark all as Read') 
 								i.fa.fa-fw.fa-check
+						li.btn-success(ng-if='!stream.subscribed')
+							a(href='',alt='Subscribe',ng-click='sbmt()') 
+								i.fa.fa-fw.fa-plus
 						li
 							a(href='#',alt='Refresh') 
 								i.fa.fa-fw.fa-refresh

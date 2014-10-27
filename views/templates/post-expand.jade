@@ -14,9 +14,8 @@
 				button.btn.btn-default
 					i.fa.fa-fw.fa-eye
 				.btn-group
-					button.btn.btn-default
-						i.fa.fa-fw.fa-share-alt
 					button.btn.btn-default.dropdown-toggle.withripple(data-toggle="dropdown")
+						i.fa.fa-fw.fa-share-alt
 						span.caret
 						span.sr-only Toggle Dropdown
 						.ripple-wrapper
@@ -37,6 +36,6 @@
 		.clearfix
 		.line-separator
 .row
-	.col-xs-12.article-content
-		p(ng-bind-html="post.content.content")
+	.col-xs-12
+		p.article-content(ng-bind-html="post.content.content")
 		.line-separator

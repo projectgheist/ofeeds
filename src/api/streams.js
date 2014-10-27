@@ -11,11 +11,11 @@ var app = module.exports = ex();
  * @param posts: Array of posts to format
  * @param feed: information related to the feed 
  */
-function formatPosts(posts, feed) {
+function formatPosts(feed, posts, tags, obj) {
 	// creates a new array with the posts 
     var items = posts.map(function(post) {
-		var tags = post.tags.map(function(tag) {
-			return tag.stringID;
+		var tags = post.tags.map(function(t) {
+			return t.stringID;
         });
         return {
             id: post.shortID,
@@ -28,6 +28,7 @@ function formatPosts(posts, feed) {
                 direction: 'ltr',
                 content: post.body,
 				images: post.images,
+				videos: post.videos
             },
             author: post.author,
             published: (mm().diff(mm(post.published), 'days') <= 7 ? mm(post.published).fromNow() : mm(post.published).format("D MMM")) || 0,
@@ -38,7 +39,7 @@ function formatPosts(posts, feed) {
                 title: post.feed.title,
                 url: post.feed.feedURL
             },
-            crawlTimeMsec: '' + (+post.feed.successfulCrawlTime),
+            crawlTimeMsec: post.feed.successfulCrawlTime.getTime(),
             timestampUsec: post.published.getTime(),
             likingUsers: [],
             comments: [],
@@ -46,11 +47,16 @@ function formatPosts(posts, feed) {
         };
     });
 
-	feed.self = 	{ href: feed.self }; // url to current api fetch call
-	feed.alternate = feed.siteURL ? [{ href: feed.siteURL, type: 'text/html' }] : undefined;
-	feed.items = 	items;
-	
-    return feed;
+	obj.self 		= { href: feed.self }; // url to current api fetch call
+	obj.alternate 	= feed.siteURL ? [{ href: feed.siteURL, type: 'text/html' }] : undefined;
+	obj.items 		= items;
+	for (var i in tags) {
+		obj.subscribed = (feed.tags.indexOf(tags[i].id) > -1);
+		if (obj.subscribed) {
+			break;
+		}
+	}
+    return obj;
 };
 
 app.get('/api/0/stream/contents*', function(req, res) {
@@ -104,23 +110,26 @@ app.get('/api/0/stream/contents*', function(req, res) {
 			value 	= streams[0].value,				// string: site URL
 			feedFound = (isFeed && posts.length > 0 && posts[0]), 	// boolean: TRUE if feed object
 			feed 	= feedFound ? posts[0].feed : undefined, 		// reference to feed db obj
-			feedObj = {
-				id:           	encodeURIComponent(feedFound ? feed.stringID     : ('user/' + (req.user.id || '-') + '/' + streams[0].type + '/' + value)),
+			obj 	= {
+				id:           	encodeURIComponent(feedFound ? feed.stringID : ''),
+				feedURL:		decodeURIComponent(feedFound ? feed.feedURL : value),
 				title:        	feedFound ? feed.title        : value,
 				description:	feedFound ? feed.description  : '',
 				direction: 		'ltr',
 				siteURL:      	feedFound ? feed.siteURL      : value,
 				updated:      	mm(feedFound ? feed.lastModified : Date.now()).format('dddd, MMMM Do YYYY, h:mm:ss A'),
 				self:         	ut.fullURL(req),
+				subscribed:		false,
 				continuation: 	'TODO'
 			};
-			
         if (!feedFound) {
 			// Google Reader returns 404 response, we need a valid json response for infinite scrolling
-			res.json(feedObj);
+			res.json(obj);
         } else {
-			// @todo: atom output
-			res.json(formatPosts(posts, feedObj));
+			var r = ut.parseTags('user/-/state/reading-list', req.user)[0];
+			return db.Tag.find(r).then(function(tags) {
+				res.json(formatPosts(feed, posts, tags, obj))
+			});
 		}
     }, function(err) {
         return res.status(500).send(err);

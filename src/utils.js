@@ -108,7 +108,7 @@ exports.parseTags = function(tags, user) {
 			return null;
         }
         tags[i] = {
-            user: user,		// reference to user db object
+            user: user._id,	// reference to user db object
             type: match[2],	// string: state or label
             name: match[3]	// string: url 
         };

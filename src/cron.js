@@ -155,7 +155,10 @@ exports.FetchFeed = function(feed) {
 							r.summary		= (d.summary !== d.description) ? d.summary : undefined;
 							r.images		= d.images;
 							r.url			= d.link;
-							r.published		= d.pubdate || mm();
+							// prevent the publish date to be overridden
+							if (!r.published) {
+								r.published = d.pubdate || mm();
+							}
 							r.updated 		= d.date || mm();
 							r.author		= d.author;
 							r.commentsURL	= d.comments;
@@ -177,12 +180,12 @@ exports.FetchFeed = function(feed) {
 				// then mark crawl success or failure
 				rs.all(posts).then(function() {
 					feed.lastModified = feed.successfulCrawlTime = new Date();			
-					feed.save();
 					//console.log('feed sucessfully finished');
 					resolve(feed);
 				}, function(err) {
 					feed.lastModified = feed.failedCrawlTime = new Date();
 					feed.lastFailureWasParseFailure = parseError;
+					// update db
 					feed.save();
 					//console('feed error finished');
 					reject(err);
