@@ -30,6 +30,9 @@ exports.setup = function() {
 
 	// start cron jobs
 	ag.start();
+	
+	// start
+	UpdateAllFeeds(function() {});
 };
 
 /*
@@ -180,14 +183,12 @@ exports.FetchFeed = function(feed) {
 				// then mark crawl success or failure
 				rs.all(posts).then(function() {
 					feed.lastModified = feed.successfulCrawlTime = new Date();			
-					//console.log('feed sucessfully finished');
 					resolve(feed);
 				}, function(err) {
 					feed.lastModified = feed.failedCrawlTime = new Date();
 					feed.lastFailureWasParseFailure = parseError;
 					// update db
 					feed.save();
-					//console('feed error finished');
 					reject(err);
 				});
 			}
