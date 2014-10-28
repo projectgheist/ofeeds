@@ -27,7 +27,11 @@ jQuery(document).ready(function($) {
 	});
 	sb.initialize();
 	// prep typeahead
-	$('.typeahead').typeahead(null, {
+	$('.typeahead').typeahead({
+		hint: true,
+		highlight: true,
+		minLength: 3
+	}, {
 		name: 'sb', // identifier
 		displayKey: 'title', // name of value to check against
 		source: sb.ttAdapter()
@@ -37,6 +41,7 @@ jQuery(document).ready(function($) {
 		} else {
 			angular.element($('#map')).scope().gotostream(datum);
 		}
+		$('.typeahead').focusout().val('');
 	});
 });
 
