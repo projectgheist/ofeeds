@@ -118,7 +118,6 @@ exports.getPosts = function(streams, options) {
     return rs.all([getTags(tags), getTags(options.excludeTags)]).then(function(results) {
         includeTags = results[0];
         excludeTags = results[1];
-		
         // find feeds given directly and by tag
         return exports.Feed.find({
             $or: [
