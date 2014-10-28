@@ -128,11 +128,10 @@ app.directive('ngInclude', function() {
     return {
         restrict: 'A',
 		link: {
-			post: function(scope, element, attrs){
-				// retrieve stream
+			post: function(scope, element, attrs) {
 				var s = scope.$parent.$parent;
-				if (s.cp) {
-					s.scrollto(s.cp.id);
+				if (element.parent().hasClass('expand') && s.cp) {
+					$('#'+s.cp.id).ScrollTo({offsetTop:85});
 				}
 				// make all links open in a new tab
 				var o = $('.article-content').find('a');
@@ -222,6 +221,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	}
 	$scope.expand = function(p) {
 		p.template = '/templates/post-expand';
+		$('#' + p.id).addClass('expand');
 		$scope.cp = p;
 		if ($scope.$root.$$phase != '$apply' && $scope.$root.$$phase != '$digest') {
 			$scope.$apply();
@@ -230,6 +230,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	$scope.toggle = function(p) {
 		// make previous expanded post small again
 		if ($scope.cp && $scope.cp != p) {
+			$('#' + $scope.cp.id).removeClass('expand');
 			$scope.cp.template = '/templates/post-compact';
 		}
 		// store current expanded post
