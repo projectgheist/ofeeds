@@ -46,17 +46,22 @@ function formatPosts(feed, posts, tags, obj) {
             annotations: []
         };
     });
-
-	obj.self 		= { href: feed.self }; // url to current api fetch call
-	obj.alternate 	= feed.siteURL ? [{ href: feed.siteURL, type: 'text/html' }] : undefined;
+	if (!feed && tags) {
+		obj.id		= 'user/' + tags[0].name;
+		obj.title 	= tags[0].name;
+	}
+	obj.self 		= {href: (feed ? feed.self : '')}; // url to current api fetch call
+	obj.alternate 	= (feed && feed.siteURL) ? [{ href: feed.siteURL, type: 'text/html' }] : '';
 	obj.items 		= items;
-	for (var i in tags) {
-		obj.subscribed = (feed.tags.indexOf(tags[i].id) > -1);
-		if (obj.subscribed) {
-			break;
+	if (feed) {
+		for (var i in tags) {
+			obj.subscribed = (feed.tags.indexOf(tags[i].id) > -1);
+			if (obj.subscribed) {
+				break;
+			}
 		}
 	}
-   return obj;
+	return obj;
 };
 
 app.get('/api/0/stream/contents*', function(req, res) {
@@ -108,21 +113,21 @@ app.get('/api/0/stream/contents*', function(req, res) {
     }).then(function(posts) {
 		var isFeed 	= (streams[0].type === 'feed'), // boolean: TRUE if feed
 			value 	= streams[0].value,				// string: site URL
-			feedFound = (isFeed && posts.length > 0 && posts[0]), 	// boolean: TRUE if feed object
-			feed 	= feedFound ? posts[0].feed : undefined, 		// reference to feed db obj
+			hasPosts = (posts.length > 0 && posts[0]), 					// boolean: TRUE if feed object
+			feed 	= (isFeed && hasPosts) ? posts[0].feed : undefined,	// reference to feed db obj
 			obj 	= {
-				id:           	encodeURIComponent(feedFound ? feed.stringID : ''),
-				feedURL:		decodeURIComponent(feedFound ? feed.feedURL : value),
-				title:        	feedFound ? feed.title        : value,
-				description:	feedFound ? feed.description  : '',
+				id:           	encodeURIComponent(isFeed ? feed.stringID : ''),
+				feedURL:		decodeURIComponent(isFeed ? feed.feedURL : value),
+				title:        	isFeed ? feed.title        : value,
+				description:	isFeed ? feed.description  : '',
 				direction: 		'ltr',
-				siteURL:      	feedFound ? feed.siteURL      : value,
-				updated:      	mm(feedFound ? feed.lastModified : Date.now()).format('dddd, MMMM Do YYYY, h:mm:ss A'),
+				siteURL:      	isFeed ? feed.siteURL      : '',
+				updated:      	mm(isFeed ? feed.lastModified : Date.now()).format('dddd, MMMM Do YYYY, h:mm:ss A'),
 				self:         	ut.fullURL(req),
 				subscribed:		false,
 				continuation: 	'TODO'
 			};
-        if (!feedFound) {
+        if (!hasPosts) {
 			// Google Reader returns 404 response, we need a valid json response for infinite scrolling
 			res.json(obj);
         } else {
