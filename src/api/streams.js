@@ -49,13 +49,15 @@ function formatPosts(feed, posts, tags, obj) {
 	if (!feed && tags) {
 		obj.id		= 'user/' + tags[0].name;
 		obj.title 	= tags[0].name;
+		obj.showOrigin = true;
+		obj.subscribed = -1;
 	}
 	obj.self 		= {href: (feed ? feed.self : '')}; // url to current api fetch call
 	obj.alternate 	= (feed && feed.siteURL) ? [{ href: feed.siteURL, type: 'text/html' }] : '';
 	obj.items 		= items;
 	if (feed) {
 		for (var i in tags) {
-			obj.subscribed = (feed.tags.indexOf(tags[i].id) > -1);
+			obj.subscribed = (feed.tags.indexOf(tags[i].id) > -1) ? 1 : 0;
 			if (obj.subscribed) {
 				break;
 			}
@@ -124,7 +126,8 @@ app.get('/api/0/stream/contents*', function(req, res) {
 				siteURL:      	isFeed ? feed.siteURL      : '',
 				updated:      	mm(isFeed ? feed.lastModified : Date.now()).format('dddd, MMMM Do YYYY, h:mm:ss A'),
 				self:         	ut.fullURL(req),
-				subscribed:		false,
+				subscribed:		0,
+				showOrigin:		false,
 				continuation: 	'TODO'
 			};
         if (!hasPosts) {

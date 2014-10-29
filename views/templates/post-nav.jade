@@ -7,10 +7,10 @@
 				.collapse.navbar-collapse
 					ul.nav.navbar-nav.navbar-right
 						if user
-							li.btn-success(ng-if='!stream.subscribed')
+							li.btn-success(ng-if='stream.subscribed === 0')
 								a(href='',alt='Subscribe',ng-click='sbmt()') 
 									i.fa.fa-fw.fa-plus
-							li(ng-if='stream.subscribed')
+							li(ng-if='stream.subscribed > 0')
 								a(href='',alt='Mark all as Read') 
 									i.fa.fa-fw.fa-check
 						li

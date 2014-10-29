@@ -1,7 +1,13 @@
 .row
-	a(href='',ng-click="toggle(post)")
-		.col-xs-9
+	div(ng-if="stream.showOrigin")
+		.visible-lg.col-lg-2
+			a(href="#/subscription/feed/{{post.origin.url}}") 
+				span.label.label-primary {{post.origin.title}}
+		.col-xs-9.col-lg-7(ng-click="toggle(post)")
 			p.text-overflow {{post.title}}
-		.col-xs-3(style="text-align:right")
-			p {{post.published}}
+	div(ng-if="!stream.showOrigin")
+		.col-xs-9(ng-click="toggle(post)")
+			p.text-overflow {{post.title}}
+	.col-xs-3(style="text-align:right")
+		p {{post.published}}
 .line-separator

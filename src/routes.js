@@ -62,10 +62,13 @@ ap.get("/dashboard", ensureAuth, function(req, res) {
 });
 ap.get("/subscription/*", ensureAuth, function(req, res) {
 	res.render('dashboard', { 
-		'config': cf.site
+		'config': cf.site,
+		'user': req.user
 	});
 });
 /** templates route */
 ap.get("/templates/:name", function(req, res) {
-	res.render('templates/' + req.params.name);
+	res.render('templates/' + req.params.name, {
+		'user': req.user
+	});
 });
