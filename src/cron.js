@@ -153,7 +153,7 @@ exports.FetchFeed = function(feed) {
 				var np = function(d) {
 					return new rs.Promise(function(rslv,rjct) {
 						st.findOrCreate(st.Post, {'feed': d.feed, 'guid': (d.guid || d.link)}).then(function(r) {
-							r.title 		= d.title;
+							r.title 		= ut.parseHtmlEntities(d.title);
 							r.body			= d.description;
 							r.summary		= (d.summary !== d.description) ? d.summary : undefined;
 							r.images		= d.images;
