@@ -61,7 +61,7 @@ Mousetrap.bind('k', function() {
 /** Open article in new tab/window from stream
  */
 Mousetrap.bind('v', function() {
-	window.open(g_contentView.exp.$el.attr("data-target"), '_blank');
+	window.open(angular.element($('#ma')).scope().cp.alternate.href, '_blank');
 	window.focus();
 });
 
