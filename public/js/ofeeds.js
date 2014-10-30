@@ -29,12 +29,15 @@ jQuery(document).ready(function($) {
 	// prep typeahead
 	$('.typeahead').typeahead({
 		hint: true,
-		highlight: true,
 		minLength: 3
 	}, {
 		name: 'sb', // identifier
 		displayKey: 'title', // name of value to check against
-		source: sb.ttAdapter()
+		source: sb.ttAdapter(),
+		templates: {
+			empty: ['<p class="col-xs-12">','<i class="fa fa-times fa-fw"></i> No results found!','</p>'].join('\n'),
+			suggestion: Handlebars.compile('<p><i class="fa fa-bookmark-o fa-fw"></i> <strong>{{title}}</strong><br>{{description}}</p>')
+		}
 	}).on('typeahead:selected', function(obj, datum) {
 		if ($('#m').length) {
 			angular.element($('#m')).scope().gotosub(datum);

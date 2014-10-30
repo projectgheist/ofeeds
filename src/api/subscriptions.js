@@ -10,7 +10,7 @@ var app = module.exports = ex();
 // @todo: functions need to be merged
 var actions = {
 	search: function(ctx, url) {
-		var u = encodeURIComponent(url);
+		var u = new RegExp(encodeURIComponent(url), "i");
         // Find or create feed for this URL in the database
 		return db.Feed.find({ $or: [{title: {$regex: u}}, {feedURL: {$regex: u}}] }).limit(6).then(function(rslt0) {
 			if (rslt0.length > 0) {
@@ -109,7 +109,13 @@ app.get('/api/0/subscription/search', function(req, res) {
 		if (feeds) {
 			var vs = [];
 			for (var i in feeds) {
-				vs.push({type:'feed',value:feeds[i].feedURL,title:feeds[i].title});
+				var d = feeds[i].description;
+				vs.push({
+					type:'feed',
+					value:feeds[i].feedURL,
+					title:feeds[i].title,
+					description:(d.length < 32 ? d : (d.substring(0, 28) + ' ...'))
+					});
 			};
 			res.json(vs);
 		} else {
