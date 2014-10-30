@@ -10,7 +10,7 @@ var app = module.exports = ex();
 // @todo: functions need to be merged
 var actions = {
 	search: function(ctx, url) {
-		var u = new RegExp(encodeURIComponent(url), "i");
+		var u = encodeURIComponent(url);
         // Find or create feed for this URL in the database
 		return db.Feed.find({ $or: [{title: {$regex: u}}, {feedURL: {$regex: u}}] }).limit(6).then(function(rslt0) {
 			if (rslt0.length > 0) {
