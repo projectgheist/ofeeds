@@ -1,41 +1,38 @@
 .row
-	.col-xs-12
-		.pull-left
-			h4
-				a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
-			a(href="#/subscription/feed/{{post.origin.url}}") 
-				span.label.label-primary {{post.origin.title}}
-			span(ng-if='post.author') &nbsp;by {{post.author}}
-		.pull-right
-			p(style='text-align:right') {{post.published}}
-			.btn-group
-				button.btn.btn-default(ng-click="toggle(post)")
-					i.fa.fa-fw.fa-chevron-up
-				button.btn.btn-default
-					i.fa.fa-fw.fa-eye
-				.btn-group
-					button.btn.btn-default.dropdown-toggle.withripple(data-toggle="dropdown")
-						i.fa.fa-fw.fa-share-alt
-						span.caret
-						span.sr-only Toggle Dropdown
-						.ripple-wrapper
-					ul.dropdown-menu
-						li
-							a(href="#") 
-								i.fa.fa-fw.fa-twitter
-								| Twitter
-						li
-							a(href="#") 
-								i.fa.fa-fw.fa-facebook
-								| Facebook
-						li.divider
-						li
-							a(href="#") 
-								i.fa.fa-fw.fa-envelope
-								| E-mail
-		.clearfix
-		.line-separator
+	.col-xs-8
+		h4
+			a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+		a(href="#/subscription/feed/{{post.origin.url}}") 
+			span.label.label-primary {{post.origin.title}}
+		span(ng-if='post.author') &nbsp;by {{post.author}}
+	.col-xs-4
+		p(style='text-align:right') {{post.published}}
+		.btn-group.pull-right
+			button.btn.btn-default(ng-click="toggle(post)")
+				i.fa.fa-fw.fa-chevron-up
+			button.visible-lg.btn.btn-default
+				i.fa.fa-fw.fa-eye
+			.visible-lg.btn-group
+				button.btn.btn-default.dropdown-toggle.withripple(data-toggle="dropdown")
+					i.fa.fa-fw.fa-share-alt
+					span.caret
+					span.sr-only Toggle Dropdown
+					.ripple-wrapper
+				ul.dropdown-menu
+					li
+						a(href="#") 
+							i.fa.fa-fw.fa-twitter
+							| Twitter
+					li
+						a(href="#") 
+							i.fa.fa-fw.fa-facebook
+							| Facebook
+					li.divider
+					li
+						a(href="#") 
+							i.fa.fa-fw.fa-envelope
+							| E-mail
 .row
 	.col-xs-12
-		p.article-content(ng-bind-html="post.content.content")
 		.line-separator
+		p.article-content(ng-bind-html="post.content.content")

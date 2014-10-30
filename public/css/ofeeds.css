@@ -80,6 +80,18 @@
 .article-content img {
 	max-width:100%;
 	height: auto;
+	max-height:768px;
+}
+
+.article .btn-group {
+	margin: 0;
+}
+.article .btn {
+	padding: 4px 16px;
+}
+
+.article .line-separator {
+	margin: 7px 0;
 }
 
 .text-overflow {
