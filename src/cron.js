@@ -95,13 +95,13 @@ exports.FetchFeed = function(feed) {
 			//if (meta.xmlurl) {
 			//	feed.feedURL = meta.xmlurl;
 			//}
-
-			feed.siteURL = meta.link;
-			feed.title = meta.title;
+			feed.favicon	= meta.favicon || (meta['atom:icon'] ? meta['atom:icon']['#'] : '');
+			feed.siteURL 	= meta.link;
+			feed.title 		= meta.title;
 			feed.description = meta.description;
-			feed.author = meta.author;
-			feed.language = meta.language;
-			feed.copywrite = meta.copywrite;
+			feed.author 	= meta.author;
+			feed.language 	= meta.language;
+			feed.copywrite 	= meta.copywrite;
 			feed.categories = meta.categories;
 			
 			switch (meta.cloud.type) {

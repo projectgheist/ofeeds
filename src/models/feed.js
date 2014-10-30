@@ -5,6 +5,7 @@ var mg = require('mongoose'),
 // A Feed containing posts, shared across all users
 var Feed = mg.Schema({
     // feed metadata
+	favicon: String,
     title: String,
     description: String,
     author: String,

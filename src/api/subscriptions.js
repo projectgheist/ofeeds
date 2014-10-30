@@ -86,6 +86,7 @@ app.get('/api/0/subscription/list', function(req, res) {
 					};
 				});
 				return {
+					favicon:		f.favicon,
 					id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
 					title: 			f.titleForUser(req.user),
 					unreadcount: 	0, // TODO
