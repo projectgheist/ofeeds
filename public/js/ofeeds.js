@@ -44,7 +44,7 @@ jQuery(document).ready(function($) {
 		} else {
 			angular.element($('#map')).scope().gotostream(datum);
 		}
-		$('.typeahead').focusout().val('');
+		$('.typeahead').val('').blur();
 	});
 });
 
