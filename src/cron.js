@@ -153,24 +153,26 @@ exports.FetchFeed = function(feed) {
 				var np = function(d) {
 					return new rs.Promise(function(rslv,rjct) {
 						st.findOrCreate(st.Post, {'feed': d.feed, 'guid': (d.guid || d.link)}).then(function(r) {
-							r.title 		= ut.parseHtmlEntities(d.title);
-							r.body			= d.description;
-							r.summary		= (d.summary !== d.description) ? d.summary : undefined;
-							r.images		= d.images;
-							r.url			= d.link;
-							// prevent the publish date to be overridden
-							if (!r.published) {
-								r.published = d.pubdate || mm();
+							if (!r.updated || r.updated !== d.date) {
+								r.title 		= ut.parseHtmlEntities(d.title);
+								r.body			= d.description;
+								r.summary		= (d.summary !== d.description) ? d.summary : undefined;
+								r.images		= d.images;
+								r.url			= d.link;
+								// prevent the publish date to be overridden
+								if (!r.published) {
+									r.published = d.pubdate || mm();
+								}
+								r.author		= d.author;
+								r.commentsURL	= d.comments;
+								r.categories 	= d.categories;
+								r.feed			= d.feed;
+								r.guid			= (d.guid || d.link);
+								// (re-)save
+								r.save();
+								//
+								feed.posts.addToSet(r);
 							}
-							r.updated 		= d.date || mm();
-							r.author		= d.author;
-							r.commentsURL	= d.comments;
-							r.categories 	= d.categories;
-							r.feed			= d.feed;
-							r.guid			= (d.guid || d.link);
-							r.save();
-							//
-							feed.posts.addToSet(r);
 							//
 							rslv(r);
 						}, rjct);

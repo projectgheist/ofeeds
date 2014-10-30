@@ -186,7 +186,11 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				$scope.stream = data;
 			}
 			for (var i in $scope.stream.items) {
-				$scope.stream.items[i].template = '/templates/post-compact';
+				if ($scope.cp && $scope.stream.items[i].id === $scope.cp.id) {
+					$scope.expand($scope.stream.items[i]);
+				} else {
+					$scope.stream.items[i].template = '/templates/post-compact';
+				}
 			}
 		}, function(err) {
 		});
