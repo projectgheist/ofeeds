@@ -199,8 +199,13 @@ exports.FetchFeed = function(feed) {
 };
 
 function UpdateAllFeeds(done) {
+	var opts = {};
+	// get oldest updated feeds
+	opts.sort = { lastModified: -1 };
+	// limit the amount of feeds
+	opts.limit = 5;
 	st
-	.all(st.Feed)		// retrieve all feeds
+	.all(st.Feed, opts) // retrieve all feeds
 	.populate('posts')	// replacing the specified paths in the document with document(s) from other collection(s)
 	.then(function(feeds) {
 		var a = [];

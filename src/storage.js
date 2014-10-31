@@ -29,13 +29,17 @@ exports.setup = function() {
     });
 };
 
-exports.all = function(model, query) {
-	return model.find(query || {}, function(err,feeds) {
-		if (err) {
-			return false;
-		}
-		return feeds;
-	});
+exports.all = function(model, options) {
+	// use parameter or create empty object
+    options || (options = {});
+	var q = model.find(options.query || {});
+	if (options.sort) {
+		q.sort(options.sort); 
+	}
+	if (options.limit) {
+		q.limit(options.limit); 
+	}
+	return q;
 }
 
 exports.findOrCreate = function(model, item) {
