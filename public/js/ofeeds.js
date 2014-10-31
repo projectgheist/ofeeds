@@ -162,9 +162,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
         $scope.scrollto('top');
 	}
 	$scope.scrollto = function(id) {
-        // set the location.hash to the id of
-        // the element you wish to scroll to.
-        //$location.hash(id);
+       $('#'+id).ScrollTo({offsetTop:85}).collapse('toggle');
 	}
 	$scope.delt = function() {
 		
