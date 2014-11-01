@@ -7,6 +7,7 @@ var mg = require('mongoose'),
 // A Post in a Feed, shared across all users
 // User specific tags stored here to avoid having separate post records for each user
 var Post = mg.Schema({
+	shortID: {type: String, unique: true, default: sh.generate},
     feed: ut.ref('Feed'),
     guid: String,							// unique post identifier for this feed
     title: String, 							// post title
@@ -21,10 +22,6 @@ var Post = mg.Schema({
     commentsURL: String,
     categories: [String],
 	tags: [ut.ref('Tag')]
-});
-
-Post.virtual('shortID').get(function() {
-    return sh.generate();
 });
 
 Post.virtual('longID').get(function() {
