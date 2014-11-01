@@ -12,13 +12,11 @@ var actions = {
 	search: function(ctx, url) {
 		var u = encodeURIComponent(url);
         // Find or create feed for this URL in the database
-		return db.Feed.find({ $or: [{title: {$regex: u}}, {feedURL: {$regex: u}}] }).limit(6).then(function(rslt0) {
+		return db.Feed.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: u}}] }).limit(6).then(function(rslt0) {
 			if (rslt0.length > 0) {
 				return rslt0;
 			} else if (ut.isUrl(url)) {
 				return db.findOrCreate(db.Feed, {feedURL: u}).then(cr.FetchFeed).then(function(f) { 
-					// update db
-					f.save();
 					// return feed in array form
 					return [f]; 
 				});
@@ -29,9 +27,9 @@ var actions = {
 	},
     subscribe: function(ctx, url) {
         // Find or create feed for this URL in the database
-        var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)});
+        var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)}),
 		// Find or create a tag to add this feed to the users reading-list
-		var tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/reading-list', ctx.user)[0]);
+			tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/reading-list', ctx.user)[0]);
 		// wait for all results to return before continuing
         return rs.all([feed,tag]).then(function(results) {
 			// local ref to feed
@@ -40,10 +38,15 @@ var actions = {
             if (f.numSubscribers === 0) {
 				return cr.FetchFeed(f).then(function(n) { 
 					return [n,results[1]]; 
+				}, function(err) {
+					return [];
 				});
             }
 			return results;
         }).then(function(results) {
+			if (results.length <= 0) {
+				return {};
+			}
  			// local ref to feed and tag variable
             var f = results[0],
 				t = results[1];
@@ -54,10 +57,8 @@ var actions = {
 				// increment subscriber count
                 f.numSubscribers++; 
             }
-			// update db
-			f.save();
-			// return feed
-			return f;
+			// update db and return feed
+			return f.save();
 		});
     }
 };
@@ -114,7 +115,7 @@ app.get('/api/0/subscription/search', function(req, res) {
 					type:'feed',
 					value:feeds[i].feedURL,
 					title:feeds[i].title,
-					description:(d.length < 32 ? d : (d.substring(0, 28) + ' ...'))
+					description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : '')
 					});
 			};
 			res.json(vs);
