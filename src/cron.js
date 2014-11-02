@@ -50,89 +50,69 @@ function ContainerImages() {
 	this.other = [];
 }
 
-exports.CreatePost = function(feed, data) {
-	var uid = (data.guid || data.link),
-		p = new st.Post({
-			guid		: uid,
-			title 		: ut.parseHtmlEntities(data.title),
-			body		: data.description,
-			summary		: (data.summary !== data.description) ? data.summary : '',
-			images		: data.images,
-			url			: data.link,
-			author		: data.author,
-			commentsURL	: data.comments,
-			categories 	: data.categories,
-			feed		: data.feed,
-			published	: data.pubdate || mm()
-		});
-	// add post to posts array
-	feed.posts.addToSet(p);
-	// (re-)save post
-	return p.save();
-};
-
-exports.UpdatePost = function(post, data) {	
-	// prevent the publish date to be overridden
-	if (!post.published) {
-		post.published = data.pubdate || mm();
-	}
-	post.title 		= ut.parseHtmlEntities(data.title);
-	post.body		= data.description;
-	post.summary	= (data.summary !== data.description) ? data.summary : '';
-	post.images		= data.images;
-	// (re-)save post
-	return post;
-};
-
-exports.RetrieveTags = function(updated, posts, feed, stream) {
-	// data contains all the post information
-	var data;
-	while (data = stream.read()) {
-		var guid = data.guid || data.link,
-			thumbnail_obj = new ContainerImages();
-			
-		// Store orignal thumbnail url
-		thumbnail_obj.small = (data.image !== undefined) ? data.image.url : undefined;
-		// Retrieve all the images from the post description
-		if (data.description !== null) {
-			pr.onopentag = function(tag) {
-				// early out
-				if (!tag.attributes) {
-					return;
-				}
-				// NOTE: tag names and attributes are all in CAPS
-				switch (tag.name) {
-				case 'IMG':
-					// If image is specified as the thumbnail in the post, and no previous 
-					// thumbnail image was found, store as large thumbnail
-					if (tag.attributes.ALT === "thumbnail" && thumbnail_obj.large === "") {
-						thumbnail_obj.large = tag.attributes.SRC;
-					} else {
-						thumbnail_obj.other.push(tag.attributes.SRC);
-					}
-					break;
-				case 'A':
-					//console.log('a:'+tag.attributes.HREF);
-					break;
-				}
+exports.FindOrCreatePost = function(feed,guid,data) {
+	return new rs.Promise(function(rslv,rjct) {
+		st.findOrCreate(st.Post, {'feed':feed, 'guid':guid}).then(function(post) {
+			post.guid		= (data.guid || data.link);
+			post.title 		= ut.parseHtmlEntities(data.title);
+			post.body		= data.description;
+			post.summary	= (data.summary !== data.description) ? data.summary : '';
+			post.images		= data.thumbnail_obj;
+			post.url		= data.link;
+			post.author		= data.author;
+			post.commentsURL= data.comments;
+			post.categories = data.categories;
+			post.feed		= feed;
+			// prevent the publish date to be overridden
+			if (!post.published) {
+				post.published = data.pubdate || mm();
 			}
-			// Parse the post description for image/video tags
-			pr.write(data.description.toString("utf8")).end();
-		}				
-		// add image data to storage object
-		data.images = thumbnail_obj;
-		// link in feed
-		data.feed = feed;
-		// is existing post?
-		if (guid in posts) {
-			// override data
-			posts[guid] = exports.UpdatePost(posts[guid], data);
-			updated.push(posts[guid].save());
-		} else {
-			// store copy of data in array
-			updated.push(exports.CreatePost(feed, data));
+			// add post to posts array
+			feed.posts.addToSet(post);
+			rslv(post.save());
+		}, function(err) {
+			rjct(err);
+		});
+	});
+};
+
+exports.RetrievePosts = function(posts, feed, stream) {
+		// data contains all the post information
+		var data;
+		while (data = stream.read()) {
+			var guid = (data.guid || data.link),
+				thumbnail_obj = new ContainerImages();
+				
+			// Store orignal thumbnail url
+			thumbnail_obj.small = (data.image !== undefined) ? data.image.url : undefined;
+			// Retrieve all the images from the post description
+			if (data.description !== null) {
+				pr.onopentag = function(tag) {
+					// early out
+					if (!tag.attributes) {
+						return;
+					}
+					// NOTE: tag names and attributes are all in CAPS
+					switch (tag.name) {
+					case 'IMG':
+						// If image is specified as the thumbnail in the post, and no previous 
+						// thumbnail image was found, store as large thumbnail
+						if (tag.attributes.ALT === "thumbnail" && thumbnail_obj.large === "") {
+							thumbnail_obj.large = tag.attributes.SRC;
+						} else {
+							thumbnail_obj.other.push(tag.attributes.SRC);
+						}
+						break;
+					case 'A':
+						//console.log('a:'+tag.attributes.HREF);
+						break;
+					}
+				}
+				// Parse the post description for image/video tags
+				pr.write(data.description.toString("utf8")).end();
+			}				
+			posts.push(exports.FindOrCreatePost(feed,guid,data));
 		}
-	}
 };
 
 exports.UpdateFeed = function(feed,posts,resolve,reject) {
@@ -180,15 +160,8 @@ exports.FetchFeed = function(feed) {
 	return new rs.Promise(function(resolve, reject) {
 		// pre-define variables
 		var parseError = false,
-			existingPosts = {},
-			updatedPosts = [];
+			posts = [];
 		
-		// store all feed's posts
-		//	NOTE: done like this to prevent MongoDB locking issue
-		feed.posts.forEach(function(post) {
-			existingPosts[post.guid] = post;
-		});
-
 		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
 		var req = rq.get({
 			url: 		decodeURIComponent(feed.feedURL), 
@@ -233,13 +206,13 @@ exports.FetchFeed = function(feed) {
 				}
 			})
 			.on('readable', function () {
-				exports.RetrieveTags(updatedPosts,existingPosts,feed,this);
+				exports.RetrievePosts(posts,feed,this);
 			})
 			.on('end', function() {
 				if (parseError) {
 					reject('Feed parse error!');
 				} else {
-					exports.UpdateFeed(feed,updatedPosts,resolve,reject);
+					exports.UpdateFeed(feed,posts,resolve,reject);
 				}
 			});
 		});
@@ -249,15 +222,15 @@ exports.FetchFeed = function(feed) {
 function UpdateAllFeeds(done) {
 	var opts = {};
 	// get oldest updated feeds
-	opts.query = {lastModified:{$lt: new Date(mm().subtract(15, 'minutes'))}};
+	opts.query 	= {lastModified:{$lt: new Date(mm().subtract(15, 'minutes'))}};
 	// oldest feeds first
-	opts.sort = { lastModified: 1 };
+	opts.sort 	= {lastModified:1};
 	// limit the amount of feeds
-	opts.limit = 5;
+	opts.limit 	= 5;
 	// do database related things
 	st
 	.all(st.Feed, opts) // retrieve all feeds
-	.populate('posts')	// replacing the specified paths in the document with document(s) from other collection(s)
+	.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 	.then(function(feeds) {
 		var a = [];
 		for (var i in feeds) {
