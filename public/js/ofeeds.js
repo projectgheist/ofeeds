@@ -157,6 +157,20 @@ app.directive('ngInclude', function() {
         }
     };
 });
+app.directive('resize', function ($window) {
+    return function(scope, element, attr) {
+        var w = angular.element($window);
+        scope.$watch(function () {
+            return {'h': w.height(), 'w': w.width()};
+        }, function (newValue, oldValue) {
+            scope.windowHeight 	= newValue.h;
+            scope.windowWidth 	= newValue.w;
+        }, true);
+        w.bind('resize', function () {
+            scope.$apply();
+        });
+    }
+});
 app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, FeedSubmit, RefreshFeed) {
 	$scope.gotostream = function(obj) {
 		// go to subscription local url
@@ -328,14 +342,6 @@ app.controller('AppFeeds', function($scope, $http, $location, GetFeeds) {
 			a = new RegExp(decodeURIComponent(s));
 		return a.test($location.path());
 	}
-	$scope.$watch(
-		function () {
-			return $('#sa').width() === $('#sap').width();
-		},
-		function (n, o) {
-			$('#sa').width($('#sap').width());
-		}
-	)
 	$scope.gotosub = function(obj) {
 		// go to subscription local url
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));

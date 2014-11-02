@@ -1,14 +1,14 @@
 include includes/header
 include includes/nav
-.container#m(ng-controller="AppFeeds")
+.container-fluid#m(ng-controller="AppFeeds")
 	.row
 		.col-xs-12
 			.alert.alert-success.fade.in.hidden#as
 			.alert.alert-danger.fade.in.hidden#ad
 	.row
-		.col-xs-4#sap
+		.hidden-xs.hidden-sm.col-md-3#sap
 			#sa(data-spy="affix",data-offset-top="0")
-				.col-lg-12
+				.col-xs-12
 					form
 						.form-group
 							.form-control-wrapper
@@ -19,14 +19,14 @@ include includes/nav
 							i.fa.fa-fw.fa-bars
 							| All
 						.line-separator
-						a.list-group-item(href="/subscription/{{sub.id}}",ng-class="{active: isActive('{{sub.id}}')}",ng-repeat="sub in subs")
+						a.list-group-item.text-overflow(href="/subscription/{{sub.id}}",ng-class="{active: isActive('{{sub.id}}')}",ng-repeat="sub in subs")
 							i.fa.fa-bookmark-o.fa-fw
 							| {{sub.title}}
 						.line-separator
 				button.btn.btn-primary(href='',ng-click="gotoTop()")
 					i.fa.fa-fw.fa-angle-double-right
 					| Back to top
-		.col-xs-8#map(ng-controller="AppStream")
+		.col-xs-12.col-md-9#map(ng-controller="AppStream",resize='')
 			div(ng-view='')
 				p Loading...
 include includes/js
