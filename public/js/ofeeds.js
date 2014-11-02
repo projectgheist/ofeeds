@@ -138,7 +138,7 @@ app.directive('ngInclude', function() {
 		link: {
 			post: function(scope, element, attrs) {
 				var s = scope.$parent.$parent;
-				if (element.parent().hasClass('expand') && s.cp) {
+				if (element.parent().hasClass('expand') && s.cp && !s.params.nt) {
 					$('#'+s.cp.id).ScrollTo({offsetTop:85});
 				}
 				// make all links open in a new tab
@@ -233,6 +233,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		p.template = '/templates/post-expand';
 		$('#' + p.id).addClass('expand');
 		$scope.cp = p;
+		$scope.params.nt = undefined;
 		if ($scope.$root.$$phase != '$apply' && $scope.$root.$$phase != '$digest') {
 			$scope.$apply();
 		}
