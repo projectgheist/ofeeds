@@ -10,13 +10,12 @@ var app = module.exports = ex();
 // @todo: functions need to be merged
 var actions = {
 	search: function(ctx, url) {
-		var u = encodeURIComponent(url);
-        // Find or create feed for this URL in the database
-		return db.Feed.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: u}}] }).limit(6).then(function(rslt0) {
-			if (rslt0.length > 0) {
-				return rslt0;
+       // Find or create feed for this URL in the database
+		return db.Feed.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: url}}] }).limit(6).then(function(results) {
+			if (results.length > 0) {
+				return results;
 			} else if (ut.isUrl(url)) {
-				return db.findOrCreate(db.Feed, {feedURL: u}).then(cr.FetchFeed).then(function(f) { 
+				return db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)}).then(cr.FetchFeed).then(function(f) { 
 					// return feed in array form
 					return [f]; 
 				});
@@ -24,6 +23,10 @@ var actions = {
 				return false;
 			}
 		});
+	},
+	refresh: function(ctx, url) {
+        // Find feed for this URL in the database
+        return db.Feed.findOne({feedURL: url}).then(cr.FetchFeed);
 	},
     subscribe: function(ctx, url) {
         // Find or create feed for this URL in the database
@@ -77,13 +80,13 @@ app.get('/api/0/subscription/list', function(req, res) {
 			if (!results) {
 				return [];
 			}
-			return db.Feed.find({tags:results});
+			return db.Feed.find({tags:results}).sort({'title':1});
 		}).then(function(feeds) {
 			var s = feeds.map(function(f) {
 				var categories = f.tagsForUser(req.user).map(function(tag) {
 					return {
-						id: tag.stringID,
-						label: tag.name
+						id: 	tag.stringID,
+						label: 	tag.name
 					};
 				});
 				return {
@@ -104,7 +107,6 @@ app.get('/api/0/subscription/list', function(req, res) {
 
 // search for feeds and preview them before adding them to their account
 app.get('/api/0/subscription/search', function(req, res) {
-	var u = decodeURIComponent(req.query.q);
 	// creat or find URL in db
     actions.search(req, req.query.q).then(function(feeds) {
 		if (feeds) {
@@ -122,6 +124,30 @@ app.get('/api/0/subscription/search', function(req, res) {
 		} else {
 			res.status(500).send('Feed not found!');
 		}
+    });
+});
+
+// fetch a feed
+app.get('/api/0/subscription/refresh', function(req, res) {
+	var u = decodeURIComponent(req.query.q);
+	// Check if URL
+    if (!ut.isUrl(u)) {
+        return res.json({
+            query: u,
+            numResults: 0
+        });
+    }
+	// creat or find URL in db
+    actions
+	.refresh(req, req.query.q)
+	.then(function(feed) {
+        res.json({
+            query: u,
+            numResults: 1,
+            streamId: 'feed/' + u
+        });
+    }, function(err) {
+        res.status(500).send(err);
     });
 });
 

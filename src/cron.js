@@ -181,7 +181,7 @@ exports.FetchFeed = function(feed) {
 				console.log("\ton '" + decodeURIComponent(feed.feedURL) + "'");
 				// check if we could get the feed before
 				if (!feed.lastModified) {
-					return exports.DeleteFeed(feed,error,reject);
+					exports.DeleteFeed(feed,error,reject);
 				} else {
 					// always handle errors
 					parseError = true;

@@ -86,6 +86,12 @@ AppService.factory('GetFeeds', ['$resource',
 	}
 ]);
 
+AppService.factory('RefreshFeed', ['$resource',
+	function($resource) {
+		return $resource('/api/0/subscription/refresh', {q:'@q'}, {query:{method:'GET',isArray:false}});
+	}
+]);
+
 AppService.factory('GetPosts', ['$resource',
 	function($resource) {
 		return $resource('/api/0/stream/contents/', {type:'@type', params:'@params'}, {query:{method:'GET',isArray:false}});
@@ -151,7 +157,7 @@ app.directive('ngInclude', function() {
         }
     };
 });
-app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, FeedSubmit) {
+app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, FeedSubmit, RefreshFeed) {
 	$scope.gotostream = function(obj) {
 		// go to subscription local url
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
@@ -163,6 +169,21 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	}
 	$scope.scrollto = function(id) {
        $('#'+id).ScrollTo({offsetTop:85}).collapse('toggle');
+	}
+	$scope.rfrsh = function() {
+		RefreshFeed.query({'q':$scope.params.value},
+			function(data) {
+				// clear array of posts
+				$scope.stream.items = [];
+				// reset times on params
+				$scope.params.nt = undefined;
+				// reset expanded post
+				$scope.cp = undefined;
+				// get new latest items
+				$scope.gtposts();
+			}, 
+			function(err) {
+		});
 	}
 	$scope.delt = function() {
 		
@@ -180,8 +201,8 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				return;
 			}
 			if ($scope.stream && $scope.stream.title === data.title &&
-				data.items[0].title !== $scope.stream.items[$scope.stream.items.length-1].title &&
-				data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec) {
+				($scope.stream.items.length === 0 || (data.items[0].title !== $scope.stream.items[$scope.stream.items.length-1].title &&
+				data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))) {
 				$scope.stream.items = $scope.stream.items.concat(data.items);
 			} else {
 				$scope.stream = data;
