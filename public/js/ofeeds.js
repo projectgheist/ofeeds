@@ -46,6 +46,7 @@ jQuery(document).ready(function($) {
 		}
 		$('.typeahead').val('').blur();
 	});
+	$('#sa').affix();
 });
 
 // single keys
@@ -165,6 +166,9 @@ app.directive('resize', function ($window) {
         }, function (newValue, oldValue) {
             scope.windowHeight 	= newValue.h;
             scope.windowWidth 	= newValue.w;
+			//
+			$('#ftr').width($('#hdr').width());
+			$('#sa').width($('#sap').width());
         }, true);
         w.bind('resize', function () {
             scope.$apply();
