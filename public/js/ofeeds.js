@@ -69,6 +69,14 @@ Mousetrap.bind('v', function() {
 	window.focus();
 });
 
+function ShowAlertMessage(t,m) {
+	$('#a').removeClass('hidden').addClass(t);
+	$('#am').html(m);
+	$("#a").fadeTo(2000, 500).slideUp(500, function(){
+		$("#a").alert('close');
+	});
+}
+
 var app = angular.module('webapp', [
 	'ngRoute',
 	'ngSanitize',
@@ -131,22 +139,18 @@ app.directive('onLastRepeat', function() {
 		}, 1);
 	};
 });
-app.directive('article', function() {
-	return {
-		restrict: 'AE',
-		link: function(scope, element, attrs) {
-		},
-		template: '<article ng-include="\'/templates/post-compact\'" />'
-	}
-});
 app.directive('ngInclude', function() {
     return {
         restrict: 'A',
 		link: {
 			post: function(scope, element, attrs) {
-				var s = scope.$parent.$parent;
-				if (element.parent().hasClass('expand') && s.cp && !s.params.nt) {
-					$('#'+s.cp.id).ScrollTo({offsetTop:85});
+				var s = scope.$parent.$parent,
+					p = scope.$parent.post;
+				if (s.cp && p.id === s.cp.id) {
+					element.addClass('expand');
+					if (!s.params.nt) {
+						s.scrollto(s.cp.id);
+					}
 				}
 				// make all links open in a new tab
 				var o = $('.article-content').find('a');
@@ -166,7 +170,6 @@ app.directive('resize', function ($window) {
         }, function (newValue, oldValue) {
             scope.windowHeight 	= newValue.h;
             scope.windowWidth 	= newValue.w;
-			//
 			$('#ftr').width($('#hdr').width());
 			$('#sa').width($('#sap').width());
         }, true);
@@ -182,11 +185,14 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		// call '$apply' oteherwise angular doesn't recognize that the url has changed
 		$scope.$apply();
 	}
+	$scope.canScroll = function() {
+		return ($(document).scrollTop() > 50);
+	}
 	$scope.gotoTop = function() {
         $scope.scrollto('top');
 	}
 	$scope.scrollto = function(id) {
-       $('#'+id).ScrollTo({offsetTop:85}).collapse('toggle');
+		$('#map').stop().scrollTo('#'+id, 800, {offset:{top:85}});
 	}
 	$scope.rfrsh = function() {
 		RefreshFeed.query({'q':$scope.params.value},
@@ -199,8 +205,11 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				$scope.cp = undefined;
 				// get new latest items
 				$scope.gtposts();
+				// show message
+				ShowAlertMessage('alert-success',['<strong>Successfully</strong> refreshed feed (',$scope.stream.title,')'].join(' '));
 			}, 
 			function(err) {
+				ShowAlertMessage('alert-danger',['An <strong>error</strong> occured when trying to refresh feed (',$scope.stream.title,')'].join(' '));
 		});
 	}
 	$scope.delt = function() {
@@ -208,9 +217,12 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	}
 	$scope.sbmt = function() {
 		FeedSubmit.save({q: $scope.stream.feedURL},function(data) {
+			// show message
+			ShowAlertMessage('alert-success',['<strong>Successfully</strong> subscribed to feed (',$scope.stream.title,')'].join(' '));
 			$scope.stream.subscribed = true;
 			$rootScope.$broadcast('updateSubs');
 		}, function(err) {
+			ShowAlertMessage('alert-danger',['An <strong>error</strong> occured when trying to subscribe to',$scope.stream.title].join(' '));
 		});
 	}	
 	$scope.gtposts = function() {
@@ -219,8 +231,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				return;
 			}
 			if ($scope.stream && $scope.stream.title === data.title &&
-				($scope.stream.items.length === 0 || (data.items[0].title !== $scope.stream.items[$scope.stream.items.length-1].title &&
-				data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))) {
+				($scope.stream.items.length === 0 || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))) {
 				$scope.stream.items = $scope.stream.items.concat(data.items);
 			} else {
 				$scope.stream = data;
@@ -270,7 +281,6 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	}
 	$scope.expand = function(p) {
 		p.template = '/templates/post-expand';
-		$('#' + p.id).addClass('expand');
 		$scope.cp = p;
 		$scope.params.nt = undefined;
 		if ($scope.$root.$$phase != '$apply' && $scope.$root.$$phase != '$digest') {
@@ -292,7 +302,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	}
 	// re-activate affix
 	$scope.setaffix = function() {
-		var o = $('#map').position().top;
+		var o = $('#mah').position().top;
 		$(window).off('.affix');
 		$('#ma').removeData('bs.affix').removeClass('affix affix-top affix-bottom');
 		$('#ma').affix({

@@ -1,6 +1,6 @@
-.row
-	.col-xs-12
-		#ma(data-spy="affix",data-offset-top="85")
+#ma(data-spy="affix",data-offset-top="85")
+	.row
+		.col-xs-12
 			nav.navbar.navbar-default
 				.navbar-header
 					a.navbar-brand(href='/subscription/{{stream.id}}') {{stream.title}}
@@ -19,6 +19,18 @@
 						li
 							a(alt='Options',data-toggle="collapse",data-parent="#map",ng-click='scrollto("stream-info")') 
 								i.fa.fa-fw.fa-ellipsis-v
+						li(ng-if="canScroll()")
+							a.btn-info(alt='Scroll to top',ng-click='gotoTop()')
+								i.fa.fa-fw.fa-arrow-up
+	.row
+		.col-xs-12
+			.alert.alert-dismissible.hidden#a(role="alert")
+				button.close(type="button",data-dismiss="alert")
+					span(aria-hidden="true") &times;
+					span.sr-only Close
+				p#am
+.row
+	.col-xs-12
 		.well.collapse#stream-info
 			.row.list-group
 				.col-xs-6.list-group-item
