@@ -2,7 +2,7 @@ include includes/header
 .container-fluid#m(ng-controller="AppFeeds")
 	.row
 		.hidden-xs.hidden-sm.col-md-3(style='position:fixed;padding:0')
-			nav.navbar.navbar-default#hdr
+			nav.navbar#hdr
 				.container(style='width:100%')
 					.navbar-header
 						a.navbar-brand(ng-href='/')
@@ -23,7 +23,7 @@ include includes/header
 						i.fa.fa-bookmark-o.fa-fw
 						| {{sub.title}}
 					.line-separator
-			nav.navbar.navbar-default#ftr(style='position:fixed;bottom:0;margin-bottom:0')
+			nav.navbar#ftr(style='position:fixed;bottom:0;margin-bottom:0')
 				.container(style='width:100%')
 					.navbar-collapse.collapse
 						ul.nav.navbar-nav
@@ -31,7 +31,7 @@ include includes/header
 								a(href='/logout',target="_self")
 									i.fa.fa-fw.fa-power-off
 									| Logout		
-		.col-xs-12.col-md-offset-3.col-md-9#mah(ng-controller="AppStream",resize='')
-			#map(ng-view='')
+		.col-xs-12.col-md-offset-3.col-md-9#map(ng-controller="AppStream",resize='')
+			div(ng-view='')
 				p Loading...
 include includes/js
