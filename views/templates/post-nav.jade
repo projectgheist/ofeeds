@@ -1,27 +1,28 @@
 #ma(data-spy="affix",data-offset-top="85")
 	.row
-		.col-xs-12
-			nav.navbar.navbar-default
-				.navbar-header
-					a.navbar-brand(href='/subscription/{{stream.id}}') {{stream.title}}
-				.collapse.navbar-collapse
-					ul.nav.navbar-nav.navbar-right
-						if user
-							li.btn-success(ng-if='stream.subscribed === 0')
-								a(href='',alt='Subscribe',ng-click='sbmt()') 
-									i.fa.fa-fw.fa-plus
-							li(ng-if='stream.subscribed > 0')
-								a(href='',alt='Mark all as Read') 
-									i.fa.fa-fw.fa-check
-						li
-							a(href='#',alt='Refresh',ng-click='rfrsh()') 
-								i.fa.fa-fw.fa-refresh
-						li
-							a(alt='Options',data-toggle="collapse",data-parent="#map",ng-click='scrollto("stream-info")') 
-								i.fa.fa-fw.fa-ellipsis-v
-						li(ng-if="canScroll()")
-							a.btn-info(alt='Scroll to top',ng-click='gotoTop()')
-								i.fa.fa-fw.fa-arrow-up
+		nav.navbar.navbar-default
+			.navbar-header
+				a.navbar-brand(href='/subscription/{{stream.id}}')
+					i.fa.fa-bookmark-o.fa-fw
+					| {{stream.title}}
+			.collapse.navbar-collapse
+				ul.nav.navbar-nav.navbar-right
+					if user
+						li.btn-success(ng-if='stream.subscribed === 0')
+							a(href='',alt='Subscribe',ng-click='sbmt()') 
+								i.fa.fa-fw.fa-plus
+						li(ng-if='stream.subscribed > 0')
+							a(href='',alt='Mark all as Read') 
+								i.fa.fa-fw.fa-check
+					li
+						a(href='#',alt='Refresh',ng-click='rfrsh()') 
+							i.fa.fa-fw.fa-refresh
+					li
+						a(alt='Options',data-toggle="collapse",data-parent="#map",ng-click='scrollto("stream-info")') 
+							i.fa.fa-fw.fa-ellipsis-v
+					li(ng-if="canScroll()")
+						a.btn-info(alt='Scroll to top',ng-click='gotoTop()')
+							i.fa.fa-fw.fa-arrow-up
 	.row
 		.col-xs-12
 			.alert.alert-dismissible.hidden#a(role="alert")

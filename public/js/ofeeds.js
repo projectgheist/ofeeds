@@ -302,14 +302,14 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	}
 	// re-activate affix
 	$scope.setaffix = function() {
-		var o = $('#map').position().top;
 		$(window).off('.affix');
 		$('#ma').removeData('bs.affix').removeClass('affix affix-top affix-bottom');
 		$('#ma').affix({
 			offset: {
-				top: o
+				top: $('#map').position().top
 			}
 		});
+		$('#ma').width($('#map').width());
 	}
 	$scope.$watch(
 		function () {
