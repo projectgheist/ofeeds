@@ -16,13 +16,13 @@ exports.setup = function() {
     if (mg.connection.db) {
 		return;
 	}
-    mg.connect(ut.getDBConnectionURL(cf.db));
+    mg.connect(ut.getDBConnectionURL(cf.db()));
     var db = mg.connection;
     db.on('error', function(err) {
         console.log("MongoDB " + err);
     });
     db.once('open', function() {
-        console.log('Connected to Mongo: '+cf.db.dbname+'!');
+        console.log('Connected to Mongo: '+cf.db().dbname+'!');
 		/** Cron jobs execution
 		 */
 		require('./cron').setup();

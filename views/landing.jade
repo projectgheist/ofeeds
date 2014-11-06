@@ -22,14 +22,14 @@ include includes/header
 							.form-group
 								a.btn.btn-primary.btn-lg.btn-block.btn-danger(href='/auth/google',target="_self") Sign in with
 									i.fa.fa-google-plus.fa-fw
-					.col-xs-12.col-lg-1
+					.col-xs-12.col-lg-2
 						.lead.text-center(style='margin-top:20px')
 							p -&nbsp;OR&nbsp;-
-					.col-xs-12.col-lg-6(ng-controller="AppStream")
+					.col-xs-12.col-lg-5(ng-controller="AppStream")
 						form(style='margin-top:17px')
 							.form-group
 								.form-control-wrapper
-									input.input-lg.form-control.typeahead#nrss(type="text",placeholder='Fetch a feed (example.feed.com/rss)')
+									input.input-lg.form-control.typeahead#nrss(type="text",placeholder='Fetch a feed')
 									span.material-input
 		.row
 			.col-xs-12#map(resize='')

@@ -24,6 +24,8 @@ exports.getDBConnectionURL = function(obj,noPrefix) {
 	var r = '';
 	if (process.env.OPENSHIFT_MONGODB_DB_URL) {
 		r = process.env.OPENSHIFT_MONGODB_DB_URL + obj.dbname;
+    } else if (obj.url) {
+        r = obj.url;
     } else if (obj.username && obj.password) {
         r = "mongodb://" + obj.username + ":" + obj.password + "@" + obj.hostname + ":" + obj.port + "/" + obj.dbname;
     } else {

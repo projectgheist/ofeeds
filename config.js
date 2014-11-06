@@ -29,7 +29,11 @@ module.exports.IpAddr = function() {
  */
 module.exports.Port = function() {
 	if (process.env.OPENSHIFT_NODEJS_PORT) {
-		return process.env.OPENSHIFT_NODEJS_PORT || 8080;
+        // Openshift
+		return process.env.OPENSHIFT_NODEJS_PORT;
+	} else if (process.env.VCAP_APP_PORT) {
+        // Appfog
+		return process.env.VCAP_APP_PORT;
 	}
 	return process.env.PORT || 3000;
 };
@@ -51,10 +55,17 @@ module.exports.site = {
 
 /** Mongo DB Credentials
  */
-module.exports.db = {
-	hostname: process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost',
-	port: process.env.OPENSHIFT_MONGODB_DB_PORT || '27017',
-	dbname: process.env.OPENSHIFT_APP_NAME || 'storageDB',
-	username: process.env.OPENSHIFT_MONGODB_DB_USERNAME || '',
-	password: process.env.OPENSHIFT_MONGODB_DB_PASSWORD || ''
+module.exports.db = function() {
+	if (process.env.VCAP_SERVICES) {
+		var env = JSON.parse(process.env.VCAP_SERVICES);
+		return env['mongodb2-2.4.8'][0]['credentials'];
+	} else {
+		return {
+			hostname: 	process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost',
+			port: 		process.env.OPENSHIFT_MONGODB_DB_PORT || '27017',
+			dbname: 	process.env.OPENSHIFT_APP_NAME || 'storageDB',
+			username: 	process.env.OPENSHIFT_MONGODB_DB_USERNAME || '',
+			password: 	process.env.OPENSHIFT_MONGODB_DB_PASSWORD || ''
+		};
+	}
 };

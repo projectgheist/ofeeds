@@ -12,7 +12,7 @@ var fp = require('feedparser'),
 	mg = require('mongoose');
 	
 var Agenda = require('agenda'),
-	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db,true), collection: 'agendaJobs' }, processEvery: '3 minute', defaultLockLifetime: 90000 });
+	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db(),true), collection: 'agendaJobs' }, processEvery: '3 minute', defaultLockLifetime: 90000 });
 
 exports.setup = function() {
 	console.log("// ----------------------------------------------------------------------------");
@@ -51,8 +51,12 @@ function ContainerImages() {
 }
 
 exports.FindOrCreatePost = function(feed,guid,data) {
+    // return a new promise
 	return new rs.Promise(function(rslv,rjct) {
-		st.findOrCreate(st.Post, {'feed':feed, 'guid':guid}).then(function(post) {
+        // find post in database
+		st
+        .findOrCreate(st.Post, {'feed':feed, 'guid':guid})
+        .then(function(post) {
 			post.guid		= (data.guid || data.link);
 			post.title 		= ut.parseHtmlEntities(data.title);
 			post.body		= data.description;
@@ -77,42 +81,40 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 };
 
 exports.RetrievePosts = function(posts, feed, stream) {
-		// data contains all the post information
-		var data;
-		while (data = stream.read()) {
-			var guid = (data.guid || data.link),
-				thumbnail_obj = new ContainerImages();
-				
-			// Store orignal thumbnail url
-			thumbnail_obj.small = (data.image !== undefined) ? data.image.url : undefined;
-			// Retrieve all the images from the post description
-			if (data.description !== null) {
-				pr.onopentag = function(tag) {
-					// early out
-					if (!tag.attributes) {
-						return;
-					}
-					// NOTE: tag names and attributes are all in CAPS
-					switch (tag.name) {
-					case 'IMG':
-						// If image is specified as the thumbnail in the post, and no previous 
-						// thumbnail image was found, store as large thumbnail
-						if (tag.attributes.ALT === "thumbnail" && thumbnail_obj.large === "") {
-							thumbnail_obj.large = tag.attributes.SRC;
-						} else {
-							thumbnail_obj.other.push(tag.attributes.SRC);
-						}
-						break;
-					case 'A':
-						//console.log('a:'+tag.attributes.HREF);
-						break;
-					}
+	// data contains all the post information
+	var data;
+	while (data = stream.read()) {
+		var thumbnail_obj = new ContainerImages();
+		// Store orignal thumbnail url
+		thumbnail_obj.small = (data.image !== undefined) ? data.image.url : undefined;
+		// Retrieve all the images from the post description
+		if (data.description !== null) {
+			pr.onopentag = function(tag) {
+				// early out
+				if (!tag.attributes) {
+					return;
 				}
-				// Parse the post description for image/video tags
-				pr.write(data.description.toString("utf8")).end();
-			}				
-			posts.push(exports.FindOrCreatePost(feed,guid,data));
-		}
+				// NOTE: tag names and attributes are all in CAPS
+				switch (tag.name) {
+				case 'IMG':
+					// If image is specified as the thumbnail in the post, and no previous 
+					// thumbnail image was found, store as large thumbnail
+					if (tag.attributes.ALT === "thumbnail" && thumbnail_obj.large === "") {
+						thumbnail_obj.large = tag.attributes.SRC;
+					} else {
+						thumbnail_obj.other.push(tag.attributes.SRC);
+					}
+					break;
+				case 'A':
+					//console.log('a:'+tag.attributes.HREF);
+					break;
+				}
+			}
+			// Parse the post description for image/video tags
+			pr.write(data.description.toString("utf8")).end();
+		}			
+		posts.push(exports.FindOrCreatePost(feed,(data.guid || data.link),data));
+	}
 };
 
 exports.UpdateFeed = function(feed,posts,resolve,reject) {
@@ -226,7 +228,7 @@ function UpdateAllFeeds(done) {
 	// oldest feeds first
 	opts.sort 	= {lastModified:1};
 	// limit the amount of feeds
-	opts.limit 	= 5;
+	opts.limit 	= 15;
 	// do database related things
 	st
 	.all(st.Feed, opts) // retrieve all feeds
