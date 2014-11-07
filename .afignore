@@ -1,9 +1,12 @@
 # this is my ignore file with a nice comment at the top
 
+# ignore nodejs library modules
+/node_modules
+
 # ignore dot files
 .*
 
-# ignore dot files
+# ignore git files
 .git/
 
 # ignore executables
