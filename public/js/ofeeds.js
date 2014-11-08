@@ -44,7 +44,10 @@ jQuery(document).ready(function($) {
 		} else {
 			angular.element($('#map')).scope().gotostream(datum);
 		}
-		$('.typeahead').val('').blur();
+        // reset input value & lose focus
+        $('.typeahead')
+        .typeahead('val', '')
+        .blur();
 	});
 	$('#sa').affix();
 });
@@ -69,10 +72,10 @@ Mousetrap.bind('v', function() {
 	window.focus();
 });
 
-function ShowAlertMessage(t,m) {
+function ShowAlertMessage(t, m) {
 	$('#a').removeClass('hidden').addClass(t);
 	$('#am').html(m);
-	$("#a").fadeTo(2000, 500).slideUp(500, function(){
+	$("#a").fadeTo(2000, 500).slideUp(500, function() {
 		$("#a").alert('close');
 	});
 }
@@ -91,7 +94,7 @@ var app = angular.module('webapp', [
 var AppService = angular.module('AppService', []);
 AppService.factory('GetFeeds', ['$resource',
 	function($resource) {
-		return $resource('/api/0/subscription/list', {}, {query:{method:'GET',isArray:true}});
+		return $resource('/api/0/subscription/list', {}, {query:{method:'GET',isArray: true}});
 	}
 ]);
 
@@ -146,10 +149,11 @@ app.directive('ngInclude', function() {
 			post: function(scope, element, attrs) {
 				var s = scope.$parent.$parent,
 					p = scope.$parent.post;
+				element.attr('id',p.id);
 				if (s.cp && p.id === s.cp.id) {
 					element.addClass('expand');
 					if (!s.params.nt) {
-						s.scrollto(s.cp.id);
+						s.scrollto(s.cp.id, -60);
 					}
 				}
 				// make all links open in a new tab
@@ -189,11 +193,11 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		return ($(document).scrollTop() > 50);
 	}
 	$scope.gotoTop = function() {
-        $scope.scrollto('top');
+        $scope.scrollto('map', 0);
 	}
-	$scope.scrollto = function(id) {
-		$('#map').stop().scrollTo('#'+id, 800, {offset:{top:85}});
-	}
+	$scope.scrollto = function(id, offset) {
+		$('html,body').scrollTo($('#'+id), 400, {offset: {top: offset || 0}});
+ 	}
 	$scope.rfrsh = function() {
 		RefreshFeed.query({'q':$scope.params.value},
 			function(data) {
