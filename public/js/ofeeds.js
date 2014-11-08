@@ -196,7 +196,8 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
         $scope.scrollto('map', 0);
 	}
 	$scope.scrollto = function(id, offset) {
-		$('html,body').scrollTo($('#'+id), 400, {offset: {top: offset || 0}});
+		$.scrollTo.window().queue([]).stop();
+		$('html,body').scrollTo($('#'+id), 400, {queue: false, offset: {top: offset || 0}});
  	}
 	$scope.rfrsh = function() {
 		RefreshFeed.query({'q':$scope.params.value},
