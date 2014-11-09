@@ -1,62 +1,29 @@
-#btn-subscribe.btn-group.btn-block
-	a(class="btn btn-danger btn-block dropdown-toggle", data-toggle="dropdown", href="#") Subscribe
-		span.icon-caret
-	ul.dropdown-menu(style="margin-top:12px; padding:15px")
-		form#quickform(action="/subscription/quickadd", method="post")
-			label
-				small Copy and paste a feed url.
-			.input-append
-				input(type="text", name="quickadd", style="width:180px")
-				#quickadd.button.btn.palette-turquoise(type="submit") Add
-			label 
-				small e.g., googleblog.blogspot.com or cnn
-#sidebar.reader-nav
-	ul(class="nav nav-list accordion", id="nav-accordion")
-		// dropdown menu links
-		li.accordion-group.palette-midnight-blue
-			div(class="accordion-heading")
-				a(class="accordion-toggle", href="/reader/api/0/") 
-					i.icon-home
-					| &nbsp;Home
-		li.accordion-group.palette-midnight-blue
-			div(class="accordion-heading")
-				.accordion-toggle
-					a.icon-chevron-right(data-toggle="collapse", data-parent="#nav-accordion", href="#nav-allitems")
-					a#read-list(href="#", style="display:inline-block", onclick="readList()") &nbsp;&nbsp;All items
-				#nav-allitems.accordion-body.collapse
-					div(class="accordion-inner")
-						ul.nav.nav-pills.nav-stacked
-							li.disabled
-								a(href="#")
-									i(class="icon-star")
-									| Starred items
-							li
-								a(href="/trends")
-									i(class="icon-bar-chart")
-									| Trends
-							li.disabled
-								a(href="#") Browse for stuff
-		li.accordion-group.palette-midnight-blue
-			div(class="accordion-heading")
-				a.accordion-toggle(data-toggle="collapse", data-parent="#nav-accordion", href="#nav-explore")
-					i.icon-chevron-right 
-					| &nbsp;Explore
-			div(class="accordion-body collapse", id="nav-explore")
-				div(class="accordion-inner")
-					ul.nav.nav-pills.nav-stacked
-						li
-							a(href="#") 
-								i(class="icon-rss-sign")
-								| Recommended items
-						li
-							a(href="#") 
-								i(class="icon-rss-sign")
-								| Recommended sources
-		li.accordion-group.palette-midnight-blue
-			div(class="accordion-heading")
-				a(class="accordion-toggle", data-toggle="collapse", data-parent="#nav-accordion", href="#nav-subscriptions")
-					i(class="icon-chevron-right") 
-					&nbsp;Subscriptions
-			#nav-subscriptions.accordion-body.collapse
-				.accordion-inner
-					ul#feed-subscriptions.nav.nav-pills.nav-stacked.icons-ul(style="margin-left:0")
+nav.navbar#hdr(style='margin-bottom:0')
+	.container(style='width:100%')
+		.navbar-header
+			a.navbar-brand(ng-href='/')
+				i.fa.fa-rss.fa-fw.fa-flip-horizontal
+				| OFeeds
+.well(style='height:100%')
+	form
+		.form-group
+			.form-control-wrapper
+				input.input-lg.form-control.typeahead#nrss(type="text",placeholder='example.feed.com/rss') 
+				span.material-input
+	.list-group
+		a.list-group-item(href="/subscription/user/reading-list",ng-class="{active:isActive('/state/-/reading-list')}",id='All')
+			i.fa.fa-fw.fa-bars
+			| All
+		.line-separator
+		a.list-group-item.text-overflow(href="/subscription/{{sub.id}}",ng-class="{active: isActive('{{sub.id}}')}",ng-repeat="sub in subs")
+			i.fa.fa-bookmark-o.fa-fw
+			| {{sub.title}}
+		.line-separator
+nav.navbar#ftr(style='position:fixed;bottom:0;margin-bottom:0')
+	.container(style='width:100%')
+		.navbar-collapse.collapse
+			ul.nav.navbar-nav
+				li
+					a(href='/logout',target="_self")
+						i.fa.fa-fw.fa-power-off
+						| Logout
