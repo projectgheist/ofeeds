@@ -45,8 +45,8 @@ ag.define('UpdateAllFeeds', function(job, done) {
 });
 
 function ContainerImages() {
-	this.small = '';
-	this.large = '';
+	this.small = {};
+	this.large = {};
 	this.other = [];
 }
 
@@ -61,7 +61,7 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 			post.title 		= ut.parseHtmlEntities(data.title);
 			post.body		= data.description;
 			post.summary	= (data.summary !== data.description) ? data.summary : '';
-			post.images		= data.thumbnail_obj;
+			post.images		= data.images;
 			post.url		= data.link;
 			post.author		= data.author;
 			post.commentsURL= data.comments;
@@ -84,9 +84,42 @@ exports.RetrievePosts = function(posts, feed, stream) {
 	// data contains all the post information
 	var data;
 	while (data = stream.read()) {
-		var thumbnail_obj = new ContainerImages();
+		var images = new ContainerImages();
 		// Store orignal thumbnail url
-		thumbnail_obj.small = (data.image !== undefined) ? data.image.url : undefined;
+		images.small = (data.image !== undefined && data.image.url && data.image.url.length > 0) ? {'url':data.image.url,'width':data.image.width || 0,'height':data.image.height || 0} : undefined;
+		if (data['media:thumbnail'] !== null || data['media:content'] !== null) {
+			var media = [data['media:thumbnail'],data['media:content']];
+			for (var j in media) {
+				var obj = media[j];
+				if (!obj) {
+					continue;
+				}
+				if (!Array.isArray(obj)) {
+					obj = [obj];
+				}
+				// NOTE: don't assume that integers are integers, they could actually be strings
+				for (var i in obj) {
+					// early out
+					if (obj[i]['@'].medium && obj[i]['@'].medium === 'document') {
+						continue;
+					}
+					// store image regardless of size
+					images.other.push(obj[i]['@']);
+					// early out
+					if (obj[i]['@'].width === 0) {
+						continue;
+					}
+					// get the smallest image
+					if (!images.small || !images.small.width || (parseInt(images.small.width) > parseInt(obj[i]['@'].width))) {
+						images.small = obj[i]['@'];
+					}
+					// get the largest
+					if (!images.large || !images.large.width || (parseInt(images.large.width) < parseInt(obj[i]['@'].width))) {
+						images.large = obj[i]['@'];
+					}
+				}
+			}
+		}
 		// Retrieve all the images from the post description
 		if (data.description !== null) {
 			pr.onopentag = function(tag) {
@@ -97,12 +130,29 @@ exports.RetrievePosts = function(posts, feed, stream) {
 				// NOTE: tag names and attributes are all in CAPS
 				switch (tag.name) {
 				case 'IMG':
-					// If image is specified as the thumbnail in the post, and no previous 
-					// thumbnail image was found, store as large thumbnail
-					if (tag.attributes.ALT === "thumbnail" && thumbnail_obj.large === "") {
-						thumbnail_obj.large = tag.attributes.SRC;
-					} else {
-						thumbnail_obj.other.push(tag.attributes.SRC);
+					// create new image object
+					var obj = {'url':tag.attributes.SRC,'width':tag.attributes.WIDTH || 0,'height':tag.attributes.HEIGHT || 0}
+						found = false;
+					// check if image already exists in list
+					for (var i in images.other) {
+						if (images.other[i].url === obj.url) {
+							found = true;
+							break; // stop for-loop
+						}
+					}
+					// image was already added
+					if (found) {
+						break; // stop switch-statement
+					}
+					// add to images array
+					images.other.push(obj);
+					// store small image
+					if (!images.small || !images.small.width) {
+						images.small = obj;
+					}
+					// store large image
+					if (!images.large || !images.large.width) {
+						images.large = obj;
 					}
 					break;
 				case 'A':
@@ -112,7 +162,8 @@ exports.RetrievePosts = function(posts, feed, stream) {
 			}
 			// Parse the post description for image/video tags
 			pr.write(data.description.toString("utf8")).end();
-		}			
+		}
+		data.images = images;
 		posts.push(exports.FindOrCreatePost(feed,(data.guid || data.link),data));
 	}
 };
