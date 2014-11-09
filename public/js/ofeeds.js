@@ -311,6 +311,15 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}, function(err) {
 		});
 	}
+	$scope.updateStyle = function(n) {
+		if (gTemplateID === n) {
+			return;
+		}
+		gTemplateID = n;
+		for (var i in $scope.stream.items) {
+			$scope.stream.items[i].template = gTemplates[gTemplateID][0];
+		}
+	}
 	$scope.loadMore = function() {
 		if (!$scope.stream || !$scope.stream.items ||
 			$scope.stream.items.length <= 0) {
