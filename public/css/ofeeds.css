@@ -39,6 +39,18 @@
 	overflow: hidden;
 }
 
+.vertical-image, .horizontal-image {
+	position:relative;
+}
+
+.vertical-image {
+	width:100%;
+}
+
+.horizontal-image {
+	height:100%;
+}
+
 .rotate_text_90
 {
 	-moz-transform:rotate(-90deg); 
@@ -66,6 +78,10 @@
 
 .list-group-item.active {
 	color: #428bca;
+	margin-left: 10px;
+	margin-right: 10px;
+	padding-left: 5px;
+	padding-right: 0;
 }
 
 .list-group > a:hover {

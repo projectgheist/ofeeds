@@ -1,7 +1,12 @@
 /**
  * Global variables
  */
-var ta = [];
+var ta = [],
+	gTemplateID = 'list',
+	gTemplates = {
+		'list': ['/templates/post-compact','/templates/post-expand'],
+		'tile': ['/templates/post-tile']
+	};
 
 /**
  * On page load ready
@@ -75,7 +80,7 @@ Mousetrap.bind('v', function() {
 function ShowAlertMessage(t, m) {
 	$('#a').removeClass('hidden').addClass(t);
 	$('#am').html(m);
-	$("#a").fadeTo(2000, 500).slideUp(500, function() {
+	$("#a").fadeTo(5000, 500).slideUp(500, function() {
 		$("#a").alert('close');
 	});
 }
@@ -137,9 +142,11 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 }]);
 app.directive('onLastRepeat', function() {
 	return function(scope, element, attrs) {
-		if (scope.$last) setTimeout(function(){
-			scope.$emit('onRepeatLast', element, attrs);
-		}, 1);
+		if (scope.$last) {
+			setTimeout(function() {
+				scope.$emit('onRepeatLast', element, attrs);
+			}, 1);
+		}
 	};
 });
 app.directive('ngInclude', function() {
@@ -149,13 +156,22 @@ app.directive('ngInclude', function() {
 			post: function(scope, element, attrs) {
 				var s = scope.$parent.$parent,
 					p = scope.$parent.post;
+				// set item id (can't do this in the template as it won't show up correctly in the document)
 				element.attr('id',p.id);
+				// if a current element has been expanded
 				if (s.cp && p.id === s.cp.id) {
+					// set expand class
 					element.addClass('expand');
+					// if not infinite scrolling
 					if (!s.params.nt) {
-						s.scrollto(s.cp.id, -60);
+						// scroll to article
+						s.scrollto(s.cp.id, -80);
 					}
 				}
+				// find thumbnail image
+				element.find('.tn img').one('load', function() {
+					s.stretchImg($(this),p);
+				});
 				// make all links open in a new tab
 				var o = $('.article-content').find('a');
 				//.each(function() {
@@ -172,6 +188,7 @@ app.directive('resize', function ($window) {
         scope.$watch(function () {
             return {'h': w.height(), 'w': w.width()};
         }, function (newValue, oldValue) {
+			// store new window height and width
             scope.windowHeight 	= newValue.h;
             scope.windowWidth 	= newValue.w;
 			$('#ftr').width($('#hdr').width());
@@ -191,6 +208,47 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	}
 	$scope.canScroll = function() {
 		return ($(document).scrollTop() > 50);
+	}
+	$scope.makeHorizontal = function(e) {
+		e.addClass('horizontal-image');
+		if (e.width() > e.parent().width()) {
+			e.css('left',Math.min(0,(e.parent().width() - e.width()) / 2));
+		} else if (e.width() < e.parent().width()) {
+			e.removeClass('horizontal-image');
+			$scope.makeVertical(e);
+		}
+	}
+	$scope.makeVertical = function(e) {
+		e.addClass('vertical-image');
+		if (e.height() > e.parent().height()) {
+			e.css('top',Math.min(0,(e.parent().height() - e.height()) / 2));
+		} else if (e.height() < e.parent().height()) {
+			e.removeClass('vertical-image');
+			$scope.makeHorizontal(e);
+		}
+	}
+	$scope.stretchImg = function(e,p) {
+		// retrieve real image size
+		var t = new Image();
+		t.src = e.attr("src");
+		// decide to make it a horizontal or vertical image
+		if (t.width > t.height) {
+			$scope.makeHorizontal(e);
+		} else {
+			$scope.makeVertical(e);
+		}
+		/*if (t.width > e.parent().width()) {
+			var o = (e.parent().width() - e.width()) / 2;
+			e.css('left', Math.min(o, 0) + 'px');
+		} 
+		if (t.height > e.parent().height()) {
+			console.log('d');
+			// make the same width as parent
+			e.width(e.parent().width());
+			// offset vertically if necessary
+			var o = (e.parent().height() - e.height()) / 2;
+			e.css('top', Math.min(o, 0) + 'px');
+		}*/
 	}
 	$scope.gotoTop = function() {
         $scope.scrollto('map', 0);
@@ -224,7 +282,9 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		FeedSubmit.save({q: $scope.stream.feedURL},function(data) {
 			// show message
 			ShowAlertMessage('alert-success',['<strong>Successfully</strong> subscribed to feed (',$scope.stream.title,')'].join(' '));
+			// set stream as subscribed
 			$scope.stream.subscribed = true;
+			// notify sidebar to update
 			$rootScope.$broadcast('updateSubs');
 		}, function(err) {
 			ShowAlertMessage('alert-danger',['An <strong>error</strong> occured when trying to subscribe to',$scope.stream.title].join(' '));
@@ -245,7 +305,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				if ($scope.cp && $scope.stream.items[i].id === $scope.cp.id) {
 					$scope.expand($scope.stream.items[i]);
 				} else {
-					$scope.stream.items[i].template = '/templates/post-compact';
+					$scope.stream.items[i].template = gTemplates[gTemplateID][0];
 				}
 			}
 		}, function(err) {
@@ -267,8 +327,10 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	$scope.next = function() {
 		if (!$scope.cp && $scope.stream.items.length > 0) {
 			$scope.expand($scope.stream.items[0]);
-		} else {
+		} else if ($scope.cp) {
+			// retrieve the next post in the list
 			var p = angular.element($('#'+$scope.cp.id).next()).scope();
+			// if next post exists
 			if (p) {
 				$scope.toggle(p.post);
 			}
@@ -277,7 +339,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	$scope.prev = function() {
 		if (!$scope.cp && $scope.stream.items.length > 0) {
 			$scope.expand($scope.stream.items[0]);
-		} else {
+		} else if ($scope.cp) {
 			var p = angular.element($('#'+$scope.cp.id).prev()).scope();
 			if (p) {
 				$scope.toggle(p.post);
@@ -285,7 +347,10 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}
 	}
 	$scope.expand = function(p) {
-		p.template = '/templates/post-expand';
+		if (gTemplates[gTemplateID].length <= 1) {
+			return;
+		}
+		p.template = gTemplates[gTemplateID][1];
 		$scope.cp = p;
 		$scope.params.nt = undefined;
 		if ($scope.$root.$$phase != '$apply' && $scope.$root.$$phase != '$digest') {
@@ -293,16 +358,19 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}
 	}
 	$scope.toggle = function(p) {
+		if (gTemplates[gTemplateID].length <= 1) {
+			return;
+		}
 		// make previous expanded post small again
 		if ($scope.cp && $scope.cp != p) {
 			$('#' + $scope.cp.id).removeClass('expand');
-			$scope.cp.template = '/templates/post-compact';
+			$scope.cp.template = gTemplates[gTemplateID][0];
 		}
 		// store current expanded post
-		if (p.template === '/templates/post-expand') {
-			p.template = '/templates/post-compact';
-		} else {
+		if (p.template !== gTemplates[gTemplateID][1]) {
 			$scope.expand(p);
+		} else {
+			p.template = gTemplates[gTemplateID][0];
 		}
 	}
 	// re-activate affix
@@ -325,7 +393,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			$scope.setaffix();
 		}
 	)
-	$scope.$on('onRepeatLast', function(scope, element, attrs){
+	$scope.$on('onRepeatLast', function(scope, element, attrs) {
 		// make all links open in a new tab
 		$(".article-content a").each(function() {
 			$(this).attr("target","_blank");
@@ -366,13 +434,6 @@ app.controller('AppFeeds', function($scope, $http, $location, GetFeeds) {
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
 		// call '$apply' oteherwise angular doesn't recognize that the url has changed
 		$scope.$apply();
-	}
-	$scope.gotoTop = function() {
-        // set the location.hash to the id of
-        // the element you wish to scroll to.
-        $location.hash('top');
-        // call $anchorScroll()
-        $anchorScroll();
 	}
 	$scope.gtsubs();
 });
