@@ -86,7 +86,7 @@ exports.editTags = function(record, addTags, removeTags) {
     return rs.all([add, remove]);
 };
 
-function getTags(tags) {
+exports.getTags = function(tags) {
     if (tags && tags.length) {
         return exports.Tag.find({ $or: tags });
     }
@@ -119,7 +119,7 @@ exports.getPosts = function(streams, options) {
 
 	// load the tags to include and exclude
     var includeTags, excludeTags;
-    return rs.all([getTags(tags), getTags(options.excludeTags)]).then(function(results) {
+    return rs.all([exports.getTags(tags), exports.getTags(options.excludeTags)]).then(function(results) {
         includeTags = results[0];
         excludeTags = results[1];
         // find feeds given directly and by tag
@@ -143,18 +143,18 @@ exports.getPosts = function(streams, options) {
             }
         });
 		
-        if (options.limit)
+        if (options.limit) {
             query.limit(options.limit);
-            
-        if (options.sort)
+		}
+        if (options.sort) {
 			query.sort(options.sort);
-            
-        if (options.count)
+		}
+        if (options.count) {
             query.count();
-            
-        if (options.populate)
+		}
+        if (options.populate) {
             query.populate(options.populate);
-
+		}
         return query;
     });
 };
@@ -164,6 +164,4 @@ exports.User 	= require('./models/user');
 exports.Feed 	= require('./models/feed');
 exports.Post 	= require('./models/post');
 exports.Tag 	= require('./models/tag');
-/*
-exports.Preference = require('./models/preference');
-*/
+//exports.Pref 	= require('./models/pref');

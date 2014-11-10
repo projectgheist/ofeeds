@@ -18,7 +18,7 @@ app.get('/auth/google', pp.authenticate('google', { scope: 'https://www.googleap
 // the process by verifying the assertion.  If valid, the user will be
 // logged in.  Otherwise, authentication has failed.
 app.get('/auth/google/callback', 
-		pp.authenticate('google', { successRedirect: '/dashboard',
+		pp.authenticate('google', { successRedirect: '/subscription/user/reading-list',
 									failureRedirect: '/' }));
 
 // Passport session setup.

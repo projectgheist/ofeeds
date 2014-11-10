@@ -39,7 +39,7 @@ ap.param('name', /^.*$/);
 /** home route */
 ap.get("/", function(req, res) {
 	if (req.isAuthenticated()) {
-		res.redirect('/dashboard');
+		res.redirect('/subscription/user/reading-list');
 	} else {
 		res.render('landing', { 
 			'config': cf.site
@@ -55,10 +55,7 @@ ap.get("/logout", ensureAuth, function(req, res) {
 	res.redirect('/'); 
 });
 ap.get("/dashboard", ensureAuth, function(req, res) {
-	res.render('dashboard', { 
-		'config': cf.site,
-		'user': req.user
-	});
+	res.redirect('/subscription/user/reading-list');
 });
 ap.get("/subscription/*", ensureAuth, function(req, res) {
 	res.render('dashboard', { 
