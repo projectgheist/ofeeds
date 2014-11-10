@@ -191,6 +191,7 @@ app.directive('resize', function ($window) {
 			// store new window height and width
             scope.windowHeight 	= newValue.h;
             scope.windowWidth 	= newValue.w;
+			// copy parent width to child
 			$('#ftr').width($('#hdr').width());
 			$('#sa').width($('#sap').width());
         }, true);
@@ -416,9 +417,9 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		// declare variable
 		$scope.params = {};
 		// set type
-		$scope.params.type = String($routeParams.type) || 'feed';
+		$scope.params.type = (String($routeParams.type) || 'feed');
 		// remove trailing '*/' otherwise use normal url
-		$scope.params.value = /\*(\/)*$/.test(v) ? v.substring(0,v.length-1) : v;
+		$scope.params.value = (/\*(\/)*$/.test(v) ? v.substring(0,v.length-1) : v);
 		// retrieve posts
 		$scope.gtposts();
 	}

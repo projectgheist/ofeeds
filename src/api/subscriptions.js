@@ -68,36 +68,42 @@ var actions = {
 
 // lists all of the feeds a user is subscribed to
 app.get('/api/0/subscription/list', function(req, res) {
-    /** Check auth
-	 */
+    // is user logged in?
 	if (!req.isAuthenticated()) {
 		res.status(500).send('User feed not defined!');
 	} else {
-		// get tag for getting all feeds the user is subscribed to
-		var r = ut.parseTags('user/-/state/reading-list', req.user)[0];
-		return db.Tag.findOne(r).then(function(results) {
+		// get tags
+		var tags = ut.parseTags(['user/-/state/reading-list','user/-/state/read'], req.user);
+		return db.Tag.findOne(tags[0]).then(function(rtags) {
 			// no feeds returned
-			if (!results) {
+			if (!rtags) {
 				return [];
 			}
-			return db.Feed.find({tags:results}).sort({'title':1});
-		}).then(function(feeds) {
-			var s = feeds.map(function(f) {
-				var categories = f.tagsForUser(req.user).map(function(tag) {
+			// find all feeds that contain 'reading-list' tag & sort by alphabetical title
+			return rs.all([db.Feed.find({ tags: rtags }).sort({'title':1}), db.getTags(tags[1])]);
+		}).then(function(results) {
+			var a = results[0].map(function(f) {
+				// find posts in feed WHERE 'read'-tag 'not in' array
+				return db.Post.find({ _id: {$in: f.posts}, tags: {$nin: results[1]} }).then(function(c) {
+					var categories = f.tagsForUser(req.user).map(function(tag) {
+						return {
+							id: 	tag.stringID,
+							label: 	tag.name
+						};
+					});
 					return {
-						id: 	tag.stringID,
-						label: 	tag.name
+						favicon:		f.favicon,
+						id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
+						title: 			f.titleForUser(req.user),
+						unreadcount: 	c.length,
+						shortid: 		f.shortID,
+						categories: 	categories
 					};
+				}, function(err) {
 				});
-				return {
-					favicon:		f.favicon,
-					id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
-					title: 			f.titleForUser(req.user),
-					unreadcount: 	0, // TODO
-					shortid: 		f.shortID,
-					categories: 	categories
-				};
 			});
+			return rs.all(a);			
+		}).then(function(s) {
 			return res.json(s);
 		}, function(err) {
 			res.status(500).send(err);
@@ -152,8 +158,7 @@ app.get('/api/0/subscription/refresh', function(req, res) {
 });
 
 app.post('/api/0/subscription/quickadd', function(req, res) {
-    /** Check auth
-	 */
+    // is user logged in?
 	if (!req.isAuthenticated()) {
         return;
 	}
