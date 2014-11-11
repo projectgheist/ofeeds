@@ -35,8 +35,7 @@ Supports 'Plug and play' code for the following hosts:
 
 * [Openshift](https://www.openshift.com/)
 * [Appfog](https://www.appfog.com/)
-	Requires additional setup steps: 
-	* An addition environment variable `AF_APP_URL` that contains the website root URL.
+	* Requires an additional setup step:  Add an environment variable `AF_APP_URL` that contains the website root URL to the project.
 
 Note: Both require you to add a MongoDB to the application during setup
 
