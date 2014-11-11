@@ -9,7 +9,7 @@ Uses [AngularJS](http://angularjs.org/), [Twitter Bootstrap](http://getbootstrap
 
 ## Examples
 
-For some working version of this repo, visit [not yet available](#).
+For some working version of this repo, visit [Reader Demo Site](http://reader-bapple.rhcloud.com/).
 
 ## Requirements:
 * [Node.JS](http://nodejs.org/)
@@ -28,6 +28,17 @@ Two quick start options are available:
 * Browse to `localhost:3000`
 
 Note: You can change the port, ip, database connection settings, ... inside the config file.
+
+### Hosting
+
+Supports 'Plug and play' code for the following hosts:
+
+* [Openshift](https://www.openshift.com/)
+* [Appfog](https://www.appfog.com/)
+	Requires additional setup steps: 
+	* An addition environment variable `AF_APP_URL` that contains the website root URL.
+
+Note: Both require you to add a MongoDB to the application during setup
 
 ## Todo
 
