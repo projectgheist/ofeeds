@@ -40,8 +40,7 @@ ap.use(require('./src/routes'));
  */
 ap.use(require('./src/api/subscriptions'));
 ap.use(require('./src/api/streams'));
-
+ap.use(require('./src/api/tag'));
 /*
-app.use(require('./src/api/tag'));
 app.use(require('./src/api/preference'));
 */

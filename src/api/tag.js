@@ -6,34 +6,11 @@ var ex = require('express'),
     
 var app = module.exports = ex();
 
-app.get('/api/0/tag/list', function(req, res) {
-    // is user logged in?
-	if (!ut.checkAuth(req, res)) {
-        return;
-	}
-	// find tags for user
-    db.Tag
-	.find({user: req.user})
-	.then(function(tags) {
-        var ret = [];
-        tags.forEach(function(tag) {
-            if (!(tag.type == 'state' && tag.name == 'reading-list')) {
-                ret.push({
-                    id: tag.stringID,
-                    sortid: tag.sortID
-                });
-            }
-        });    
-        ut.respond(res, {tags: ret});
-    }, function(err) {
-        res.send(500, 'Error=Unknown');
-    });
-});
-
+// To mark a post as read,starred,...
 app.post('/api/0/tag/edit', function(req, res) {
     // is user logged in?
-	if (!ut.checkAuth(req, res)) {
-        return;
+    if (!req.isAuthenticated()) {
+    	return;
 	}
     var items = ut.parseItems(req.body.i);
     if (!items) {
@@ -59,77 +36,54 @@ app.post('/api/0/tag/edit', function(req, res) {
     }).then(function() {
         res.send('OK');
     }, function(err) {
-        res.send(500, 'Error=Unknown');
+        res.status(500).send(err);
     });
 });
 
-app.post('/api/0/tag/rename-tag', function(req, res) {
+// rename a stream folder
+app.post('/api/0/tag/rename', function(req, res) {
     // is user logged in?
-	if (!ut.checkAuth(req, res)) {
+    if (!req.isAuthenticated()) {
         return;
 	}
-        
-    var source = ut.parseTags(req.body.s, req.user);
-    var dest = ut.parseTags(req.body.dest, req.user);
-    
-    if (!source || !dest)
+    var orig = ut.parseTags(req.body.s, req.user),
+		dest = ut.parseTags(req.body.dest, req.user);
+    if (!orig || !dest) {
         return res.send(400, 'Error=InvalidStream');
-        
+	}
     // TODO: if dest is another existing tag, the tags need to be merged
-    db.Tag.update(source[0], dest[0]).then(function() {
+    db.Tag.update(orig[0], dest[0]).then(function() {
         res.send('OK');
     }, function(err) {
-        return res.send(500, 'Error=Unknown');
+        res.status(500).send(err);
     });
 });
 
-app.post('/api/0/tag/disable-tag', function(req, res) {
-    if (!ut.checkAuth(req, res, true))
-        return;
-        
-    var tag = ut.parseTags(req.body.s, req.user);
-    if (!tag)
-        return res.send(400, 'Error=InvalidStream');
-        
-    db.Tag.findOneAndRemove(tag[0]).then(function(tag) {            
-        if (tag) {
-            // remove references to this tag from subscriptions and posts
-            return rs.all([
-                db.Feed.update({}, { $pull: { tags: tag }}),
-                db.Post.update({}, { $pull: { tags: tag }})
-            ]);
-        }
-    }).then(function() {
-        res.send('OK');
-    }, function(err) {
-        res.send(500, 'Error=Unknown');
-    });
-});
-
+// mark all posts in a stream as read
 app.post('/api/0/tag/mark-all-as-read', function(req, res) {
-    if (!ut.checkAuth(req, res, true))
+    if (!req.isAuthenticated()) {
         return;
-        
+	}
     var streams = ut.parseStreams(req.body.s, req.user);
-    if (!streams)
+    if (!streams) {
         return res.send(400, 'Error=InvalidStream');
-    
+	}
     // Check if the timestamp parameter is set.
     // If so, add to postsForStreams options.
     var options = {};
-    if (req.body.ts)
+    if (req.body.ts) {
         options.maxTime = req.body.ts;
-        
+	}
     // Find or create the read state tag
-    var tag = ut.parseTags('user/-/state/read', req.user)[0];
-    tag = db.findOrCreate(db.Tag, tag);
+    var tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/read', req.user)[0]);
 
     // Get all of the posts in the stream
     // Google Reader appears to only accept a single stream
     var posts = db.postsForStreams(streams, options);
     
     rs.all([tag, posts]).then(function(results) {
-        var tag = results[0], posts = results[1];
+        var tag = results[0], 
+			posts = results[1];
         
         // Add the tag to each of them
         return rs.all(posts.map(function(post) {
@@ -139,6 +93,6 @@ app.post('/api/0/tag/mark-all-as-read', function(req, res) {
     }).then(function() {
         res.send('OK');
     }, function(err) {
-        res.send(500, 'Error=Unknown');
+        res.status(500).send(err);
     });
 });
