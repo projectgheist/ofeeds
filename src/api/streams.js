@@ -18,7 +18,8 @@ function formatPosts(feed, posts, tags, obj) {
 			return t.stringID;
         });
         return {
-            id: post.shortID.toString(),
+            uid: post.shortID.toString(),
+			lid: post.longID.toString(),
             title: post.title,
             alternate: {
                 href: post.url,

@@ -157,15 +157,15 @@ app.directive('ngInclude', function() {
 				var s = scope.$parent.$parent,
 					p = scope.$parent.post;
 				// set item id (can't do this in the template as it won't show up correctly in the document)
-				element.attr('id',p.id);
+				element.attr('id',p.uid);
 				// if a current element has been expanded
-				if (s.cp && p.id === s.cp.id) {
+				if (s.cp && p.uid === s.cp.uid) {
 					// set expand class
 					element.addClass('expand');
 					// if not infinite scrolling
 					if (!s.params.nt) {
 						// scroll to article
-						s.scrollto(s.cp.id, -80);
+						s.scrollto(s.cp.uid, -80);
 					}
 				}
 				// find thumbnail image
@@ -259,6 +259,10 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		$('html,body').scrollTo($('#'+id), 400, {queue: false, offset: {top: offset || 0}});
  	}
 	$scope.rfrsh = function() {
+		if (!$('#ar').hasClass('fa-spin')) {
+			$('#ar').addClass('fa-spin');
+			$scope.rf = true;
+		}		
 		RefreshFeed.query({'q':$scope.params.value},
 			function(data) {
 				// clear array of posts
@@ -268,12 +272,12 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				// reset expanded post
 				$scope.cp = undefined;
 				// get new latest items
-				$scope.gtposts();
-				// show message
-				ShowAlertMessage('alert-success',['<strong>Successfully</strong> refreshed feed (',$scope.stream.title,')'].join(' '));
-			}, 
+				$scope.gtposts({t:'alert-success',m:['<strong>Successfully</strong> refreshed feed (',$scope.stream.title,')'].join(' ')});
+			},
 			function(err) {
 				ShowAlertMessage('alert-danger',['An <strong>error</strong> occured when trying to refresh feed (',$scope.stream.title,')'].join(' '));
+				$('#ar').removeClass('fa-spin');
+				scope.rf = false;
 		});
 	}
 	$scope.delt = function() {
@@ -291,8 +295,14 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			ShowAlertMessage('alert-danger',['An <strong>error</strong> occured when trying to subscribe to',$scope.stream.title].join(' '));
 		});
 	}	
-	$scope.gtposts = function() {
+	$scope.gtposts = function(m) {
+		if (!$('#ar').hasClass('fa-spin')) {
+			$('#ar').addClass('fa-spin');
+			$scope.rf = true;
+		}
 		GetPosts.query($scope.params,function(data) {
+			$('#ar').removeClass('fa-spin');
+			$scope.rf = false;
 			if (!data || !data.items || data.items.length <= 0) {
 				return;
 			}
@@ -303,13 +313,19 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				$scope.stream = data;
 			}
 			for (var i in $scope.stream.items) {
-				if ($scope.cp && $scope.stream.items[i].id === $scope.cp.id) {
+				if ($scope.cp && $scope.stream.items[i].uid === $scope.cp.uid) {
 					$scope.expand($scope.stream.items[i]);
 				} else {
 					$scope.stream.items[i].template = gTemplates[gTemplateID][0];
 				}
 			}
+			if (m) {
+				// show message
+				ShowAlertMessage(m.t,m.m);
+			}
 		}, function(err) {
+			$('#ar').removeClass('fa-spin');
+			$scope.rf = false;
 		});
 	}
 	$scope.updateStyle = function(n) {
@@ -339,7 +355,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			$scope.expand($scope.stream.items[0]);
 		} else if ($scope.cp) {
 			// retrieve the next post in the list
-			var p = angular.element($('#'+$scope.cp.id).next()).scope();
+			var p = angular.element($('#'+$scope.cp.uid).next()).scope();
 			// if next post exists
 			if (p) {
 				$scope.toggle(p.post);
@@ -350,7 +366,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		if (!$scope.cp && $scope.stream.items.length > 0) {
 			$scope.expand($scope.stream.items[0]);
 		} else if ($scope.cp) {
-			var p = angular.element($('#'+$scope.cp.id).prev()).scope();
+			var p = angular.element($('#'+$scope.cp.uid).prev()).scope();
 			if (p) {
 				$scope.toggle(p.post);
 			}
@@ -373,7 +389,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}
 		// make previous expanded post small again
 		if ($scope.cp && $scope.cp != p) {
-			$('#' + $scope.cp.id).removeClass('expand');
+			$('#' + $scope.cp.uid).removeClass('expand');
 			$scope.cp.template = gTemplates[gTemplateID][0];
 		}
 		// store current expanded post

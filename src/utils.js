@@ -80,12 +80,12 @@ exports.parseHtmlEntities = function(str) {
     });
 }
 exports.parseFeeds = function(feeds) {
-    if (!feeds)
+    if (!feeds) {
         return null;
-        
-    if (!Array.isArray(feeds))
+	}
+    if (!Array.isArray(feeds)) {
         feeds = [feeds];
-        
+	}
     for (var i = 0; i < feeds.length; i++) {
         if (!/^feed\//.test(feeds[i]))
             return null;
@@ -97,6 +97,25 @@ exports.parseFeeds = function(feeds) {
         feeds[i] = url;
     }
     return feeds;
+};
+
+exports.parseItems = function(items) {
+    if (!items) {
+        return null;
+    }
+    if (!Array.isArray(items)) {
+        items = [items];
+    }
+	for (var i = 0; i < items.length; i++) {
+		// the long version has a prefix and the id in hex
+		var match = /^tag:reader\/item\/([0-9a-f]+)$/.exec(items[i]);
+		if (!match) {
+			return null;
+		}
+		// store post mongoDB ID
+		items[i] = match[1];
+	}
+	return items;
 };
 
 exports.parseTags = function(tags, user) {
