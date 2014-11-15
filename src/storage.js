@@ -1,7 +1,6 @@
 /** Includes
  */
 require('./mongoose-promise');
-
 var mg = require('mongoose'),
     rs = require('rsvp'),
     pr = rs.Promise,
@@ -91,7 +90,7 @@ exports.getTags = function(tags) {
         return exports.Tag.find({ $or: tags });
     }
 	// returns an empty promise
-	return new pr(function(resolve, reject){ resolve([]); });
+	return new pr(function(resolve, reject) { resolve([]); });
 }
 
 // Returns a list of posts for a list of streams (feeds and tags) as parsed
@@ -109,6 +108,7 @@ exports.getPosts = function(streams, options) {
 		
     // separate streams by type
     var feeds = [], tags = [];
+	// loop all items in stream
     for (var i in streams) {
 		if (streams[i].type === 'feed') {
             feeds.push(streams[i].value);
@@ -164,4 +164,4 @@ exports.User 	= require('./models/user');
 exports.Feed 	= require('./models/feed');
 exports.Post 	= require('./models/post');
 exports.Tag 	= require('./models/tag');
-//exports.Pref 	= require('./models/pref');
+exports.Pref 	= require('./models/pref');

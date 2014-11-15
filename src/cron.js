@@ -12,18 +12,20 @@ var fp = require('feedparser'),
 	mg = require('mongoose');
 	
 var Agenda = require('agenda'),
-	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db(),true), collection: 'agendaJobs' }, processEvery: '3 minute', defaultLockLifetime: 90000 });
+	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db(),true), collection: 'agendaJobs' }, 
+		defaultLockLifetime: 1000 
+	});
 
 exports.setup = function() {
-	console.log("// ----------------------------------------------------------------------------");
+	//console.log("// ----------------------------------------------------------------------------");
 	// purge all unreferenced jobs from db
 	ag.purge(function(err, numRemoved) {
-		console.log('Amount of unreferenced jobs removed: ' + numRemoved);
+		//console.log('Amount of unreferenced jobs removed: ' + numRemoved);
 	});
 
 	// clear all pre-existing 'UpdateAllFeeds' jobs
 	ag.cancel({name: 'UpdateAllFeeds'}, function(err, numRemoved) {
-		console.log("Amount of 'UpdateAllFeeds' jobs removed: " + numRemoved);
+		//console.log("Amount of 'UpdateAllFeeds' jobs removed: " + numRemoved);
 	});
 
 	// set all jobs
