@@ -121,6 +121,12 @@ AppService.factory('FeedSubmit', ['$resource',
 	}
 ]);
 
+AppService.factory('MarkAsRead', ['$resource',
+	function($resource) {
+		return $resource('/api/0/tag/edit', {i:'@i',s:'@s',a:'@a',r:'@r'}, {query:{method:'POST'}});
+	}
+]);
+
 /**
  * App configuration
  */
@@ -200,7 +206,7 @@ app.directive('resize', function ($window) {
         });
     }
 });
-app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, FeedSubmit, RefreshFeed) {
+app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, MarkAsRead, FeedSubmit, RefreshFeed) {
 	$scope.gotostream = function(obj) {
 		// go to subscription local url
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
@@ -372,7 +378,22 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			}
 		}
 	}
+	$scope.markAsRead = function(p) {
+		if (!p || p === undefined) {
+			return;
+		}
+		MarkAsRead.query({i:p.lid,a:'user/-/state/read'}, function(d) {
+			p.read = true;
+			// notify sidebar to update
+			$rootScope.$broadcast('updateSubs');
+		}, function(e) {
+		});
+	}
+	$scope.isRead = function(p) {
+		return p.read;
+	}
 	$scope.expand = function(p) {
+		$scope.markAsRead(p);
 		if (gTemplates[gTemplateID].length <= 1) {
 			return;
 		}
@@ -384,6 +405,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}
 	}
 	$scope.toggle = function(p) {
+		$scope.markAsRead(p);
 		if (gTemplates[gTemplateID].length <= 1) {
 			return;
 		}

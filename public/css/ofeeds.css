@@ -93,13 +93,15 @@
 	max-height:768px;
 }
 
-.article .btn-group {
+.article p, .article .btn-group {
 	margin: 0;
 }
 .article .btn {
 	padding: 4px 16px;
 }
-
+.article.read {
+	background-color: #D5D5D5;
+}
 .article .line-separator {
 	margin: 7px 0;
 }

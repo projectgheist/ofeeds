@@ -53,8 +53,7 @@ Feed.methods.setTitleForUser = function(title, user) {
 };
 
 Feed.pre('remove', function(callback) {
-    var Post = mg.model('Post');
-    Post.where('_id').in(this.posts).remove(callback);
+    mg.model('Post').where('_id').in(this.posts).remove(callback);
 });
 
 module.exports = mg.model('Feed', Feed);

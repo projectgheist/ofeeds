@@ -12,31 +12,25 @@ app.post('/api/0/tag/edit', function(req, res) {
     if (!req.isAuthenticated()) {
     	return;
 	}
-    var items = ut.parseItems(req.body.i);
+	var p = (req.query || req.body);
+	var items = ut.parseItems(p['i'] || 0);
     if (!items) {
-        return res.send(400, 'Error=InvalidItem');
+        return res.statuc(400); // Invalid item
 	}
-    var streams = ut.parseFeeds(req.body.s);
-    if (req.body.s && !streams) {
-        return res.send(400, 'Error=InvalidStream');
-	}
-    if (streams && streams.length !== items.length) {
-        return res.send(400, 'Error=UnknownCount');
-	}
-    var at = ut.parseTags(req.body.a, req.user),
-		rt = ut.parseTags(req.body.r, req.user);
-	
+    var at = ut.parseTags(p['a'] || 0, req.user), // tags to add to the item
+		rt = ut.parseTags(p['r'] || 0, req.user); // tags to remove from the item
     // TODO: use streams to filter
-    db.Post.where('_id').in(items).then(function(posts) {
+    db.Post.where('_id').in(items)
+	.then(function(posts) {
         return rs.all(posts.map(function(post) {
-            return db.editTags(post, addTags, removeTags).then(function() {
-				return post.save();
+            return db.editTags(post, at, rt).then(function(data) {
+				return data.save();
             });
         }));
-    }).then(function() {
+    }).then(function(data) {
         res.send('OK');
     }, function(err) {
-        res.status(500).send(err);
+       	res.status(500).send(err);
     });
 });
 

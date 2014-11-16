@@ -14,13 +14,19 @@ var app = module.exports = ex();
 function formatPosts(feed, posts, tags, obj) {
 	// creates a new array with the posts 
     var items = posts.map(function(post) {
-		var tags = post.tags.map(function(t) {
-			return t.stringID;
-        });
+		var isRead = 0,
+			pts = post.tags ? post.tags.map(function(t) {
+				var r = t.stringID;
+				if (!isRead && r && ut.isRead(r)) {
+					isRead = 1;
+				}
+				return r;
+        	}) : [];
         return {
             uid: post.shortID.toString(),
 			lid: post.longID.toString(),
             title: post.title,
+			read: isRead,
             alternate: {
                 href: post.url,
                 type: 'text/html'
@@ -32,9 +38,9 @@ function formatPosts(feed, posts, tags, obj) {
 				videos: post.videos
             },
             author: post.author,
-            published: (mm().diff(mm(post.published), 'days') <= 7 ? mm(post.published).fromNow() : mm(post.published).format("D MMM")) || 0,
-            updated: post.updated || 0,
-            categories: tags.concat(post.categories),
+            published: ((mm().diff(mm(post.published), 'days') <= 7 ? mm(post.published).fromNow() : mm(post.published).format("D MMM")) || 0),
+            updated: (post.updated || 0),
+            categories: pts.concat(post.categories),
             origin: {
                 streamId: post.feed.stringID,
                 title: post.feed.title,
@@ -45,15 +51,18 @@ function formatPosts(feed, posts, tags, obj) {
             likingUsers: [],
             comments: [],
             annotations: []
-        };
+        }; 
     });
+	//
 	if (!feed && tags) {
 		obj.id		= 'user/' + tags[0].name;
 		obj.title 	= tags[0].name;
 		obj.showOrigin = true;
+		// can't subscribe to this feed
 		obj.subscribed = -1;
 	}
-	obj.self 		= {href: (feed ? feed.self : '')}; // url to current api fetch call
+	// url to current api fetch call
+	obj.self 		= {href: (feed ? feed.self : '')}; 
 	obj.alternate 	= (feed && feed.siteURL) ? [{ href: feed.siteURL, type: 'text/html' }] : '';
 	obj.items 		= items;
 	if (feed) {
@@ -112,7 +121,7 @@ app.get('/api/0/stream/contents*', function(req, res) {
         maxTime: req.query.nt,
         sort: (req.query.r === 'o') ? 'published' : '-published',
         limit: +req.query.n || 20,
-        populate: 'feed'
+        populate: ['feed','tags']
     }).then(function(posts) {
 		var isFeed 	= (streams[0].type === 'feed'), // boolean: TRUE if feed
 			value 	= streams[0].value,				// string: site URL

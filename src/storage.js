@@ -68,27 +68,31 @@ exports.editTags = function(record, addTags, removeTags) {
     // optional parameter declaration
 	addTags || (addTags = []);
     removeTags || (removeTags = []);
-	
-    var add = addTags.map(function(tag) {
-        return exports.findOrCreate(exports.Tag, tag).then(function(tag) {
-            record.tags.addToSet(tag);
+
+	var add = addTags.map(function(tag) {
+        return exports.findOrCreate(exports.Tag, tag).then(function(t) {
+            record.tags.addToSet(t);
         });
     });
-    
     var remove = removeTags.map(function(tag) {
-        return exports.Tag.findOne(tag).then(function(tag) {
-            record.tags.remove(tag);
+        return exports.Tag.findOne(tag).then(function(t) {
+            record.tags.remove(t);
         });
     });
-	
+	var all = add.concat(remove);
 	// returns a promise
-    return rs.all([add, remove]);
+    return rs.all(all).then(function() {
+		return record; 
+	});
 };
 
 exports.getTags = function(tags) {
-    if (tags && tags.length) {
+	if (tags) {
+		if (!Array.isArray(tags)) {
+			tags = [tags];
+		}
         return exports.Tag.find({ $or: tags });
-    }
+	}
 	// returns an empty promise
 	return new pr(function(resolve, reject) { resolve([]); });
 }
@@ -153,7 +157,13 @@ exports.getPosts = function(streams, options) {
             query.count();
 		}
         if (options.populate) {
-            query.populate(options.populate);
+			// check if already an array, else make it an array
+			if (!Array.isArray(options.populate)) {
+				options.populate = [options.populate];
+			}
+			for (var i in options.populate) {
+            	query.populate(options.populate[i]);
+			}
 		}
         return query;
     });

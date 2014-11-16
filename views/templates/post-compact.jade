@@ -1,4 +1,4 @@
-.row(ng-click="toggle(post)")
+.row(ng-click="toggle(post)",style='padding: 10px 0')
 	div(ng-if="stream.showOrigin")
 		.visible-lg.col-lg-2
 			a(href="#/subscription/feed/{{post.origin.url}}") 
@@ -10,4 +10,6 @@
 			p.text-overflow {{post.title}}
 	.col-xs-3(style="text-align:right")
 		p {{post.published}}
-.line-separator
+.row
+	.col-xs-12
+		.line-separator

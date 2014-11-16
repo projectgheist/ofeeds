@@ -19,6 +19,15 @@ exports.isUrl = function(url) {
     return vd.isURL(url);
 };
 
+// check if the string is a url
+exports.isRead = function(tag) {
+	var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tag);
+	if (match && match[3] === 'read') {
+		return true;
+	}
+	return false;
+};
+
 // returns a string that points to the database url
 exports.getDBConnectionURL = function(obj,noPrefix) {
 	var r = '';

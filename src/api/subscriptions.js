@@ -70,17 +70,17 @@ var actions = {
 app.get('/api/0/subscription/list', function(req, res) {
     // is user logged in?
 	if (!req.isAuthenticated()) {
-		res.status(500).send('User feed not defined!');
+		res.status(500).send('User not defined!');
 	} else {
 		// get tags
 		var tags = ut.parseTags(['user/-/state/reading-list','user/-/state/read'], req.user);
-		return db.Tag.findOne(tags[0]).then(function(rtags) {
+		return db.getTags(tags[0]).then(function(readinglist) {
 			// no feeds returned
-			if (!rtags) {
+			if (!readinglist) {
 				return [];
 			}
 			// find all feeds that contain 'reading-list' tag & sort by alphabetical title
-			return rs.all([db.Feed.find({ tags: rtags }).sort({'title':1}), db.getTags(tags[1])]);
+			return rs.all([db.Feed.find({ tags: readinglist }).sort({ 'title': 1 }),db.getTags(tags[1])]);
 		}).then(function(results) {
 			var a = results[0].map(function(f) {
 				// find posts in feed WHERE 'read'-tag 'not in' array
