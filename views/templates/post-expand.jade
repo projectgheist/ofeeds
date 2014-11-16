@@ -10,8 +10,8 @@
 		.btn-group.pull-right
 			button.btn.btn-default(ng-click="toggle(post)")
 				i.fa.fa-fw.fa-chevron-up
-			button.visible-lg.btn.btn-default
-				i.fa.fa-fw.fa-eye
+			button.visible-lg.btn.btn-default(ng-click="toggleRead(post)")
+				i.fa.fa-fw(ng-class="isRead(post) ? 'fa-eye-slash' : 'fa-eye'")
 			.visible-lg.btn-group
 				button.btn.btn-default.dropdown-toggle.withripple(data-toggle="dropdown")
 					i.fa.fa-fw.fa-share-alt

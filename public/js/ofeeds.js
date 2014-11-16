@@ -77,6 +77,13 @@ Mousetrap.bind('v', function() {
 	window.focus();
 });
 
+/** Toggle article read state
+ */
+Mousetrap.bind('m', function() {
+	var s = angular.element($('#ma')).scope();
+	s.toggleRead(s.cp);
+});
+
 function ShowAlertMessage(t, m) {
 	$('#a').removeClass('hidden').addClass(t);
 	$('#am').html(m);
@@ -121,7 +128,7 @@ AppService.factory('FeedSubmit', ['$resource',
 	}
 ]);
 
-AppService.factory('MarkAsRead', ['$resource',
+AppService.factory('SetTag', ['$resource',
 	function($resource) {
 		return $resource('/api/0/tag/edit', {i:'@i',s:'@s',a:'@a',r:'@r'}, {query:{method:'POST'}});
 	}
@@ -206,7 +213,7 @@ app.directive('resize', function ($window) {
         });
     }
 });
-app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, MarkAsRead, FeedSubmit, RefreshFeed) {
+app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, SetTag, FeedSubmit, RefreshFeed) {
 	$scope.gotostream = function(obj) {
 		// go to subscription local url
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
@@ -378,12 +385,33 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			}
 		}
 	}
+	$scope.toggleRead = function(p) {
+		if (!p || p === undefined) {
+			return;
+		}
+		if (p.read) {
+			$scope.markAsUnread(p);
+		} else {
+			$scope.markAsRead(p);
+		}
+	}
 	$scope.markAsRead = function(p) {
 		if (!p || p === undefined) {
 			return;
 		}
-		MarkAsRead.query({i:p.lid,a:'user/-/state/read'}, function(d) {
+		SetTag.query({i:p.lid,a:'user/-/state/read'}, function(d) {
 			p.read = true;
+			// notify sidebar to update
+			$rootScope.$broadcast('updateSubs');
+		}, function(e) {
+		});
+	}
+	$scope.markAsUnread = function(p) {
+		if (!p || p === undefined) {
+			return;
+		}
+		SetTag.query({i:p.lid,r:'user/-/state/read'}, function(d) {
+			p.read = false;
 			// notify sidebar to update
 			$rootScope.$broadcast('updateSubs');
 		}, function(e) {
