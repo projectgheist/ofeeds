@@ -111,9 +111,9 @@ app.get('/api/0/stream/contents*', function(req, res) {
         return res.status(400).send('InvalidRank');
     
     var excludeTags = ut.parseTags(req.query.xt, req.user);
-    if (req.query.xt && !excludeTags)
+    if (req.query.xt && !excludeTags) {
         return res.status(400).send('InvalidTag');
-
+	}
 	// load posts
     db.getPosts(streams, {
         excludeTags: excludeTags,

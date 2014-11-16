@@ -91,7 +91,10 @@ exports.getTags = function(tags) {
 		if (!Array.isArray(tags)) {
 			tags = [tags];
 		}
-        return exports.Tag.find({ $or: tags });
+		// make sure it has elements inside the array
+		if (tags.length > 0) {
+        	return exports.Tag.find({ $or: tags });
+		}
 	}
 	// returns an empty promise
 	return new pr(function(resolve, reject) { resolve([]); });
@@ -109,7 +112,6 @@ exports.getTags = function(tags) {
 exports.getPosts = function(streams, options) {
 	// use parameter or create empty object
     options || (options = {});
-		
     // separate streams by type
     var feeds = [], tags = [];
 	// loop all items in stream
@@ -120,11 +122,10 @@ exports.getPosts = function(streams, options) {
             tags.push(streams[i].value);
 		}
     };
-
 	// load the tags to include and exclude
     var includeTags, excludeTags;
     return rs.all([exports.getTags(tags), exports.getTags(options.excludeTags)]).then(function(results) {
-        includeTags = results[0];
+		includeTags = results[0];
         excludeTags = results[1];
         // find feeds given directly and by tag
         return exports.Feed.find({
