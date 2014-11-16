@@ -20,9 +20,12 @@ exports.isUrl = function(url) {
 };
 
 // check if the string is a url
-exports.isRead = function(tag) {
+exports.isRead = function(user,tag) {
+	if (!user || Object.keys(user).length === 0) {
+		return false;
+	}
 	var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tag);
-	if (match && match[3] === 'read') {
+	if (match && match[1] === user._id && match[3] === 'read') {
 		return true;
 	}
 	return false;

@@ -11,13 +11,13 @@ var app = module.exports = ex();
  * @param posts: Array of posts to format
  * @param feed: information related to the feed 
  */
-function formatPosts(feed, posts, tags, obj) {
+function formatPosts(user, feed, posts, tags, obj) {
 	// creates a new array with the posts 
     var items = posts.map(function(post) {
 		var isRead = 0,
 			pts = post.tags ? post.tags.map(function(t) {
 				var r = t.stringID;
-				if (!isRead && r && ut.isRead(r)) {
+				if (!isRead && r && ut.isRead(user,r)) {
 					isRead = 1;
 				}
 				return r;
@@ -98,18 +98,18 @@ app.get('/api/0/stream/contents*', function(req, res) {
     /*if (hasTagStreams(streams) && !utils.checkAuth(req, res))
         return;
         */
-    if (req.query.n && !/^[0-9]+$/.test(req.query.n))
+    if (req.query.n && !/^[0-9]+$/.test(req.query.n)) {
         return res.status(400).send('InvalidCount');
-        
-    if (req.query.ot && !/^[0-9]+$/.test(req.query.ot))
+	}
+    if (req.query.ot && !/^[0-9]+$/.test(req.query.ot)) {
         return res.status(400).send('InvalidTime');
-        
-    if (req.query.nt && !/^[0-9]+$/.test(req.query.nt))
+	}
+    if (req.query.nt && !/^[0-9]+$/.test(req.query.nt)) {
         return res.status(400).send('InvalidTime');
-        
-    if (req.query.r && !/^[no]$/.test(req.query.r))
+	}
+    if (req.query.r && !/^[no]$/.test(req.query.r)) {
         return res.status(400).send('InvalidRank');
-    
+	}
     var excludeTags = ut.parseTags(req.query.xt, req.user);
     if (req.query.xt && !excludeTags) {
         return res.status(400).send('InvalidTag');
@@ -147,10 +147,10 @@ app.get('/api/0/stream/contents*', function(req, res) {
 			if (req.user) {
 				var r = ut.parseTags('user/-/state/reading-list', req.user)[0];
 				return db.Tag.find(r).then(function(tags) {
-					res.json(formatPosts(feed, posts, tags, obj))
+					res.json(formatPosts(req.user, feed, posts, tags, obj))
 				});
 			} else {
-				res.json(formatPosts(feed, posts, [], obj))
+				res.json(formatPosts({}, feed, posts, [], obj))
 			}
 		}
     }, function(err) {
