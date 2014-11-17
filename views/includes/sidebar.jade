@@ -16,6 +16,7 @@ nav.navbar#hdr(style='margin-bottom:0')
 			a(href="/subscription/user/reading-list",id='All')
 				i.fa.fa-fw.fa-bars
 				| All
+			span.badge(ng-if="rlurc > 0") {{rlurc}}
 		.line-separator
 		.list-group-item(ng-repeat="sub in subs",ng-class="{active: isActive('{{sub.id}}')}")
 			a.text-overflow(href="/subscription/{{sub.id}}")

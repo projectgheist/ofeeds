@@ -1,4 +1,4 @@
-.row
+.row(ng-class="{read:isRead(post)}")
 	.col-xs-8
 		h4
 			a(href='{{post.alternate.href}}',target='_blank') {{post.title}}

@@ -1,4 +1,4 @@
-.row(ng-click="toggle(post)",style='padding: 10px 0')
+.row(ng-click="toggle(post)",ng-class="isRead(post) ? 'read' : ''",style='padding: 10px 0')
 	div(ng-if="stream.showOrigin")
 		.visible-lg.col-lg-2
 			a(href="#/subscription/feed/{{post.origin.url}}") 

@@ -16,7 +16,7 @@
 								i.fa.fa-fw.fa-check
 					li
 						a(href='#',alt='Refresh',ng-click='rfrsh()') 
-							i.fa.fa-fw.fa-refresh
+							i.fa.fa-fw.fa-refresh#ar(ng-class="isSpinning() ? 'fa-spin' : ''")
 					li
 						a.dropdown-toggle(alt='Options',data-toggle="dropdown") 
 							i.fa.fa-fw.fa-ellipsis-v
@@ -29,6 +29,10 @@
 								a(href='',ng-click="updateStyle('tile')")
 									i.fa.fa-fw.fa-th
 									| Tile view
+							li
+								a(href='',ng-click="updateStyle('mini')")
+									i.fa.fa-fw.fa-list
+									| Minimal view
 							li.divider
 							li
 								a(href='')

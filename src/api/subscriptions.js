@@ -73,7 +73,8 @@ app.get('/api/0/subscription/list', function(req, res) {
 		res.status(500).send('User not defined!');
 	} else {
 		// get tags
-		var tags = ut.parseTags(['user/-/state/reading-list','user/-/state/read'], req.user);
+		var tags = ut.parseTags(['user/-/state/reading-list','user/-/state/read'], req.user),
+			tuc = 0;
 		return db.getTags(tags[0]).then(function(readinglist) {
 			// no feeds returned
 			if (!readinglist) {
@@ -91,6 +92,8 @@ app.get('/api/0/subscription/list', function(req, res) {
 							label: 	tag.name
 						};
 					});
+					// increment total unread count
+					tuc += c.length;
 					return {
 						favicon:		f.favicon,
 						id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
@@ -104,6 +107,9 @@ app.get('/api/0/subscription/list', function(req, res) {
 			});
 			return rs.all(a);			
 		}).then(function(s) {
+			// add separate reading-list
+			s.push({id:encodeURIComponent('label/reading-list'),unreadcount:tuc});
+			// return json value
 			return res.json(s);
 		}, function(err) {
 			res.status(500).send(err);
@@ -158,7 +164,7 @@ app.get('/api/0/subscription/refresh', function(req, res) {
 });
 
 app.post('/api/0/subscription/quickadd', function(req, res) {
-    // is user logged in?
+   	// is user logged in?
 	if (!req.isAuthenticated()) {
         return;
 	}

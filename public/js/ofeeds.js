@@ -5,7 +5,8 @@ var ta = [],
 	gTemplateID = 'list',
 	gTemplates = {
 		'list': ['/templates/post-compact','/templates/post-expand'],
-		'tile': ['/templates/post-tile']
+		'tile': ['/templates/post-tile'],
+		'mini': ['/templates/post-minimal','/templates/post-expand'],
 	};
 
 /**
@@ -13,7 +14,7 @@ var ta = [],
  */
 jQuery(document).ready(function($) {
 	var sb = new Bloodhound({
-		datumTokenizer: function(d) { console.log(d); return Bloodhound.tokenizers.whitespace(d.title); },
+		datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.title); },
 		queryTokenizer: Bloodhound.tokenizers.whitespace,
 		remote: {
 			url: '/api/0/subscription/search?q=',
@@ -175,6 +176,7 @@ app.directive('ngInclude', function() {
 				if (s.cp && p.uid === s.cp.uid) {
 					// set expand class
 					element.addClass('expand');
+					s.markAsRead(p);
 					// if not infinite scrolling
 					if (!s.params.nt) {
 						// scroll to article
@@ -272,10 +274,9 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		$('html,body').scrollTo($('#'+id), 400, {queue: false, offset: {top: offset || 0}});
  	}
 	$scope.rfrsh = function() {
-		if (!$('#ar').hasClass('fa-spin')) {
-			$('#ar').addClass('fa-spin');
+		if (!$scope.rf) {
 			$scope.rf = true;
-		}		
+		}
 		RefreshFeed.query({'q':$scope.params.value},
 			function(data) {
 				// clear array of posts
@@ -288,8 +289,9 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				$scope.gtposts({t:'alert-success',m:['<strong>Successfully</strong> refreshed feed (',$scope.stream.title,')'].join(' ')});
 			},
 			function(err) {
+				// show error message
 				ShowAlertMessage('alert-danger',['An <strong>error</strong> occured when trying to refresh feed (',$scope.stream.title,')'].join(' '));
-				$('#ar').removeClass('fa-spin');
+				// turn off spinner
 				scope.rf = false;
 		});
 	}
@@ -309,12 +311,10 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		});
 	}	
 	$scope.gtposts = function(m) {
-		if (!$('#ar').hasClass('fa-spin')) {
-			$('#ar').addClass('fa-spin');
+		if (!$scope.rf) {
 			$scope.rf = true;
 		}
 		GetPosts.query($scope.params,function(data) {
-			$('#ar').removeClass('fa-spin');
 			$scope.rf = false;
 			if (!data || !data.items || data.items.length <= 0) {
 				return;
@@ -337,7 +337,6 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				ShowAlertMessage(m.t,m.m);
 			}
 		}, function(err) {
-			$('#ar').removeClass('fa-spin');
 			$scope.rf = false;
 		});
 	}
@@ -351,13 +350,16 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}
 	}
 	$scope.loadMore = function() {
+		// make sure
 		if (!$scope.stream || !$scope.stream.items ||
 			$scope.stream.items.length <= 0) {
+			// skip rest of function
 			return;
 		}
 		// last post update time
 		var t = $scope.stream.items[$scope.stream.items.length-1].timestampUsec;
 		if (t !== $scope.params.nt) {
+			// set new fetch time
 			$scope.params.nt = t;
 			// retrieve posts
 			$scope.gtposts();
@@ -389,7 +391,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		if (!p || p === undefined) {
 			return;
 		}
-		if (p.read) {
+		if (isRead(p)) {
 			$scope.markAsUnread(p);
 		} else {
 			$scope.markAsRead(p);
@@ -418,10 +420,12 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		});
 	}
 	$scope.isRead = function(p) {
-		return p.read;
+		return (p.read > 0) ? true : false;
+	}
+	$scope.isSpinning = function() {
+		return $scope.rf;
 	}
 	$scope.expand = function(p) {
-		$scope.markAsRead(p);
 		if (gTemplates[gTemplateID].length <= 1) {
 			return;
 		}
@@ -433,7 +437,6 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}
 	}
 	$scope.toggle = function(p) {
-		$scope.markAsRead(p);
 		if (gTemplates[gTemplateID].length <= 1) {
 			return;
 		}
@@ -496,6 +499,19 @@ app.controller('AppFeeds', function($scope, $http, $location, GetFeeds) {
 	});
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
+			// loop subscription array
+			for (var i = 0; i < data.length; ++i) {
+				// if reading-list found
+				if (decodeURIComponent(data[i].id) === 'label/reading-list') {
+					// set reading-list unread count
+					$scope.rlurc = data[i].unreadcount;
+					// remove item from array
+					data.splice(i, 1);
+					// no need to continue
+					break;
+				}
+			}
+			// update subscriptions
 			$scope.subs = data;
 		}, function(err) {
 		});
@@ -503,6 +519,7 @@ app.controller('AppFeeds', function($scope, $http, $location, GetFeeds) {
 	$scope.isActive = function(str) {
 		var s = str.substring('feed%2F'.length,str.length),
 			a = new RegExp(decodeURIComponent(s));
+		// do regex test
 		return a.test($location.path());
 	}
 	$scope.gotosub = function(obj) {

@@ -1,4 +1,4 @@
 div(style='min-height:85px')
 	include post-nav
 .list-article-group(infinite-scroll='loadMore()',infinite-scroll-distance='2')
-	.article(ng-repeat='post in stream.items',ng-include='post.template',ng-class="{read:isRead(post)}",on-last-repeat='')
+	.article(ng-repeat='post in stream.items',ng-include='post.template',on-last-repeat='')
