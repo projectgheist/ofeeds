@@ -163,6 +163,7 @@ app.get('/api/0/subscription/refresh', function(req, res) {
     });
 });
 
+// subscribe to feed
 app.post('/api/0/subscription/quickadd', function(req, res) {
    	// is user logged in?
 	if (!req.isAuthenticated()) {

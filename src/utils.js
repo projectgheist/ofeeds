@@ -14,6 +14,14 @@ exports.ref = function(type) {
     };
 };
 
+exports.refAndIndex = function(type) {
+    return {
+        type: mg.Schema.Types.ObjectId,
+        ref: type,
+		index: 1
+    };
+};
+
 // check if the string is a url
 exports.isUrl = function(url) {
     return vd.isURL(url);
