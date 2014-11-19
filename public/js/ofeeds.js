@@ -314,6 +314,9 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		if (!$scope.rf) {
 			$scope.rf = true;
 		}
+		if ($scope.ignoreReadArticles) {
+			$scope.params.xt = 'user/-/state/read';
+		}
 		GetPosts.query($scope.params,function(data) {
 			$scope.rf = false;
 			if (!data || !data.items || data.items.length <= 0) {
@@ -391,11 +394,20 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		if (!p || p === undefined) {
 			return;
 		}
-		if (isRead(p)) {
+		if ($scope.isRead(p)) {
 			$scope.markAsUnread(p);
 		} else {
 			$scope.markAsRead(p);
 		}
+	}
+	$scope.toggleIgnoreReadArticles = function() {
+		if ($scope.ignoreReadArticles) {
+			$scope.ignoreReadArticles = !$scope.ignoreReadArticles;
+		} else {
+			$scope.ignoreReadArticles = true;
+		}
+		// refresh stream to indicate new value
+		$scope.rfrsh();
 	}
 	$scope.markAsRead = function(p) {
 		if (!p || p === undefined) {
