@@ -1,6 +1,6 @@
 {
   "name": "OFeeds",
-  "version": "0.0.1",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "start": "node app.js",
@@ -32,7 +32,7 @@
   ],
   "author": "",
   "license": "BSD",
-  "subdomain": "www.google.com",
+  "subdomain": "",
   "engines": {
     "node": "0.10.x"
   }
