@@ -94,6 +94,9 @@ exports.parseParameters = function(obj,user) {
     return obj;
 };
 exports.parseHtmlEntities = function(str) {
+	if (!str) {
+		return "";
+	}
     return str.replace(/&#([0-9]{1,3});/gi, function(match, numStr) {
         var num = parseInt(numStr, 10); // read num as normal number
         return String.fromCharCode(num);

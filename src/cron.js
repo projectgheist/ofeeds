@@ -59,24 +59,28 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 		st
         .findOrCreate(st.Post, {'feed':feed, 'guid':guid})
         .then(function(post) {
-			post.guid		= (data.guid || data.link);
-			post.title 		= ut.parseHtmlEntities(data.title);
-			post.body		= data.description;
+			post.guid		= guid;
+			post.title 		= ut.parseHtmlEntities(data.title || '');
+			post.body		= data.description || "";
 			post.summary	= (data.summary !== data.description) ? data.summary : '';
 			post.images		= data.images;
-			post.url		= data.link;
-			post.author		= data.author;
-			post.commentsURL= data.comments;
-			post.categories = data.categories;
+			post.url		= data.link || '';
+			post.author		= data.author || '';
+			post.commentsURL= data.comments || '';
+			post.categories = data.categories || [];
 			post.feed		= feed;
 			// prevent the publish date to be overridden
 			if (!post.published) {
 				post.published = data.pubdate || mm();
 			}
+			// if feeds post variable doesn't exist, make it an array
+			feed.posts || (feed.posts = []);
 			// add post to posts array
 			feed.posts.addToSet(post);
+			// return succesfully
 			rslv(post.save());
 		}, function(err) {
+			//console.log("ERROR!"+err);
 			rjct(err);
 		});
 	});
@@ -91,11 +95,15 @@ exports.RetrievePosts = function(posts, feed, stream) {
 		images.small = (data.image !== undefined && data.image.url && data.image.url.length > 0) ? {'url':data.image.url,'width':data.image.width || 0,'height':data.image.height || 0} : undefined;
 		if (data['media:thumbnail'] !== null || data['media:content'] !== null) {
 			var media = [data['media:thumbnail'],data['media:content']];
+			// loop array
 			for (var j in media) {
+				// local reference to array element
 				var obj = media[j];
+				// if not a valid object
 				if (!obj) {
 					continue;
 				}
+				// convert object to array if it isn't already
 				if (!Array.isArray(obj)) {
 					obj = [obj];
 				}
@@ -165,7 +173,9 @@ exports.RetrievePosts = function(posts, feed, stream) {
 			// Parse the post description for image/video tags
 			pr.write(data.description.toString("utf8")).end();
 		}
+		// store images in object
 		data.images = images;
+		// add
 		posts.push(exports.FindOrCreatePost(feed,(data.guid || data.link),data));
 	}
 };
@@ -224,7 +234,7 @@ exports.FetchFeed = function(feed) {
 		}, function (err, res, user) {
 			// return error
 			if (err || res.statusCode != 200) {
-				return exports.DeleteFeed(feed,(err || 'Bad status code'),reject);
+				return exports.DeleteFeed(feed,(err || 'Bad status code'), reject);
 			}
 		});
 		req.on('response', function(res) {
@@ -287,21 +297,28 @@ function UpdateAllFeeds(done) {
 	.all(st.Feed, opts) // retrieve all feeds
 	.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 	.then(function(feeds) {
+		//console.log("Start cron jobs!");
 		var a = [];
+		// loop all found feeds
 		for (var i in feeds) {
 			if (feeds[i].feedURL === undefined) {
+				//console.log("Remove feed: "+feeds[i].feedURL);
 				a.push(feeds[i].remove());
 			} else {
+				//console.log("Fetch feed: "+feeds[i].feedURL);
 				a.push(exports.FetchFeed(feeds[i]));
 			}
 		}
 		if (a.length > 0) {
-			rs.all(a).then(function() { 
+			rs.all(a).then(function() {
+				//console.log("All feeds were updated succesfully!");
 				done();
 			}, function(err) {
+				//console.log("Cron job error: "+err);
 				done();
 			});
 		} else {
+			//console.log("No functions to execute!");
 			done();
 		}
 	});

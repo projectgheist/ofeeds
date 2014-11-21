@@ -226,6 +226,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		return ($(document).scrollTop() > 50);
 	}
 	$scope.makeHorizontal = function(e) {
+		// make element use the horizontal CSS
 		e.addClass('horizontal-image');
 		if (e.width() > e.parent().width()) {
 			e.css('left',Math.min(0,(e.parent().width() - e.width()) / 2));
@@ -414,6 +415,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			return;
 		}
 		SetTag.query({i:p.lid,a:'user/-/state/read'}, function(d) {
+			// mark post as read
 			p.read = true;
 			// notify sidebar to update
 			$rootScope.$broadcast('updateSubs');
@@ -425,6 +427,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			return;
 		}
 		SetTag.query({i:p.lid,r:'user/-/state/read'}, function(d) {
+			// mark post as unread
 			p.read = false;
 			// notify sidebar to update
 			$rootScope.$broadcast('updateSubs');
@@ -438,29 +441,37 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		return $scope.rf;
 	}
 	$scope.expand = function(p) {
+		// if template style doesn't have an expanded version, skip
 		if (gTemplates[gTemplateID].length <= 1) {
 			return;
 		}
+		// change the template of the post to the expanded version
 		p.template = gTemplates[gTemplateID][1];
+		// store post as the current post
 		$scope.cp = p;
+		// 
 		$scope.params.nt = undefined;
 		if ($scope.$root.$$phase != '$apply' && $scope.$root.$$phase != '$digest') {
 			$scope.$apply();
 		}
 	}
 	$scope.toggle = function(p) {
+		// if template style doesn't have an expanded version, skip
 		if (gTemplates[gTemplateID].length <= 1) {
 			return;
 		}
 		// make previous expanded post small again
 		if ($scope.cp && $scope.cp != p) {
+			// remove expand class from current post
 			$('#' + $scope.cp.uid).removeClass('expand');
+			// set post template to compact version
 			$scope.cp.template = gTemplates[gTemplateID][0];
 		}
 		// store current expanded post
 		if (p.template !== gTemplates[gTemplateID][1]) {
 			$scope.expand(p);
 		} else {
+			// set post template to compact version
 			p.template = gTemplates[gTemplateID][0];
 		}
 	}
