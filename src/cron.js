@@ -61,9 +61,10 @@ exports.FindOrCreatePost = function(feed,guid,data) {
         .then(function(post) {
 			post.guid		= guid;
 			post.title 		= ut.parseHtmlEntities(data.title || '');
-			post.body		= data.description || "";
+			post.body		= data.description || '';
 			post.summary	= (data.summary !== data.description) ? data.summary : '';
-			post.images		= data.images;
+			post.images		= data.images || {};
+			post.videos		= data.videos || [];
 			post.url		= data.link || '';
 			post.author		= data.author || '';
 			post.commentsURL= data.comments || '';
@@ -90,7 +91,8 @@ exports.RetrievePosts = function(posts, feed, stream) {
 	// data contains all the post information
 	var data;
 	while (data = stream.read()) {
-		var images = new ContainerImages();
+		var images = new ContainerImages(),
+			videos = [];
 		// Store orignal thumbnail url
 		images.small = (data.image !== undefined && data.image.url && data.image.url.length > 0) ? {'url':data.image.url,'width':data.image.width || 0,'height':data.image.height || 0} : undefined;
 		if (data['media:thumbnail'] !== null || data['media:content'] !== null) {
@@ -168,6 +170,10 @@ exports.RetrievePosts = function(posts, feed, stream) {
 				case 'A':
 					//console.log('a:'+tag.attributes.HREF);
 					break;
+				case 'IFRAME':
+					// add video url to array
+					videos.push(tag.attributes.SRC);
+					break;
 				}
 			}
 			// Parse the post description for image/video tags
@@ -175,6 +181,8 @@ exports.RetrievePosts = function(posts, feed, stream) {
 		}
 		// store images in object
 		data.images = images;
+		// store videos in object
+		data.videos = videos;
 		// add
 		posts.push(exports.FindOrCreatePost(feed,(data.guid || data.link),data));
 	}
@@ -197,6 +205,7 @@ exports.UpdateFeed = function(feed,posts,resolve,reject) {
 		if (a.length > 1 && a[1]) {
 			reject(a[1]);
 		} else {
+			console.log("Updated feed!");
 			// return feed
 			resolve(a[0]);
 		}
@@ -216,12 +225,12 @@ exports.DeleteFeed = function(feed,err,reject) {
  */
 exports.FetchFeed = function(feed) {
 	// early escape if no feed is returned 
-	if (!feed ||
+	/*if (!feed ||
 		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(feed); 
 		});
-	}
+	}*/
 	return new rs.Promise(function(resolve, reject) {
 		// pre-define variables
 		var parseError = false,
@@ -297,7 +306,7 @@ function UpdateAllFeeds(done) {
 	.all(st.Feed, opts) // retrieve all feeds
 	.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 	.then(function(feeds) {
-		//console.log("Start cron jobs!");
+		console.log("Start cron jobs!");
 		var a = [];
 		// loop all found feeds
 		for (var i in feeds) {
@@ -305,20 +314,21 @@ function UpdateAllFeeds(done) {
 				//console.log("Remove feed: "+feeds[i].feedURL);
 				a.push(feeds[i].remove());
 			} else {
-				//console.log("Fetch feed: "+feeds[i].feedURL);
+				console.log("Fetch feed: "+feeds[i].feedURL);
 				a.push(exports.FetchFeed(feeds[i]));
 			}
 		}
 		if (a.length > 0) {
+			console.log("Update feed count: " + a.length);
 			rs.all(a).then(function() {
-				//console.log("All feeds were updated succesfully!");
+				console.log("All feeds were updated succesfully!");
 				done();
 			}, function(err) {
 				//console.log("Cron job error: "+err);
 				done();
 			});
 		} else {
-			//console.log("No functions to execute!");
+			console.log("No functions to execute!");
 			done();
 		}
 	});
