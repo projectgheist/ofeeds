@@ -205,7 +205,6 @@ exports.UpdateFeed = function(feed,posts,resolve,reject) {
 		if (a.length > 1 && a[1]) {
 			reject(a[1]);
 		} else {
-			console.log("Updated feed!");
 			// return feed
 			resolve(a[0]);
 		}
@@ -306,7 +305,7 @@ function UpdateAllFeeds(done) {
 	.all(st.Feed, opts) // retrieve all feeds
 	.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 	.then(function(feeds) {
-		console.log("Start cron jobs!");
+		//console.log("Start cron jobs!");
 		var a = [];
 		// loop all found feeds
 		for (var i in feeds) {
@@ -314,21 +313,21 @@ function UpdateAllFeeds(done) {
 				//console.log("Remove feed: "+feeds[i].feedURL);
 				a.push(feeds[i].remove());
 			} else {
-				console.log("Fetch feed: "+feeds[i].feedURL);
+				//console.log("Fetch feed: "+feeds[i].feedURL);
 				a.push(exports.FetchFeed(feeds[i]));
 			}
 		}
 		if (a.length > 0) {
-			console.log("Update feed count: " + a.length);
+			//console.log("Update feed count: " + a.length);
 			rs.all(a).then(function() {
-				console.log("All feeds were updated succesfully!");
+				//console.log("All feeds were updated succesfully!");
 				done();
 			}, function(err) {
 				//console.log("Cron job error: "+err);
 				done();
 			});
 		} else {
-			console.log("No functions to execute!");
+			//console.log("No functions to execute!");
 			done();
 		}
 	});
