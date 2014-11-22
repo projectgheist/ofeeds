@@ -7,19 +7,31 @@ var mg = require('mongoose'),
 // A Post in a Feed, shared across all users
 // User specific tags stored here to avoid having separate post records for each user
 var Post = mg.Schema({
+	// reference to the feed this post belongs to
     feed: ut.refAndIndex('Feed'),
-    guid: { type: String, index: 1 },		// unique post identifier for this feed
-    title: String, 							// post title
-    body: String,							// post html markup
+	// unique post identifier for this feed
+    guid: { type: String, index: 1 },
+	// post title
+    title: String,
+	// post html markup
+    body: String,
     summary: String,
+	// object that contains URLs to images in the post
     images: mg.Schema.Types.Mixed,
-	videos: [String],						// array of found video URLs
-	url: String,							// URL to original post location
-    published: Date,						// post html markup
+	// array of found video URLs
+	videos: [String],
+	// URL to original post location
+	url: String,
+	// timestamp of post publish date
+    published: Date,
+	// timestamp of post update date
     updated: Date,
-    author: String,							// author/writer of the post
+	// author/writer of the post
+    author: String,	
+	// url link to comments page
     commentsURL: String,
     categories: [String],
+	// array of tags that are attached to this post
 	tags: [ut.ref('Tag')]
 });
 

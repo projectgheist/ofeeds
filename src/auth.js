@@ -1,5 +1,4 @@
-/*
- * Module dependencies
+/** Module dependencies
  */
 var ex = require('express'),
 	cf = require('../config'),
@@ -12,7 +11,8 @@ var app = module.exports = ex();
 	
 // Redirect the user to Google for authentication.  When complete, Google
 // will redirect the user back to the application at '/auth/google/callback'
-app.get('/auth/google', pp.authenticate('google', { scope: 'https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email' }));
+app.get('/auth/google', 
+		pp.authenticate('google', { scope: 'https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email' }));
 
 // Google will redirect the user to this URL after authentication.  Finish
 // the process by verifying the assertion.  If valid, the user will be
