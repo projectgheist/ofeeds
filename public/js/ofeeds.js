@@ -188,11 +188,9 @@ app.directive('ngInclude', function() {
 					s.stretchImg($(this),p);
 				});
 				// make all links open in a new tab
-				var o = $('.article-content').find('a');
-				//.each(function() {
-					//console.log($(this));
-					//$(this).attr("target","_blank");
-				//});
+				element.find('.article-content').find('a').each(function() {
+					$(this).attr("target","_blank");
+				});
 			}
         }
     };
@@ -215,7 +213,7 @@ app.directive('resize', function ($window) {
         });
     }
 });
-app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, GetPosts, SetTag, FeedSubmit, RefreshFeed) {
+app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, $sce, GetPosts, SetTag, FeedSubmit, RefreshFeed) {
 	$scope.gotostream = function(obj) {
 		// go to subscription local url
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
@@ -330,6 +328,8 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				$scope.stream = data;
 			}
 			for (var i in $scope.stream.items) {
+				// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
+				$scope.stream.items[i].content.content = $sce.trustAsHtml($scope.stream.items[i].content.content);
 				if ($scope.cp && $scope.stream.items[i].uid === $scope.cp.uid) {
 					$scope.expand($scope.stream.items[i]);
 				} else {
