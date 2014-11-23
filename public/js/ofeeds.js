@@ -269,10 +269,13 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
         $scope.scrollto('map', 0);
 	}
 	$scope.scrollto = function(id, offset) {
+		// clear scroll to array
 		$.scrollTo.window().queue([]).stop();
+		// scroll to next element
 		$('html,body').scrollTo($('#'+id), 400, {queue: false, offset: {top: offset || 0}});
  	}
 	$scope.rfrsh = function() {
+		// set refresh page to TRUE
 		if (!$scope.rf) {
 			$scope.rf = true;
 		}
@@ -310,13 +313,16 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		});
 	}	
 	$scope.gtposts = function(m) {
+		// set refresh page to TRUE
 		if (!$scope.rf) {
 			$scope.rf = true;
 		}
+		// ignore read articles if stated
 		if ($scope.ignoreReadArticles) {
 			$scope.params.xt = 'user/-/state/read';
 		}
 		GetPosts.query($scope.params,function(data) {
+			// turn off refresh
 			$scope.rf = false;
 			if (!data || !data.items || data.items.length <= 0) {
 				return;
@@ -328,8 +334,13 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				$scope.stream = data;
 			}
 			for (var i in $scope.stream.items) {
-				// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
-				$scope.stream.items[i].content.content = $sce.trustAsHtml($scope.stream.items[i].content.content);
+				// local reference to variable
+				var str = $scope.stream.items[i].content.content;
+				// check if string
+				if (typeof str == 'string' || str instanceof String) {
+					// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
+					$scope.stream.items[i].content.content = $sce.trustAsHtml($scope.stream.items[i].content.content);
+				}
 				if ($scope.cp && $scope.stream.items[i].uid === $scope.cp.uid) {
 					$scope.expand($scope.stream.items[i]);
 				} else {
