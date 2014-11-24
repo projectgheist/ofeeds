@@ -224,12 +224,12 @@ exports.DeleteFeed = function(feed,err,reject) {
  */
 exports.FetchFeed = function(feed) {
 	// early escape if no feed is returned 
-	/*if (!feed ||
+	if (!feed ||
 		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(feed); 
 		});
-	}*/
+	}
 	return new rs.Promise(function(resolve, reject) {
 		// pre-define variables
 		var parseError = false,
