@@ -166,33 +166,59 @@ app.directive('onLastRepeat', function() {
 app.directive('ngInclude', function() {
     return {
         restrict: 'A',
-		link: {
-			post: function(scope, element, attrs) {
-				var s = scope.$parent.$parent,
-					p = scope.$parent.post;
-				// set item id (can't do this in the template as it won't show up correctly in the document)
-				element.attr('id',p.uid);
-				// if a current element has been expanded
-				if (s.cp && p.uid === s.cp.uid) {
-					// set expand class
-					element.addClass('expand');
-					s.markAsRead(p);
-					// if not infinite scrolling
-					if (!s.params.nt) {
-						// scroll to article
-						s.scrollto(s.cp.uid, -80);
+		link: function(scope, element, attrs) {
+			var s = scope.$parent.$parent,
+				p = scope.$parent.post;
+			// Trigger when number of children changes,
+            // including by directives like ng-repeat
+            var watch = scope.$watch(function() {
+                return element.children().length;
+            }, function() {
+                // Wait for templates to render
+                scope.$evalAsync(function() {
+					// set item id (can't do this in the template as it won't show up correctly in the document)
+					element.attr('id',p.uid);
+					// if a current element has been expanded
+					if (s.cp && p.uid === s.cp.uid) {
+						// set expand class
+						element.addClass('expand');
+						// mark post as read
+						s.markAsRead(p);
+						// if not infinite scrolling
+						if (!s.params.nt) {
+							// scroll to article
+							s.scrollto(s.cp.uid, -80);
+						}
+						// make all links open in a new tab
+						element.find('.article-content').find('a').each(function(e) {
+							// open in new tab
+							$(this).attr("target","_blank");
+							// if tumblr site
+							var u = $(this).attr("href"),
+								r = new RegExp("(?:http:\/\/)?(?:www\.+)?([A-Za-z0-9]*)(\.tumblr\.com\/)"),
+								a = u.match(r);
+							// 
+							if (a && a.length > 0) {
+								// give it a tooltip
+								$(this).attr("data-toggle","popover").attr("title",['<a href="',a[0],'rss">',a[1],'</a>'].join('')).attr("data-content","Lorem ipsum<br>"+['<a href="',a[0],'rss">',a[1],'</a>'].join(''));
+								// initialise tooltips
+								$('[data-toggle="popover"]').popover({trigger: 'hover', delay:{hide: 3000}, html: true});
+							}
+						});
+						// don't have iframes that are larger then the article width
+						element.find('iframe').each(function(e) {
+							if ($(this).width() > element.width()) {
+								$(this).width('100%');
+							}
+						});
 					}
-				}
-				// find thumbnail image
-				element.find('.tn img').one('load', function() {
-					s.stretchImg($(this),p);
-				});
-				// make all links open in a new tab
-				element.find('.article-content').find('a').each(function() {
-					$(this).attr("target","_blank");
-				});
-			}
-        }
+                });
+            });
+			// find thumbnail image
+			element.find('.tn img').one('load', function() {
+				s.stretchImg($(this),p);
+			});
+		}
     };
 });
 app.directive('resize', function ($window) {

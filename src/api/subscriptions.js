@@ -86,6 +86,7 @@ app.get('/api/0/subscription/list', function(req, res) {
 			var a = results[0].map(function(f) {
 				// find posts in feed WHERE 'read'-tag 'not in' array
 				return db.Post.find({ _id: {$in: f.posts}, tags: {$nin: results[1]} }).then(function(c) {
+					// create array of users tags for this feed
 					var categories = f.tagsForUser(req.user).map(function(tag) {
 						return {
 							id: 	tag.stringID,

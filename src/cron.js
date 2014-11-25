@@ -237,6 +237,7 @@ exports.FetchFeed = function(feed) {
 		
 		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
 		var req = rq.get({
+			timeout:	15000,
 			url: 		decodeURIComponent(feed.feedURL), 
 			headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 		}, function (err, res, user) {
