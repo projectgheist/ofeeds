@@ -196,7 +196,6 @@ exports.UpdateFeed = function(feed,posts,resolve,reject) {
 		return [feed];
 	}, function(err) {
 		feed.lastModified = feed.failedCrawlTime = new Date();
-		feed.lastFailureWasParseFailure = parseError;
 		return [feed, e];
 	}).then(function(a) {
 		// save feed in db
@@ -284,7 +283,10 @@ exports.FetchFeed = function(feed) {
 			})
 			.on('end', function() {
 				if (parseError) {
-					reject('Feed parse error!');
+					feed.lastModified = feed.failedCrawlTime = new Date();
+					feed.lastFailureWasParseFailure = parseError;
+					// save feed in db
+					resolve(feed.save());
 				} else {
 					exports.UpdateFeed(feed,posts,resolve,reject);
 				}
