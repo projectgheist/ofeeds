@@ -57,6 +57,12 @@ ap.get("/logout", ensureAuth, function(req, res) {
 ap.get("/dashboard", ensureAuth, function(req, res) {
 	res.redirect('/subscription/user/reading-list');
 });
+ap.get("/manage", function(req, res) {
+	res.render('manage', { 
+		'config': cf.site,
+		'user': req.user
+	});
+});
 ap.get("/subscription/*", ensureAuth, function(req, res) {
 	res.render('dashboard', { 
 		'config': cf.site,

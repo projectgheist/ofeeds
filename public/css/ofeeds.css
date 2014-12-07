@@ -9,6 +9,9 @@
 .text-center {
 	text-align: center;
 }
+.table>tbody>tr>td {
+    vertical-align: middle;
+}
 /* webkit solution */
 .text-center ::-webkit-input-placeholder { 
 	text-align: center; 
