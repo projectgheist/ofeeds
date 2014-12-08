@@ -101,14 +101,16 @@ app.get('/api/0/subscription/list', function(req, res) {
 						title: 			f.titleForUser(req.user),
 						unreadcount: 	c.length,
 						shortid: 		f.shortID,
-						categories: 	categories
+						categories: 	categories,
+						crawlTime:		f.successfulCrawlTime,
+						updated:		f.lastModified
 					};
 				}, function(err) {
 				});
 			});
 			return rs.all(a);			
 		}).then(function(s) {
-			// add separate reading-list
+			// add separate reading-list element
 			s.push({id:encodeURIComponent('label/reading-list'),unreadcount:tuc});
 			// return json value
 			return res.json(s);
