@@ -14,7 +14,9 @@ var ta = [],
  */
 jQuery(document).ready(function($) {
 	var sb = new Bloodhound({
-		datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.title); },
+		datumTokenizer: function(d) { 
+			return Bloodhound.tokenizers.whitespace(d.title); 
+		},
 		queryTokenizer: Bloodhound.tokenizers.whitespace,
 		remote: {
 			url: '/api/0/subscription/search?q=',
@@ -48,7 +50,7 @@ jQuery(document).ready(function($) {
 		if ($('#m').length) {
 			angular.element($('#m')).scope().gotosub(datum);
 		} else {
-			angular.element($('#map')).scope().gotostream(datum);
+			angular.element($('#map')).scope().gotostream(datum,true);
 		}
         // reset input value & lose focus
         $('.typeahead')
@@ -59,6 +61,14 @@ jQuery(document).ready(function($) {
 });
 
 // single keys
+/** Set focus on text input field
+ */
+Mousetrap.bind('/', function() {
+	$("#nrss").focus();
+	// prevent default browser behavior
+	return false;
+});
+
 /** Move to article below (previous) in stream
  */
 Mousetrap.bind('j', function() {
@@ -163,7 +173,7 @@ app.directive('onLastRepeat', function() {
 		}
 	};
 });
-app.directive('ngInclude', function() {
+app.directive('ngInclude', function($compile) {
     return {
         restrict: 'A',
 		link: function(scope, element, attrs) {
@@ -195,14 +205,20 @@ app.directive('ngInclude', function() {
 							$(this).attr("target","_blank");
 							// if tumblr site
 							var u = $(this).attr("href"),
-								r = new RegExp("(?:http:\/\/)?(?:www\.+)?([A-Za-z0-9]*)(\.tumblr\.com\/)"),
+								r = new RegExp("(?:http:\/\/)?(?:www\.+)?([A-Za-z0-9\-]*)(\.tumblr\.com\/)"),
 								a = u.match(r);
 							// 
 							if (a && a.length > 0) {
 								// give it a tooltip
-								$(this).attr("data-toggle","popover").attr("title",['<a href="',a[0],'rss">',a[1],'</a>'].join('')).attr("data-content","Lorem ipsum<br>"+['<a href="',a[0],'rss">',a[1],'</a>'].join(''));
+								$(this)
+								.attr("data-toggle","popover")
 								// initialise tooltips
-								$('[data-toggle="popover"]').popover({trigger: 'hover', delay:{hide: 3000}, html: true});
+								$('[data-toggle="popover"]').popover({ 
+								trigger: 'hover', 
+									delay:{hide: 3000}, 
+									html: true, 
+									'content': function() { return $compile(['<a ng-click="gotoFeed(\'',a[0].trim(),'rss\')">',a[1],'</a>'].join(''))(scope); }
+								});
 							}
 						});
 						// don't have iframes that are larger then the article width
@@ -235,19 +251,31 @@ app.directive('resize', function ($window) {
 			$('#sa').width($('#sap').width());
         }, true);
         w.bind('resize', function () {
-            scope.$apply();
+			if (!scope.$$phase && !scope.$root.$$phase) {
+            	scope.$apply();
+			}
         });
     }
 });
 app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, $sce, GetPosts, SetTag, FeedSubmit, RefreshFeed) {
-	$scope.gotostream = function(obj) {
+	$scope.gotostream = function(obj,refresh) {
 		// go to subscription local url
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
-		// call '$apply' oteherwise angular doesn't recognize that the url has changed
-		$scope.$apply();
+		if (refresh && !$scope.$$phase && !$scope.$root.$$phase) {
+			// call '$apply' oteherwise angular doesn't recognize that the url has changed
+			$scope.$apply();
+		}
 	}
 	$scope.canScroll = function() {
 		return ($(document).scrollTop() > 50);
+	}
+	$scope.gotoFeed = function(r) {
+		$http.get('/api/0/subscription/search',{params:{q:r}})
+		.success(function(data, status, headers, config) {
+			$scope.gotostream(data[0],false);
+		})
+		.error(function(data, status, headers, config) {
+		});
 	}
 	$scope.makeHorizontal = function(e) {
 		// make element use the horizontal CSS
@@ -298,14 +326,18 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		// clear scroll to array
 		$.scrollTo.window().queue([]).stop();
 		// scroll to next element
-		$('html,body').scrollTo($('#'+id), 400, {queue: false, offset: {top: offset || 0}});
+		$('html,body').scrollTo($('#'+id), 400, { queue: false, offset: {top: offset || 0} });
  	}
 	$scope.rfrsh = function() {
+		// make sure that it has a param value
+		if ($scope.params === undefined) {
+			return;
+		}
 		// set refresh page to TRUE
 		if (!$scope.rf) {
 			$scope.rf = true;
 		}
-		RefreshFeed.query({'q':$scope.params.value},
+		RefreshFeed.query({ 'q': $scope.params.value },
 			function(data) {
 				// clear array of posts
 				$scope.stream.items = [];
@@ -327,6 +359,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		
 	}
 	$scope.sbmt = function() {
+		// submit new feed URL to server
 		FeedSubmit.save({q: $scope.stream.feedURL},function(data) {
 			// show message
 			ShowAlertMessage('alert-success',['<strong>Successfully</strong> subscribed to feed (',$scope.stream.title,')'].join(' '));
@@ -339,6 +372,10 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		});
 	}	
 	$scope.gtposts = function(m) {
+		// make sure that it has a param value
+		if ($scope.params === undefined) {
+			return;
+		}
 		// set refresh page to TRUE
 		if (!$scope.rf) {
 			$scope.rf = true;
@@ -350,15 +387,19 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		GetPosts.query($scope.params,function(data) {
 			// turn off refresh
 			$scope.rf = false;
+			// make sure variables exist
 			if (!data || !data.items || data.items.length <= 0) {
 				return;
 			}
 			if ($scope.stream && $scope.stream.title === data.title &&
 				($scope.stream.items.length === 0 || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))) {
+				// append to the articles that were already in the array
 				$scope.stream.items = $scope.stream.items.concat(data.items);
 			} else {
+				// copy retrieved articles to stream
 				$scope.stream = data;
 			}
+			// loop all articles/items
 			for (var i in $scope.stream.items) {
 				// local reference to variable
 				var str = $scope.stream.items[i].content.content;
@@ -406,8 +447,11 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			$scope.gtposts();
 		}
 	};
+	$scope.lmf = function() {
+		
+	}
 	$scope.next = function() {
-		if (!$scope.cp && $scope.stream.items.length > 0) {
+		if (!$scope.cp && $scope.stream !== undefined && $scope.stream.items.length > 0) {
 			$scope.expand($scope.stream.items[0]);
 		} else if ($scope.cp) {
 			// retrieve the next post in the list
@@ -419,7 +463,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}
 	}
 	$scope.prev = function() {
-		if (!$scope.cp && $scope.stream.items.length > 0) {
+		if (!$scope.cp && $scope.stream !== undefined && $scope.stream.items.length > 0) {
 			$scope.expand($scope.stream.items[0]);
 		} else if ($scope.cp) {
 			var p = angular.element($('#'+$scope.cp.uid).prev()).scope();
@@ -448,7 +492,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		$scope.rfrsh();
 	}
 	$scope.markAsRead = function(p) {
-		if (!p || p === undefined) {
+		if (!$('#m').length || (!p || p === undefined)) {
 			return;
 		}
 		SetTag.query({i:p.lid,a:'user/-/state/read'}, function(d) {
@@ -460,7 +504,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		});
 	}
 	$scope.markAsUnread = function(p) {
-		if (!p || p === undefined) {
+		if (!$('#m').length || (!p || p === undefined)) {
 			return;
 		}
 		SetTag.query({i:p.lid,r:'user/-/state/read'}, function(d) {
@@ -472,6 +516,9 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		});
 	}
 	$scope.isRead = function(p) {
+		if (!$('#m').length) {
+			return false;
+		}
 		return (p.read > 0) ? true : false;
 	}
 	$scope.isSpinning = function() {
@@ -488,7 +535,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		$scope.cp = p;
 		// 
 		$scope.params.nt = undefined;
-		if ($scope.$root.$$phase != '$apply' && $scope.$root.$$phase != '$digest') {
+		if (!$scope.$$phase && !$scope.$root.$$phase) {
 			$scope.$apply();
 		}
 	}
@@ -521,14 +568,14 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 				top: $('#map').position().top
 			}
 		});
-		$('#ma').width($('#map').width());
+		$('#ma').width($('body').width());
 	}
 	$scope.$watch(
 		function () {
-			return $('#ma').width() === $('#map').width();
+			return $('#ma').width() === $('body').width();
 		},
 		function (n, o) {
-			$('#ma').width($('#map').width());
+			$('#ma').width($('body').width());
 			$scope.setaffix();
 		}
 	)
@@ -544,11 +591,12 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		// don't URL encode the values of param as they get converted later on anyway
 		var v = String($routeParams.value);
 		// declare variable
-		$scope.params = {};
-		// set type
-		$scope.params.type = (String($routeParams.type) || 'feed');
-		// remove trailing '*/' otherwise use normal url
-		$scope.params.value = (/\*(\/)*$/.test(v) ? v.substring(0,v.length-1) : v);
+		$scope.params = {
+			// set type
+			type: (String($routeParams.type) || 'feed'),
+			// remove trailing '*/' otherwise use normal url
+			value: (/\*(\/)*$/.test(v) ? v.substring(0, v.length - 1) : v)
+		};
 		// retrieve posts
 		$scope.gtposts();
 	}
