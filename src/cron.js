@@ -63,12 +63,12 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 			post.title 		= ut.parseHtmlEntities(data.title || '');
 			post.body		= data.description || '';
 			post.summary	= (data.summary !== data.description) ? data.summary : '';
-			post.images		= data.images || {};
-			post.videos		= data.videos || [];
+			post.images		= data.images || undefined;
+			post.videos		= data.videos || undefined;
 			post.url		= data.link || '';
 			post.author		= data.author || '';
 			post.commentsURL= data.comments || '';
-			post.categories = data.categories || [];
+			post.categories = data.categories || undefined;
 			post.feed		= feed;
 			// prevent the publish date to be overridden
 			if (!post.published) {
@@ -323,10 +323,10 @@ function UpdateAllFeeds(done) {
 		if (a.length > 0) {
 			//console.log("Update feed count: " + a.length);
 			rs.all(a).then(function() {
-				//console.log("All feeds were updated succesfully!");
+				console.log("All feeds were updated succesfully!");
 				done();
 			}, function(err) {
-				//console.log("Cron job error: "+err);
+				console.log("Cron job error: "+err);
 				done();
 			});
 		} else {
