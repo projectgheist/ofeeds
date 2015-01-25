@@ -52,12 +52,12 @@ jQuery(document).ready(function($) {
 		} else {
 			angular.element($('#map')).scope().gotostream(datum,true);
 		}
-        // reset input value & lose focus
-        $('.typeahead')
-        .typeahead('val', '')
-        .blur();
+        
+        $('.typeahead').blur(); // lose focus
+        //.typeahead('val', '')  // reset input value
 	});
 	$('#sa').affix();
+    $('.typeahead').focus(); // focus
 });
 
 // single keys
@@ -160,6 +160,12 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 	.when('/subscription/:type/:value', {
 		templateUrl: function(urlattr) {
 			return '/templates/posts-list';
+		},
+		controller: 'AppStream'
+	})
+	.otherwise({
+		templateUrl: function(urlattr) {
+			return '/templates/empty';
 		},
 		controller: 'AppStream'
 	});
@@ -267,7 +273,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}
 	}
 	$scope.canScroll = function() {
-		return ($(document).scrollTop() > 50);
+		return ($(document).scrollTop() > 0);
 	}
 	$scope.gotoFeed = function(r) {
 		$http.get('/api/0/subscription/search',{params:{q:r}})
@@ -578,7 +584,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			$('#ma').width($('body').width());
 			$scope.setaffix();
 		}
-	)
+	);
 	$scope.$on('onRepeatLast', function(scope, element, attrs) {
 		// make all links open in a new tab
 		$(".article-content a").each(function() {

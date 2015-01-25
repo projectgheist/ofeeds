@@ -96,11 +96,8 @@
 	max-height:768px;
 }
 
-.article p, .article .btn-group {
+.article p {
 	margin: 0;
-}
-.article .btn {
-	padding: 4px 16px;
 }
 .article .read {
 	background-color: #D5D5D5;

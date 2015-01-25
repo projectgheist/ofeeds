@@ -1,6 +1,6 @@
 include includes/header
 div(ng-controller="AppStream")
-	#ma(data-spy="affix",data-offset-top="85")
+	#ma(data-spy="affix")
 		.nav.navbar.navbar-default
 			.container
 				.col-lg-2
@@ -14,13 +14,13 @@ div(ng-controller="AppStream")
 							.form-control-wrapper
 								input.input-lg.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style="width:100%")
 								span.material-input
-				.col-lg-4
+				.navbar-right
 					.collapse.navbar-collapse
 						ul.nav.navbar-nav
-							li
+							li(ng-if="stream !== undefined")
 								a(href="#",alt="Refresh",ng-click="rfrsh()") 
 									i.fa.fa-fw.fa-refresh#ar(ng-class="isSpinning() ? 'fa-spin' : ''")
-							li
+							li(ng-if="stream !== undefined")
 								a.dropdown-toggle(alt="Options",data-toggle="dropdown") 
 									i.fa.fa-fw.fa-ellipsis-v
 								ul.dropdown-menu

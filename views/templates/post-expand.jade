@@ -1,39 +1,29 @@
 .row(ng-class="{read:isRead(post)}")
 	.col-xs-8
-		h4
+		p
+			a(href="#/subscription/feed/{{post.origin.url}}") 
+				span.label.label-primary {{post.origin.title}}
+			| &nbsp;
 			a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
-		a(href="#/subscription/feed/{{post.origin.url}}") 
-			span.label.label-primary {{post.origin.title}}
 		span(ng-if='post.author') &nbsp;by {{post.author}}
 	.col-xs-4
 		p(style='text-align:right') {{post.published}}
-		.btn-group.pull-right
-			button.btn.btn-default(ng-click="toggle(post)")
-				i.fa.fa-fw.fa-chevron-up
-			button.visible-lg.btn.btn-default(ng-click="toggleRead(post)")
-				i.fa.fa-fw(ng-class="isRead(post) ? 'fa-eye-slash' : 'fa-eye'")
-			.visible-lg.btn-group
-				button.btn.btn-default.dropdown-toggle.withripple(data-toggle="dropdown")
-					i.fa.fa-fw.fa-share-alt
-					span.caret
-					span.sr-only Toggle Dropdown
-					.ripple-wrapper
-				ul.dropdown-menu
-					li
-						a(href="#") 
-							i.fa.fa-fw.fa-twitter
-							| Twitter
-					li
-						a(href="#") 
-							i.fa.fa-fw.fa-facebook
-							| Facebook
-					li.divider
-					li
-						a(href="#") 
-							i.fa.fa-fw.fa-envelope
-							| E-mail
 .row
 	.col-xs-12
 		.line-separator
-		p.article-content(ng-bind-html="post.content.content")
+		.row
+			.col-xs-1
+				.btn-group-vertical
+					button.btn(type="button",ng-click="toggle(post)")
+						i.fa.fa-fw.fa-chevron-up
+					button.visible-lg.btn.btn-default(ng-click="toggleRead(post)")
+						i.fa.fa-fw(ng-class="isRead(post) ? 'fa-eye-slash' : 'fa-eye'")
+					button.btn(type="button") 
+						i.fa.fa-fw.fa-twitter
+					button.btn(type="button") 
+						i.fa.fa-fw.fa-facebook
+					button.btn(type="button") 
+						i.fa.fa-fw.fa-envelope
+			.col-xs-11
+				p.article-content(ng-bind-html="post.content.content")
 		.line-separator
