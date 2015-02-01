@@ -48,3 +48,6 @@ Temporary Items
 
 # ignore custom application launcher in Windows
 *.bat
+
+# ignore specific config file
+config.js
