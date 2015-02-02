@@ -28,7 +28,7 @@
       "togglebutton": true,
       "radio": true,
       "arrive": true,
-      "autofill": true,
+      "autofill": false,
 
       "withRipples": [
         ".btn:not(.btn-link)",
@@ -70,6 +70,10 @@
       .data("mdproc", true)
       .each( function() {
         var $this = $(this);
+
+        if (!$(this).attr("data-hint") && !$this.hasClass("floating-label")) {
+          return;
+        }
         $this.wrap("<div class=form-control-wrapper></div>");
         $this.after("<span class=material-input></span>");
 
@@ -107,7 +111,7 @@
       })
       .on("keyup change", ".form-control", function() {
         var $this = $(this);
-        if($this.val() === "") {
+        if($this.val() === "" && $this[0].checkValidity()) {
           $this.addClass("empty");
         } else {
           $this.removeClass("empty");
@@ -122,7 +126,6 @@
       .on("change", ".form-control-wrapper.fileinput [type=file]", function() {
         var value = "";
         $.each($(this)[0].files, function(i, file) {
-          console.log(file);
           value += file.name + ", ";
         });
         value = value.substring(0, value.length - 2);
@@ -135,7 +138,7 @@
       });
     },
     "ripples": function(selector) {
-      $.ripples({"target": (selector) ? selector : this.options.withRipples});
+      $((selector) ? selector : this.options.withRipples).ripples();
     },
     "autofill": function() {
 
@@ -170,7 +173,7 @@
       });
     },
     "init": function() {
-      if ($.ripples && this.options.ripples) {
+      if ($.fn.ripples && this.options.ripples) {
         this.ripples();
       }
       if (this.options.input) {
@@ -190,18 +193,32 @@
       }
 
       if (document.arrive && this.options.arrive) {
-        $(document).arrive(this.options.inputElements, function() {
-          $.material.input($(this));
-        });
-        $(document).arrive(this.options.checkboxElements, function() {
-          $.material.checkbox($(this));
-        });
-        $(document).arrive(this.options.radioElements, function() {
-          $.material.radio($(this));
-        });
-        $(document).arrive(this.options.togglebuttonElements, function() {
-          $.material.togglebutton($(this));
-        });
+        if ($.fn.ripples && this.options.ripples) {
+          $(document).arrive(this.options.withRipples, function() {
+            $.material.ripples($(this));
+          });
+        }
+        if (this.options.input) {
+          $(document).arrive(this.options.inputElements, function() {
+            $.material.input($(this));
+          });
+        }
+        if (this.options.checkbox) {
+          $(document).arrive(this.options.checkboxElements, function() {
+            $.material.checkbox($(this));
+          });
+        }
+        if (this.options.radio) {
+          $(document).arrive(this.options.radioElements, function() {
+            $.material.radio($(this));
+          });
+        }
+        if (this.options.togglebutton) {
+          $(document).arrive(this.options.togglebuttonElements, function() {
+            $.material.togglebutton($(this));
+          });
+        }
+
       }
     }
   };
