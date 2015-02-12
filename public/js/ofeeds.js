@@ -608,6 +608,26 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	}
 });
 app.controller('AppFeeds', function($scope, $http, $location, GetFeeds) {
+	// re-activate affix
+	$scope.setaffix = function() {
+		$(window).off('.affix');
+		$('#ma').removeData('bs.affix').removeClass('affix affix-top affix-bottom');
+		$('#ma').affix({
+			offset: {
+				top: $('#map').position().top
+			}
+		});
+		$('#ma').width($('body').width());
+	}
+	$scope.$watch(
+		function () {
+			return $('#ma').width() === $('body').width();
+		},
+		function (n, o) {
+			$('#ma').width($('body').width());
+			$scope.setaffix();
+		}
+	);
 	$scope.$on("updateSubs", function(event, args) {
 		$scope.gtsubs();
 	});
