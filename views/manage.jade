@@ -12,6 +12,10 @@ div(ng-controller="AppFeeds")
 		.row
 			.col-xs-12
 				h1 Feeds
+				hr
+				.jumbotron
+					p Next feeds refresh in:&nbsp;
+						b {{nrt}}
 				table.table.table-striped.table-hover
 					thead
 						tr
@@ -25,11 +29,12 @@ div(ng-controller="AppFeeds")
 							td 
 								i.fa.fa-bookmark-o.fa-fw
 							td
-								input.form-control(type="text",value="{{f.title}}")
+								input.form-control(type="text",value="{{f.title}}",style='background-color:transparent')
 							td {{f.crawlTime}}
 							td {{f.updated}}
 							td
 								.btn-group
 									button.btn.btn-default(type="button") Refresh
-									button.btn.btn-default(type="button") Remove
+									if user !== undefined && user.isAdmin
+										button.btn.btn-default(type="button") Remove
 include includes/js

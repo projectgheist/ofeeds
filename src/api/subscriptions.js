@@ -3,9 +3,15 @@ var ex = require('express'),
 	db = require('../storage'),
 	cr = require('../cron'),
 	mm = require('moment'),
+	cf = require('../../config'),
 	ut = require('../utils');
 
 var app = module.exports = ex();
+
+var Agenda = require('agenda'),
+	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db(),true), collection: 'agendaJobs' }, 
+		defaultLockLifetime: 1000 
+	});
 
 // @todo: functions need to be merged
 var actions = {
@@ -65,6 +71,28 @@ var actions = {
 		});
     }
 };
+
+// lists all of the feeds a user is subscribed to
+app.get('/api/0/feeds/list', function(req, res) {
+	var opts = {};
+	db
+	.all(db.Feed, opts) // retrieve all feeds
+	.then(function(feeds) {
+		var a = feeds.map(function(f) {
+			return {
+				favicon:		f.favicon,
+				id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
+				title: 			f.title,
+				shortid: 		f.shortID,
+				crawlTime:		mm(f.successfulCrawlTime).format('ddd, h:mm:ss A'),
+				updated:		mm().subtract(f.lastModified).format('m [minutes ago]')
+			};
+		});
+		ag.jobs({name: 'UpdateAllFeeds'}, function(err, jobs) {
+			return res.json({'nextRunIn':(jobs.length > 0 ? jobs[0].attrs.nextRunAt : ''), 'feeds':a});
+		});
+	});
+});
 
 // lists all of the feeds a user is subscribed to
 app.get('/api/0/subscription/list', function(req, res) {

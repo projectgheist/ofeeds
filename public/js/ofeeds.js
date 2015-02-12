@@ -115,9 +115,15 @@ var app = angular.module('webapp', [
  * Other
  */
 var AppService = angular.module('AppService', []);
-AppService.factory('GetFeeds', ['$resource',
+AppService.factory('GetSubs', ['$resource',
 	function($resource) {
 		return $resource('/api/0/subscription/list', {}, {query:{method:'GET',isArray: true}});
+	}
+]);
+
+AppService.factory('GetFeeds', ['$resource',
+	function($resource) {
+		return $resource('/api/0/feeds/list', {}, {query:{method:'GET',isArray: false}});
 	}
 ]);
 
@@ -607,7 +613,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		$scope.gtposts();
 	}
 });
-app.controller('AppFeeds', function($scope, $http, $location, GetFeeds) {
+app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds) {
 	// re-activate affix
 	$scope.setaffix = function() {
 		$(window).off('.affix');
@@ -633,20 +639,22 @@ app.controller('AppFeeds', function($scope, $http, $location, GetFeeds) {
 	});
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
+			console.log(data);
 			// loop subscription array
-			for (var i = 0; i < data.length; ++i) {
+			for (var i = 0; i < data.feeds.length; ++i) {
 				// if reading-list found
-				if (decodeURIComponent(data[i].id) === 'label/reading-list') {
+				if (decodeURIComponent(data.feeds[i].id) === 'label/reading-list') {
 					// set reading-list unread count
-					$scope.rlurc = data[i].unreadcount;
+					$scope.rlurc = data.feeds[i].unreadcount;
 					// remove item from array
-					data.splice(i, 1);
+					data.feeds.splice(i, 1);
 					// no need to continue
 					break;
 				}
 			}
+			$scope.nrt = data.nextRunIn;
 			// update subscriptions
-			$scope.subs = data;
+			$scope.subs = data.feeds;
 		}, function(err) {
 		});
 	}	
