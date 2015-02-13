@@ -11,27 +11,27 @@ div(ng-controller="AppFeeds")
 	.container-fluid#map
 		.row
 			.col-xs-12
-				h1 Feeds
-				hr
-				.jumbotron
-					p Next feeds refresh in:&nbsp;
+				h1 All Feeds
+					small &nbsp;(Next refresh in&nbsp;
 						b {{nrt}}
+						| )
+				hr
 				table.table.table-striped.table-hover
 					thead
 						tr
 							th Icon
 							th Name
-							th.text-right Crawl time
-							th.text-right Update time
-							th Action
+							th Crawl time
+							th Update time
+							th.text-center Action
 					tbody
 						tr(ng-repeat='f in subs')
-							td.col-xs-0 
+							td
 								i.fa.fa-bookmark-o.fa-fw
-							td.col-xs-4
+							td.col-xs-5
 								input.form-control(type="text",value="{{f.title}}",style='background-color:transparent')
-							td.col-xs-2.text-right {{f.crawlTime}}
-							td.col-xs-2.text-right {{f.updated}}
+							td {{f.crawlTime}}
+							td {{f.updated}}
 							td.col-xs-4.text-center
 								button.btn.btn-primary(type="button",ng-click="gotostream(f)") View
 								button.btn.btn-primary(type="button") Refresh

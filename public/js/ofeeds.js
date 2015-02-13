@@ -652,7 +652,7 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 				}
 			}
 			// do string conversion from date
-			$scope.nrt = moment(data.nextRunIn).subtract(moment()).format('m [minutes]');
+			$scope.nrt = Math.ceil(moment(data.nextRunIn).diff(moment(), 'minutes', true)) + ' minutes';
 			// update subscriptions
 			$scope.subs = data.feeds;
 		}, function(err) {
