@@ -210,11 +210,11 @@ exports.UpdateFeed = function(feed,posts,resolve,reject) {
 	});
 };
 
-exports.DeleteFeed = function(feed,err,reject) {
+/** function DeleteFeed
+ */
+exports.DeleteFeed = function(feed, err, resolve) {
 	// remove feed from db
-	feed.remove();
-	// return error
-	reject(err);
+	resolve(feed.remove());
 	// prevent any additional code from executing
 	return false;
 };
@@ -240,25 +240,21 @@ exports.FetchFeed = function(feed) {
 			url: 		decodeURIComponent(feed.feedURL), 
 			headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 		}, function (err, res, user) {
-			// return error
-			if (err || res.statusCode != 200) {
-				return exports.DeleteFeed(feed,(err || 'Bad status code'), reject);
+			if ((err || res.statusCode != 200) && !feed.lastModified) {
+				// remove feed from db
+				resolve(feed.remove());
 			}
 		});
 		req.on('response', function(res) {
 			var stream = this;
-			stream.pipe(new fp())
+			stream
+			.pipe(new fp())
 			.on('error', function(error) {
 				console.log("// ----------------------------------------------------------------------------");
 				console.log("// Feedparser error: " + error);
 				console.log("\ton '" + decodeURIComponent(feed.feedURL) + "'");
-				// check if we could get the feed before
-				if (!feed.lastModified) {
-					exports.DeleteFeed(feed,error,reject);
-				} else {
-					// always handle errors
-					parseError = true;
-				}
+				// always handle errors
+				parseError = true;
 			})
 			.on('meta', function(meta) {
 				//if (meta.xmlurl) {
@@ -298,7 +294,7 @@ exports.FetchFeed = function(feed) {
 function UpdateAllFeeds(done) {
 	var opts = {};
 	// get oldest updated feeds
-	opts.query 	= {lastModified:{$lt: new Date(mm().subtract(15, 'minutes'))}};
+	opts.query 	= {lastModified:{$lt: new Date(mm().subtract(0, 'minutes'))}};
 	// oldest feeds first
 	opts.sort 	= {lastModified:1};
 	// limit the amount of feeds
@@ -308,29 +304,24 @@ function UpdateAllFeeds(done) {
 	.all(st.Feed, opts) // retrieve all feeds
 	.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 	.then(function(feeds) {
-		//console.log("Start cron jobs!");
 		var a = [];
 		// loop all found feeds
 		for (var i in feeds) {
-			if (feeds[i].feedURL === undefined) {
-				//console.log("Remove feed: "+feeds[i].feedURL);
-				a.push(feeds[i].remove());
-			} else {
-				//console.log("Fetch feed: "+feeds[i].feedURL);
+			if (feeds[i].feedURL !== undefined) {
 				a.push(exports.FetchFeed(feeds[i]));
 			}
 		}
 		if (a.length > 0) {
-			//console.log("Update feed count: " + a.length);
 			rs.all(a).then(function() {
-				console.log("All feeds were updated succesfully!");
-				done();
-			}, function(err) {
-				console.log("Cron job error: "+err);
-				done();
-			});
+				return st.all(st.Feed,{query:{ posts: null, numSubscribers: null, lastFailureWasParseFailure: true }}).then(function(r) {
+					var b = [];
+					for (var i in r) {
+						b.push(r[i].remove());
+					}
+					return rs.all(b);
+				});
+			}).then(done);
 		} else {
-			//console.log("No functions to execute!");
 			done();
 		}
 	});

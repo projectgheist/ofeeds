@@ -639,7 +639,6 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 	});
 	$scope.gtsubs = function() {
 		GetFeeds.query(function(data) {
-			console.log(data);
 			// loop subscription array
 			for (var i = 0; i < data.feeds.length; ++i) {
 				// if reading-list found
@@ -652,12 +651,16 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 					break;
 				}
 			}
-			$scope.nrt = data.nextRunIn;
+			// do string conversion from date
+			$scope.nrt = moment(data.nextRunIn).subtract(moment()).format('m [minutes]');
 			// update subscriptions
 			$scope.subs = data.feeds;
 		}, function(err) {
 		});
 	}	
+	$scope.gotostream = function(obj) {
+		$scope.gotosub({'value':decodeURIComponent(obj.id)});
+	}
 	$scope.isActive = function(str) {
 		var s = str.substring('feed%2F'.length,str.length),
 			a = new RegExp(decodeURIComponent(s));
@@ -667,7 +670,7 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 	$scope.gotosub = function(obj) {
 		// go to subscription local url
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
-		// call '$apply' oteherwise angular doesn't recognize that the url has changed
+		// call '$apply' otherwise angular doesn't recognize that the url has changed
 		$scope.$apply();
 	}
 	$scope.gtsubs();

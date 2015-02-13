@@ -74,14 +74,17 @@ var actions = {
 
 // lists all of the feeds a user is subscribed to
 app.get('/api/0/feeds/list', function(req, res) {
-	var opts = {};
+	var opts = {
+		// oldest feeds first
+		sort: { lastModified:1 }
+	};
 	db
 	.all(db.Feed, opts) // retrieve all feeds
 	.then(function(feeds) {
 		var a = feeds.map(function(f) {
 			return {
 				favicon:		f.favicon,
-				id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
+				id: 			encodeURIComponent(f.feedURL),
 				title: 			f.title,
 				shortid: 		f.shortID,
 				crawlTime:		mm(f.successfulCrawlTime).format('ddd, h:mm:ss A'),
