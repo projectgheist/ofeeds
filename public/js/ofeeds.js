@@ -43,8 +43,8 @@ jQuery(document).ready(function($) {
 		displayKey: 'title', // name of value to check against
 		source: sb.ttAdapter(),
 		templates: {
-			empty: ['<p class="col-xs-12">','<i class="fa fa-times fa-fw"></i> No results found!','</p>'].join('\n'),
-			suggestion: Handlebars.compile('<p><i class="fa fa-bookmark-o fa-fw"></i> <strong>{{title}}</strong><br>{{description}}</p>')
+			empty: ['<p class="col-xs-12">','<i class="fa fa-times fa-fw"></i>&nbsp;No results found!','</p>'].join('\n'),
+			suggestion: Handlebars.compile('<p><i class="fa fa-bookmark-o fa-fw"></i>&nbsp;<strong>{{title}}</strong><br>{{description}}</p>')
 		}
 	}).on('typeahead:selected', function(obj, datum) {
 		if ($('#m').length) {
@@ -652,6 +652,7 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 				}
 			}
 			// do string conversion from date
+			console.log(data)
 			$scope.nrt = Math.ceil(moment(data.nextRunIn).diff(moment(), 'minutes', true)) + ' minutes';
 			// update subscriptions
 			$scope.subs = data.feeds;

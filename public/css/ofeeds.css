@@ -232,6 +232,7 @@ hbinclude .bs-callout {
 
 .tt-suggestion p {
 	margin: 0;
+	color: #000;
 }
 
 /**
