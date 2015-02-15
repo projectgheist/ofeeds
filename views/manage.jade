@@ -25,12 +25,14 @@ div(ng-controller="AppFeeds")
 							th Update time
 							th.text-center Action
 					tbody
-						tr(ng-repeat='f in subs')
+						tr(ng-repeat='f in subs',ng:class="{true:'', false:'danger'}[f.crawlSuccesful]")
 							td
 								i.fa.fa-bookmark-o.fa-fw
 							td.col-xs-5
 								input.form-control(type="text",value="{{f.title}}",style='background-color:transparent')
-							td {{f.crawlTime}}
+							td
+								i.fa.fa-fw(ng:class="{true:'fa-check', false:'fa-times'}[f.crawlSuccesful]")
+								| {{f.crawlTime}}
 							td {{f.updated}}
 							td.col-xs-4.text-center
 								button.btn.btn-primary(type="button",ng-click="gotostream(f)") View

@@ -16,7 +16,7 @@ var Agenda = require('agenda'),
 // @todo: functions need to be merged
 var actions = {
 	search: function(ctx, url) {
-       // Find or create feed for this URL in the database
+		// Find or create feed for this URL in the database
 		return db.Feed.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: url}}] }).limit(6).then(function(results) {
 			if (results.length > 0) {
 				return results;
@@ -82,13 +82,17 @@ app.get('/api/0/feeds/list', function(req, res) {
 	.all(db.Feed, opts) // retrieve all feeds
 	.then(function(feeds) {
 		var a = feeds.map(function(f) {
+			var b = f.failedCrawlTime === undefined,
+				s = f.successfulCrawlTime === undefined,
+				r = (b && s) ? false : (!b && !s ? mm(f.successfulCrawlTime) > mm(f.failedCrawlTime) : (b && !s));
 			return {
-				favicon:		f.favicon,
-				id: 			encodeURIComponent(f.feedURL),
-				title: 			f.title,
+				favicon:		f.favicon || '',
+				id: 			f.feedURL, // its already encoded
+				title: 			f.title || '',
 				shortid: 		f.shortID,
-				crawlTime:		mm(f.successfulCrawlTime).format('ddd, h:mm:ss A'),
-				updated:		mm().subtract(f.lastModified).format('m [minutes ago]')
+				crawlTime:		f.successfulCrawlTime,
+				updated:		f.lastModified,
+				crawlSuccesful:	r
 			};
 		});
 		ag.jobs({name: 'UpdateAllFeeds'}, function(err, jobs) {

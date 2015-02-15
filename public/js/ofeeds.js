@@ -645,6 +645,15 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 		GetFeeds.query(function(data) {
 			// loop subscription array
 			for (var i = 0; i < data.feeds.length; ++i) {
+				// format time for crawlTime
+				data.feeds[i].crawlTime = moment(data.feeds[i].crawlTime).format('ddd, h:mm:ss A')
+				// format time for updated time
+				data.feeds[i].updated = moment().subtract(data.feeds[i].updated).format('m [minutes ago]')
+				// make sure it has a title
+				if (data.feeds[i].title.length <= 0) {
+					// else use the feed url
+					data.feeds[i].title = decodeURIComponent(data.feeds[i].id);
+				}
 				// if reading-list found
 				if (decodeURIComponent(data.feeds[i].id) === 'label/reading-list') {
 					// set reading-list unread count
