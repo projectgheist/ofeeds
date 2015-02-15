@@ -63,8 +63,8 @@ ap.get("/manage", function(req, res) {
 		'user': req.user
 	});
 });
-ap.get("/subscription/*", ensureAuth, function(req, res) {
-	res.render('dashboard', { 
+ap.get("/subscription/*", function(req, res) {
+	res.render(req.isAuthenticated() ? 'dashboard' : 'landing', { 
 		'config': cf.site,
 		'user': req.user
 	});

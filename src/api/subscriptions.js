@@ -80,6 +80,7 @@ app.get('/api/0/feeds/list', function(req, res) {
 	};
 	db
 	.all(db.Feed, opts) // retrieve all feeds
+	.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 	.then(function(feeds) {
 		var a = feeds.map(function(f) {
 			var b = f.failedCrawlTime === undefined,
@@ -88,10 +89,11 @@ app.get('/api/0/feeds/list', function(req, res) {
 			return {
 				favicon:		f.favicon || '',
 				id: 			f.feedURL, // its already encoded
+				postCount:		f.posts.length || 0,
 				title: 			f.title || '',
 				shortid: 		f.shortID,
-				crawlTime:		f.successfulCrawlTime || undefined,
-				updated:		f.lastModified || undefined,
+				crawlTime:		f.lastModified || undefined,
+				updated:		(f.posts && f.posts[f.posts.length-1].published) || undefined,
 				crawlSuccesful:	r
 			};
 		});

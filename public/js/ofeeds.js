@@ -401,6 +401,8 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			$scope.params.xt = 'user/-/state/read';
 		}
 		GetPosts.query($scope.params,function(data) {
+			// unfocus search box and set value
+			$('.typeahead').blur().val(data.title);
 			// turn off refresh
 			$scope.rf = false;
 			// make sure variables exist
@@ -645,10 +647,22 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 		GetFeeds.query(function(data) {
 			// loop subscription array
 			for (var i = 0; i < data.feeds.length; ++i) {
+				// retrieved crawl time
+				var ot = data.feeds[i].crawlTime;
 				// format time for crawlTime
-				data.feeds[i].crawlTime = data.feeds[i].crawlTime !== undefined ? moment(data.feeds[i].crawlTime).format('ddd, h:mm:ss A') : 'Never';
+				data.feeds[i].crawlTime = (ot !== undefined) ? moment(ot).format('ddd, h:mm:ss A') : 'Never';
+				// format time for crawlUpdate
+				data.feeds[i].crawlUpdate = (ot !== undefined) ? (moment().diff(ot, 'minutes') + ' minutes ago') : 'Never';
 				// format time for updated time
-				data.feeds[i].updated = data.feeds[i].updated !== undefined ? moment().diff(data.feeds[i].updated, 'minutes') + ' minutes ago' : 'Never';
+				data.feeds[i].updated = (data.feeds[i].updated !== undefined) ? moment(data.feeds[i].updated).format('h:mm:ss A|ddd, DD MMM YYYY') : 'Never';
+				//
+				if (data.feeds[i].updated.search('|') > -1) {
+					var a = data.feeds[i].updated.split('|');
+					data.feeds[i].time = a[0];
+					data.feeds[i].date = a[1];
+				}
+				// create url
+				data.feeds[i].url = ['/subscription/feed/',encodeURIComponent(data.feeds[i].id),'/'].join('');
 				// make sure it has a title
 				if (data.feeds[i].title.length <= 0) {
 					// else use the feed url
@@ -683,8 +697,10 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 	$scope.gotosub = function(obj) {
 		// go to subscription local url
 		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
-		// call '$apply' otherwise angular doesn't recognize that the url has changed
-		$scope.$apply();
+		if (!$scope.$$phase && !$scope.$root.$$phase) {
+			// call '$apply' otherwise angular doesn't recognize that the url has changed
+			$scope.$apply();
+		}
 	}
 	$scope.gtsubs();
 });

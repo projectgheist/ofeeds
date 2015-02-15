@@ -8,19 +8,20 @@ div(ng-controller="AppFeeds")
 						a.navbar-brand(href="/")
 							i.fa.fa-rss.fa-fw.fa-flip-horizontal
 							= config.title
+				.col-lg-7
+					.navbar-brand Manage All Feeds
+				.col-lg-3
+					p.navbar-text Next refresh in&nbsp;
+						b#nrt {{nrt}}
 	.container-fluid#map
 		.row
 			.col-xs-12
-				h1 All Feeds
-					small &nbsp;(Next refresh in&nbsp;
-						b {{nrt}}
-						| )
-				hr
 				table.table.table-striped.table-hover
 					thead
 						tr
 							th Icon
 							th Name
+							th Posts
 							th Crawl time
 							th Update time
 							th.text-center Action
@@ -28,14 +29,22 @@ div(ng-controller="AppFeeds")
 						tr(ng-repeat='f in subs',ng:class="{true:'', false:'danger'}[f.crawlSuccesful]")
 							td
 								i.fa.fa-bookmark-o.fa-fw
-							td.col-xs-5
+							td.col-xs-4
 								input.form-control(type="text",value="{{f.title}}",style='background-color:transparent')
+							td.text-center {{f.postCount}}
 							td
 								i.fa.fa-fw(ng:class="{true:'fa-check', false:'fa-times'}[f.crawlSuccesful]")
 								| {{f.crawlTime}}
-							td {{f.updated}}
+								br
+								| ({{f.crawlUpdate}})
+							td(ng-if="f.time === undefined")
+								| {{f.updated}}
+							td(ng-if="f.time !== undefined")
+								| {{f.date}}
+								br
+								| {{f.time}}
 							td.col-xs-4.text-center
-								button.btn.btn-primary(type="button",ng-click="gotostream(f)") View
+								a.btn.btn-primary(href="{{f.url}}",target="_blank") View
 								button.btn.btn-primary(type="button") Refresh
 								if user !== undefined && user.isAdmin
 									button.btn.btn-primary(type="button") Remove

@@ -224,7 +224,7 @@ exports.DeleteFeed = function(feed, err, resolve) {
 exports.FetchFeed = function(feed) {
 	// early escape if no feed is returned OR if was updated really recently
 	if (!feed ||
-		(false && feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
+		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(feed); 
 		});
@@ -240,7 +240,7 @@ exports.FetchFeed = function(feed) {
 			url: 		decodeURIComponent(feed.feedURL), 
 			headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 		}, function (err, res, user) {
-			if ((err || res.statusCode != 200) && !feed.lastModified) {
+			if ((err || res.statusCode != 200) && !feed.title) {
 				// remove feed from db
 				resolve(feed.remove());
 			}
