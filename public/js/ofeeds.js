@@ -619,7 +619,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		$scope.gtposts();
 	}
 });
-app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds) {
+app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds, RefreshFeed) {
 	// re-activate affix
 	$scope.setaffix = function() {
 		$(window).off('.affix');
@@ -693,6 +693,14 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 			a = new RegExp(decodeURIComponent(s));
 		// do regex test
 		return a.test($location.path());
+	}
+	$scope.rfrsh = function(idx) {
+		RefreshFeed.query({ 'q': idx },
+			function(data) {
+				$scope.gtsubs();
+			},
+			function(err) {
+		});
 	}
 	$scope.gotosub = function(obj) {
 		// go to subscription local url

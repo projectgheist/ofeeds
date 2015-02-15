@@ -45,7 +45,7 @@ div(ng-controller="AppFeeds")
 								| {{f.time}}
 							td.col-xs-4.text-center
 								a.btn.btn-primary(href="{{f.url}}",target="_blank") View
-								button.btn.btn-primary(type="button") Refresh
+								button.btn.btn-primary(type="button",ng-click="rfrsh(f.id)") Refresh
 								if user !== undefined && user.isAdmin
 									button.btn.btn-primary(type="button") Remove
 include includes/js
