@@ -155,8 +155,8 @@ app.get('/api/0/subscription/list', function(req, res) {
 app.get('/api/0/subscription/search', function(req, res) {
 	// creat or find URL in db
     actions.search(req, req.query.q).then(function(feeds) {
+		var vs = [];
 		if (feeds) {
-			var vs = [];
 			for (var i in feeds) {
 				var d = feeds[i].description;
 				vs.push({
@@ -166,10 +166,9 @@ app.get('/api/0/subscription/search', function(req, res) {
 					description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : '')
 					});
 			};
-			res.json(vs);
-		} else {
-			res.status(500).send('Feed not found!');
 		}
+		// always return something, don't make it return errors
+		res.json(vs);
     });
 });
 

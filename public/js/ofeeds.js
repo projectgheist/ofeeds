@@ -14,7 +14,7 @@ var ta = [],
  */
 jQuery(document).ready(function($) {
 	var sb = new Bloodhound({
-		datumTokenizer: function(d) { 
+		datumTokenizer: function(d) {
 			return Bloodhound.tokenizers.whitespace(d.title); 
 		},
 		queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -28,8 +28,11 @@ jQuery(document).ready(function($) {
 				return q;
 			},
 			filter: function(a) {
-				ta = a;
-				return a; 
+				ta = [];
+				for (var i in a) {
+					if (a[i].title !== '') ta.push(a[i]);
+				}
+				return ta; 
 			}
 		}
 	});
@@ -43,7 +46,7 @@ jQuery(document).ready(function($) {
 		displayKey: 'title', // name of value to check against
 		source: sb.ttAdapter(),
 		templates: {
-			empty: ['<p class="col-xs-12">','<i class="fa fa-times fa-fw"></i>&nbsp;No results found!','</p>'].join('\n'),
+			empty: '<p class="tt-empty"><i class="fa fa-times fa-fw"></i>&nbsp;No results found!</p>',
 			suggestion: Handlebars.compile('<p><i class="fa fa-bookmark-o fa-fw"></i>&nbsp;<strong>{{title}}</strong><br>{{description}}</p>')
 		}
 	}).on('typeahead:selected', function(obj, datum) {
@@ -52,12 +55,14 @@ jQuery(document).ready(function($) {
 		} else {
 			angular.element($('#map')).scope().gotostream(datum,true);
 		}
-        
-        $('.typeahead').blur(); // lose focus
+        // lose focus
+        $('.typeahead').blur();
         //.typeahead('val', '')  // reset input value
 	});
+	// activate affix
 	$('#sa').affix();
-    $('.typeahead').focus(); // focus
+	// focus on search box
+    $('.typeahead').focus();
 });
 
 // single keys
@@ -222,8 +227,7 @@ app.directive('ngInclude', function($compile) {
 							// 
 							if (a && a.length > 0) {
 								// give it a tooltip
-								$(this)
-								.attr("data-toggle","popover")
+								$(this).attr("data-toggle", "popover");
 								// initialise tooltips
 								$('[data-toggle="popover"]').popover({ 
 								trigger: 'hover', 
@@ -652,7 +656,6 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 				}
 			}
 			// do string conversion from date
-			console.log(data)
 			$scope.nrt = Math.ceil(moment(data.nextRunIn).diff(moment(), 'minutes', true)) + ' minutes';
 			// update subscriptions
 			$scope.subs = data.feeds;
