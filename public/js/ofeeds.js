@@ -646,9 +646,9 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds)
 			// loop subscription array
 			for (var i = 0; i < data.feeds.length; ++i) {
 				// format time for crawlTime
-				data.feeds[i].crawlTime = moment(data.feeds[i].crawlTime).format('ddd, h:mm:ss A')
+				data.feeds[i].crawlTime = data.feeds[i].crawlTime !== undefined ? moment(data.feeds[i].crawlTime).format('ddd, h:mm:ss A') : 'Never';
 				// format time for updated time
-				data.feeds[i].updated = moment().subtract(data.feeds[i].updated).format('m [minutes ago]')
+				data.feeds[i].updated = data.feeds[i].updated !== undefined ? moment().diff(data.feeds[i].updated, 'minutes') + ' minutes ago' : 'Never';
 				// make sure it has a title
 				if (data.feeds[i].title.length <= 0) {
 					// else use the feed url

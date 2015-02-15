@@ -90,8 +90,8 @@ app.get('/api/0/feeds/list', function(req, res) {
 				id: 			f.feedURL, // its already encoded
 				title: 			f.title || '',
 				shortid: 		f.shortID,
-				crawlTime:		f.successfulCrawlTime,
-				updated:		f.lastModified,
+				crawlTime:		f.successfulCrawlTime || undefined,
+				updated:		f.lastModified || undefined,
 				crawlSuccesful:	r
 			};
 		});

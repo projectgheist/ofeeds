@@ -29,8 +29,8 @@ var Feed = mg.Schema({
     // fetcher metadata
     successfulCrawlTime: Date,
     failedCrawlTime: Date,
-    lastFailureWasParseFailure: Boolean,
-    lastModified: Date,
+    lastFailureWasParseFailure: { type: Boolean, default: false },
+    lastModified: { type: Date, default: Date.now },
 });
 
 Feed.virtual('stringID').get(function() {

@@ -222,9 +222,9 @@ exports.DeleteFeed = function(feed, err, resolve) {
 /** function FetchFeed
  */
 exports.FetchFeed = function(feed) {
-	// early escape if no feed is returned 
+	// early escape if no feed is returned OR if was updated really recently
 	if (!feed ||
-		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
+		(false && feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(feed); 
 		});
@@ -261,13 +261,13 @@ exports.FetchFeed = function(feed) {
 				//	feed.feedURL = meta.xmlurl;
 				//}
 				feed.favicon	= meta.favicon || (meta['atom:icon'] ? meta['atom:icon']['#'] : '');
-				feed.siteURL 	= meta.link;
-				feed.title 		= meta.title;
-				feed.description = meta.description;
-				feed.author 	= meta.author;
-				feed.language 	= meta.language;
-				feed.copywrite 	= meta.copywrite;
-				feed.categories = meta.categories;
+				feed.siteURL 	= meta.link || '';
+				feed.title 		= meta.title || '';
+				feed.description = meta.description || '';
+				feed.author 	= meta.author || '';
+				feed.language 	= meta.language || '';
+				feed.copywrite 	= meta.copywrite || '';
+				feed.categories = meta.categories || '';
 				
 				switch (meta.cloud.type) {
 					case 'hub':      // pubsubhubbub supported
@@ -294,7 +294,7 @@ exports.FetchFeed = function(feed) {
 function UpdateAllFeeds(done) {
 	var opts = {};
 	// get oldest updated feeds
-	opts.query 	= {lastModified:{$lt: new Date(mm().subtract(0, 'minutes'))}};
+	opts.query 	= {lastModified:{$lt: new Date(mm().subtract(5, 'minutes'))}};
 	// oldest feeds first
 	opts.sort 	= {lastModified:1};
 	// limit the amount of feeds
@@ -320,7 +320,9 @@ function UpdateAllFeeds(done) {
 					}
 					return rs.all(b);
 				});
-			}).then(done);
+			}).then(function() { 
+				done(); 
+			});
 		} else {
 			done();
 		}
