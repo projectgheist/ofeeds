@@ -326,14 +326,18 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			$scope.params.xt = 'user/-/state/read';
 		}
 		GetPosts.query($scope.params,function(data) {
-			// unfocus search box and set value
-			$('.typeahead').blur().val(data.title);
 			// turn off refresh
 			$scope.rf = false;
 			// make sure variables exist
 			if (!data || !data.items || data.items.length <= 0) {
 				return;
 			}
+			// make sure it has a title
+			if (data.title.length > 0) {
+				// unfocus search box and set value
+				$('.typeahead').blur().val(data.title);
+			}
+			// what to do with the retrieved data
 			if ($scope.stream && 
 				$scope.stream.title === data.title &&
 				($scope.stream.items.length === 0 || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))) {
@@ -513,7 +517,6 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			return $('#ma').width() === $('body').width();
 		},
 		function (n, o) {
-			$('#ma').width($('body').width());
 			$scope.setaffix();
 		}
 	);
