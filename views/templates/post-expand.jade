@@ -1,4 +1,4 @@
-.row(ng-class="{read:isRead(post)}")
+.row.article-header(ng-class="{read:isRead(post)}")
 	.col-xs-8
 		p
 			a(href="#/subscription/feed/{{post.origin.url}}") 

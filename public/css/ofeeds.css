@@ -78,6 +78,10 @@
 	z-index: 10;
 }
 
+#mah {
+	height: 70px;
+}
+
 .list-group-item {
 	margin: 20px 0;
 }
@@ -88,6 +92,10 @@
 
 .well > .list-group {
 	margin-bottom: 0;
+}
+
+.article-header {
+	padding: 10px 0;
 }
 
 .article-content img {

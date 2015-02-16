@@ -125,9 +125,9 @@ app.get('/api/0/stream/contents*', function(req, res) {
     }).then(function(posts) {
 		var isFeed 	= (streams[0].type === 'feed'), // boolean: TRUE if feed
 			value 	= streams[0].value,				// string: site URL
-			hasPosts = (posts.length > 0 && posts[0]), 					// boolean: TRUE if feed object
-			feed 	= (isFeed && hasPosts) ? posts[0].feed : undefined,	// reference to feed db obj
-			obj 	= {
+			hasPosts = (posts.length > 0 && posts[0]),	// boolean: TRUE if feed object
+			feed 	= hasPosts ? posts[0].feed : undefined,	// reference to feed db obj
+			obj 	= feed ? {
 				id:           	encodeURIComponent(isFeed ? feed.stringID : ''),
 				feedURL:		decodeURIComponent(isFeed ? feed.feedURL : value),
 				title:        	isFeed ? feed.title        : value,
@@ -139,7 +139,7 @@ app.get('/api/0/stream/contents*', function(req, res) {
 				subscribed:		0,
 				showOrigin:		false,
 				continuation: 	'TODO'
-			};
+			} : {};
         if (!hasPosts) {
 			// Google Reader returns 404 response, we need a valid json response for infinite scrolling
 			res.json(obj);

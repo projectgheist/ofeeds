@@ -1,0 +1,20 @@
+.row
+	.col-xs-12
+		.well.collapse#stream-info
+			.row.list-group
+				.col-xs-6.list-group-item
+					.row-content
+						h4.list-group-item-heading Site URL
+						p.list-group-item-text 
+							input(type="text",class="form-control",value='{{stream.alternate[0].href}}',disabled='')
+							span.material-input
+					.row-content
+						h4.list-group-item-heading Description
+						p.list-group-item-text {{stream.description}}
+				.col-xs-6.list-group-item
+					.row-content
+						h4.list-group-item-heading Update time
+						p.list-group-item-text {{stream.updated}}
+					.row-content
+						p
+							button.btn.btn-primary(ng-click='delt()') Delete feed

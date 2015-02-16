@@ -13,91 +13,16 @@ var ta = [],
  * On page load ready
  */
 jQuery(document).ready(function($) {
-	var sb = new Bloodhound({
-		datumTokenizer: function(d) {
-			return Bloodhound.tokenizers.whitespace(d.title); 
-		},
-		queryTokenizer: Bloodhound.tokenizers.whitespace,
-		remote: {
-			url: '/api/0/subscription/search?q=',
-			replace: function () {
-				var q = '/api/0/subscription/search?q=';
-				if ($('#nrss').val()) {
-					q += encodeURIComponent($('#nrss').val());
-				}
-				return q;
-			},
-			filter: function(a) {
-				ta = [];
-				for (var i in a) {
-					if (a[i].title !== '') ta.push(a[i]);
-				}
-				return ta; 
-			}
-		}
-	});
-	sb.initialize();
-	// prep typeahead
-	$('.typeahead').typeahead({
-		hint: true,
-		minLength: 3
-	}, {
-		name: 'sb', // identifier
-		displayKey: 'title', // name of value to check against
-		source: sb.ttAdapter(),
-		templates: {
-			empty: '<p class="tt-empty"><i class="fa fa-times fa-fw"></i>&nbsp;No results found!</p>',
-			suggestion: Handlebars.compile('<p><i class="fa fa-bookmark-o fa-fw"></i>&nbsp;<strong>{{title}}</strong><br>{{description}}</p>')
-		}
-	}).on('typeahead:selected', function(obj, datum) {
-		if ($('#m').length) {
-			angular.element($('#m')).scope().gotosub(datum);
-		} else {
-			angular.element($('#map')).scope().gotostream(datum,true);
-		}
-        // lose focus
-        $('.typeahead').blur();
-        //.typeahead('val', '')  // reset input value
-	});
-	// activate affix
-	$('#sa').affix();
-	// focus on search box
-    $('.typeahead').focus();
 });
 
 // single keys
 /** Set focus on text input field
  */
 Mousetrap.bind('/', function() {
+	// set focus on search box
 	$("#nrss").focus();
 	// prevent default browser behavior
 	return false;
-});
-
-/** Move to article below (previous) in stream
- */
-Mousetrap.bind('j', function() {
-	angular.element($('#ma')).scope().next();
-});
-
-/** Move to article above (next) in stream
- */
-Mousetrap.bind('k', function() { 
-	angular.element($('#ma')).scope().prev();
-});
-
-/** Open article in new tab/window from stream
- */
-Mousetrap.bind('v', function() {
-	window.open(angular.element($('#ma')).scope().cp.alternate.href, '_blank');
-	window.focus();
-});
-
-/** Toggle article read state
- */
-Mousetrap.bind('m', function() {
-	var s = angular.element($('#ma')).scope();
-	s.toggleRead(s.cp);
 });
 
 function ShowAlertMessage(t, m) {
@@ -273,17 +198,15 @@ app.directive('resize', function ($window) {
         });
     }
 });
-app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, $sce, GetPosts, SetTag, FeedSubmit, RefreshFeed) {
+app.controller('AppStream', function($rootScope, $scope, $http, $location, $routeParams, $anchorScroll, $sce, $timeout, GetPosts, SetTag, FeedSubmit, RefreshFeed) {
 	$scope.gotostream = function(obj,refresh) {
 		// go to subscription local url
-		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
-		if (refresh && !$scope.$$phase && !$scope.$root.$$phase) {
-			// call '$apply' oteherwise angular doesn't recognize that the url has changed
-			$scope.$apply();
-		}
+		$timeout(function() {
+			$location.path(['/subscription/feed/',obj.value,'/'].join(''));
+		});
 	}
 	$scope.canScroll = function() {
-		return ($(document).scrollTop() > 0);
+		return ($(document).scrollTop() > 10);
 	}
 	$scope.gotoFeed = function(r) {
 		$http.get('/api/0/subscription/search',{params:{q:r}})
@@ -336,7 +259,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		}*/
 	}
 	$scope.gotoTop = function() {
-        $scope.scrollto('map', 0);
+       $scope.scrollto('mah', 0);
 	}
 	$scope.scrollto = function(id, offset) {
 		// clear scroll to array
@@ -347,6 +270,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	$scope.rfrsh = function() {
 		// make sure that it has a param value
 		if ($scope.params === undefined) {
+			$scope.rf = false;
 			return;
 		}
 		// set refresh page to TRUE
@@ -390,6 +314,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	$scope.gtposts = function(m) {
 		// make sure that it has a param value
 		if ($scope.params === undefined) {
+			$scope.rf = false;
 			return;
 		}
 		// set refresh page to TRUE
@@ -409,7 +334,8 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			if (!data || !data.items || data.items.length <= 0) {
 				return;
 			}
-			if ($scope.stream && $scope.stream.title === data.title &&
+			if ($scope.stream && 
+				$scope.stream.title === data.title &&
 				($scope.stream.items.length === 0 || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))) {
 				// append to the articles that were already in the array
 				$scope.stream.items = $scope.stream.items.concat(data.items);
@@ -432,6 +358,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 					$scope.stream.items[i].template = gTemplates[gTemplateID][0];
 				}
 			}
+			// is message present?
 			if (m) {
 				// show message
 				ShowAlertMessage(m.t,m.m);
@@ -547,15 +474,14 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		if (gTemplates[gTemplateID].length <= 1) {
 			return;
 		}
-		// change the template of the post to the expanded version
-		p.template = gTemplates[gTemplateID][1];
-		// store post as the current post
-		$scope.cp = p;
-		// 
-		$scope.params.nt = undefined;
-		if (!$scope.$$phase && !$scope.$root.$$phase) {
-			$scope.$apply();
-		}
+		$timeout(function() {
+			// change the template of the post to the expanded version
+			p.template = gTemplates[gTemplateID][1];
+			// store post as the current post
+			$scope.cp = p;
+			// reset
+			$scope.params.nt = undefined;
+		});
 	}
 	$scope.toggle = function(p) {
 		// if template style doesn't have an expanded version, skip
@@ -580,13 +506,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	// re-activate affix
 	$scope.setaffix = function() {
 		$(window).off('.affix');
-		$('#ma').removeData('bs.affix').removeClass('affix affix-top affix-bottom');
-		$('#ma').affix({
-			offset: {
-				top: $('#map').position().top
-			}
-		});
-		$('#ma').width($('body').width());
+		$('#ma').width($('body').width())
 	}
 	$scope.$watch(
 		function () {
@@ -604,6 +524,55 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		});
 		$scope.setaffix();
 	});
+	if (!$('.typeahead').parent().hasClass('twitter-typeahead')) {
+		var sb = new Bloodhound({
+			datumTokenizer: function(d) {
+				return Bloodhound.tokenizers.whitespace(d.title); 
+			},
+			queryTokenizer: Bloodhound.tokenizers.whitespace,
+			remote: {
+				url: '/api/0/subscription/search?q=',
+				replace: function () {
+					var q = '/api/0/subscription/search?q=';
+					if ($('#nrss').val()) {
+						q += encodeURIComponent($('#nrss').val());
+					}
+					return q;
+				},
+				filter: function(a) {
+					ta = [];
+					for (var i in a) {
+						if (a[i].title !== '') ta.push(a[i]);
+					}
+					return ta; 
+				}
+			}
+		});
+		sb.initialize();
+		// prep typeahead
+		$('.typeahead').typeahead({
+			hint: true,
+			minLength: 3
+		}, {
+			name: 'sb', // identifier
+			displayKey: 'title', // name of value to check against
+			source: sb.ttAdapter(),
+			templates: {
+				empty: '<p class="tt-empty"><i class="fa fa-times fa-fw"></i>&nbsp;No results found!</p>',
+				suggestion: Handlebars.compile('<p><i class="fa fa-bookmark-o fa-fw"></i>&nbsp;<strong>{{title}}</strong><br>{{description}}</p>')
+			}
+		}).on('typeahead:selected', function(obj, datum) {
+			if ($('#m').length) {
+				$scope.gotosub(datum);
+			} else {
+				$scope.gotostream(datum,true);
+			}
+			// lose focus
+			$('.typeahead').blur();
+		});
+	}
+	// focus on search box
+    $('.typeahead').focus();
 	// if it has parameters
 	if (Object.keys($routeParams).length > 0) {
 		// don't URL encode the values of param as they get converted later on anyway
@@ -618,18 +587,38 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		// retrieve posts
 		$scope.gtposts();
 	}
+
+	// single keys
+	/** Move to article below (previous) in stream
+	 */
+	Mousetrap.bind('j', function() {
+		$scope.next();
+	});
+
+	/** Move to article above (next) in stream
+	 */
+	Mousetrap.bind('k', function() { 
+		$scope.prev();
+	});
+
+	/** Open article in new tab/window from stream
+	 */
+	Mousetrap.bind('v', function() {
+		window.open($scope.cp.alternate.href, '_blank');
+		window.focus();
+	});
+
+	/** Toggle article read state
+	 */
+	Mousetrap.bind('m', function() {
+		$scope.toggleRead(s.cp);
+	});
 });
 app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds, RefreshFeed) {
 	// re-activate affix
 	$scope.setaffix = function() {
 		$(window).off('.affix');
-		$('#ma').removeData('bs.affix').removeClass('affix affix-top affix-bottom');
-		$('#ma').affix({
-			offset: {
-				top: $('#map').position().top
-			}
-		});
-		$('#ma').width($('body').width());
+		$('#ma').width($('body').width())
 	}
 	$scope.$watch(
 		function () {
@@ -703,12 +692,9 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds,
 		});
 	}
 	$scope.gotosub = function(obj) {
-		// go to subscription local url
-		$location.path(['/subscription/feed/',obj.value,'/'].join(''));
-		if (!$scope.$$phase && !$scope.$root.$$phase) {
-			// call '$apply' otherwise angular doesn't recognize that the url has changed
-			$scope.$apply();
-		}
+		$timeout(function() {
+			$location.path(['/subscription/feed/',obj.value,'/'].join(''));
+		});
 	}
 	$scope.gtsubs();
 });

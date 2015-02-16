@@ -1,20 +1,55 @@
-.row
-	.col-xs-12
-		.well.collapse#stream-info
-			.row.list-group
-				.col-xs-6.list-group-item
-					.row-content
-						h4.list-group-item-heading Site URL
-						p.list-group-item-text 
-							input(type="text",class="form-control",value='{{stream.alternate[0].href}}',disabled='')
-							span.material-input
-					.row-content
-						h4.list-group-item-heading Description
-						p.list-group-item-text {{stream.description}}
-				.col-xs-6.list-group-item
-					.row-content
-						h4.list-group-item-heading Update time
-						p.list-group-item-text {{stream.updated}}
-					.row-content
-						p
-							button.btn.btn-primary(ng-click='delt()') Delete feed
+#ma(data-spy="affix",style="position:fixed;left:0")
+	.nav.navbar.navbar-default
+		.container
+			.col-lg-2
+				.navbar-header
+					a.navbar-brand(href="/")
+						i.fa.fa-rss.fa-fw.fa-flip-horizontal
+						= config.title
+			.col-lg-6
+				form.navbar-form
+					.form-control-wrapper
+						input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style="width:100%;background-color:transparent;")
+						span.material-input
+			.navbar-right
+				.collapse.navbar-collapse
+					ul.nav.navbar-nav
+						li(ng-if="stream !== undefined")
+							a(href="#",alt="Refresh",ng-click="rfrsh()") 
+								i.fa.fa-fw.fa-refresh#ar(ng-class="isSpinning() ? 'fa-spin' : ''")
+						li(ng-if="stream !== undefined")
+							a.dropdown-toggle(alt="Options",data-toggle="dropdown") 
+								i.fa.fa-fw.fa-ellipsis-v
+							ul.dropdown-menu
+								li
+									a(href="",ng-click="updateStyle('list')")
+										i.fa.fa-fw.fa-align-justify
+										| List view
+								li
+									a(href="",ng-click="updateStyle('tile')")
+										i.fa.fa-fw.fa-th
+										| Tile view
+								li
+									a(href="",ng-click="updateStyle('mini')")
+										i.fa.fa-fw.fa-list
+										| Minimal view
+								li.divider
+								if user
+									li
+										a(href="",ng-click="toggleIgnoreReadArticles()")
+											i.fa.fa-fw.fa-minus-square
+											| Hide read articles
+									li.divider
+								li
+									a(href="")
+										i.fa.fa-fw.fa-info
+										| About feed
+						li(ng-if="canScroll()")
+							a.btn-info(alt="Scroll to top",ng-click="gotoTop()")
+								i.fa.fa-fw.fa-arrow-up
+						li
+							a(href="https://github.com/projectgheist/ofeeds",target="_blank")
+								i.fa.fa-github.fa-fw.fa-lg
+						li.active
+							a(href="/auth/google",target="_self") Sign in with&nbsp;
+								i.fa.fa-google-plus.fa-fw
