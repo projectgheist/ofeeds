@@ -37,9 +37,9 @@ exports.setup = function() {
 
 /** function UpdateAllFeeds
  */
-ag.define('UpdateAllFeeds', function(job, done) {
+ag.define('UpdateAllFeeds', { lockLifeTime: 1000 }, function(job, done) {
 	// needs to have a database connection
-	if (mg.connection.db) {
+	if (mg.connection && mg.connection.db) {
 		UpdateAllFeeds(done);
 	} else {
 		done();
@@ -225,15 +225,16 @@ exports.FetchFeed = function(feed) {
 	// early escape if no feed is returned OR if was updated really recently
 	if (!feed ||
 		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
+		// return a new promise
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(feed); 
 		});
 	}
+	// return a new promise
 	return new rs.Promise(function(resolve, reject) {
 		// pre-define variables
 		var parseError = false,
 			posts = [];
-		
 		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
 		var req = rq.get({
 			timeout:	15000,
@@ -292,9 +293,10 @@ exports.FetchFeed = function(feed) {
 };
 
 function UpdateAllFeeds(done) {
+	// declare options object
 	var opts = {};
 	// get oldest updated feeds
-	opts.query 	= {lastModified:{$lt: new Date(mm().subtract(5, 'minutes'))}};
+	opts.query 	= {};
 	// oldest feeds first
 	opts.sort 	= {lastModified:1};
 	// limit the amount of feeds
@@ -307,11 +309,15 @@ function UpdateAllFeeds(done) {
 		var a = [];
 		// loop all found feeds
 		for (var i in feeds) {
-			if (feeds[i].feedURL !== undefined) {
+			// make sure that the feed has a valid url
+			if (feeds[i].feedURL !== undefined && feeds[i].feedURL.length > 0) {
+				// add fetch feed job to array
 				a.push(exports.FetchFeed(feeds[i]));
 			}
 		}
+		// if jobs present
 		if (a.length > 0) {
+			// run all jobs
 			rs.all(a).then(function() {
 				return st.all(st.Feed,{query:{ posts: null, numSubscribers: null, lastFailureWasParseFailure: true }}).then(function(r) {
 					var b = [];
