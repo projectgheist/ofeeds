@@ -206,7 +206,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		});
 	}
 	$scope.canScroll = function() {
-		return ($(document).scrollTop() > 10);
+		return $(document).scrollTop() > 10;
 	}
 	$scope.gotoFeed = function(r) {
 		$http.get('/api/0/subscription/search',{params:{q:r}})
@@ -261,11 +261,11 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 	$scope.gotoTop = function() {
        $scope.scrollto('mah', 0);
 	}
-	$scope.scrollto = function(id, offset) {
+	$scope.scrollto = function(id, po) {
 		// clear scroll to array
 		$.scrollTo.window().queue([]).stop();
 		// scroll to next element
-		$('html,body').scrollTo($('#'+id), 400, { queue: false, offset: {top: offset || 0} });
+		$('html,body').scrollTo($('#'+id), 0, { queue: false, offset: {top: po || 0} });
  	}
 	$scope.rfrsh = function() {
 		// make sure that it has a param value
@@ -617,7 +617,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 		$scope.toggleRead(s.cp);
 	});
 });
-app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds, RefreshFeed) {
+app.controller('AppFeeds', function($scope, $http, $location, $interval, GetSubs, GetFeeds, RefreshFeed) {
 	// re-activate affix
 	$scope.setaffix = function() {
 		$(window).off('.affix');
@@ -642,7 +642,7 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds,
 				// retrieved crawl time
 				var ot = data.feeds[i].crawlTime;
 				// format time for crawlTime
-				data.feeds[i].crawlTime = (ot !== undefined) ? moment(ot).format('ddd, h:mm:ss A') : 'Never';
+				data.feeds[i].crawlFormatTime = (ot !== undefined) ? moment(ot).format('ddd, h:mm:ss A') : 'Never';
 				// format time for crawlUpdate
 				data.feeds[i].crawlUpdate = (ot !== undefined) ? (moment().diff(ot, 'minutes') + ' minutes ago') : 'Never';
 				// format time for updated time
@@ -670,8 +670,17 @@ app.controller('AppFeeds', function($scope, $http, $location, GetSubs, GetFeeds,
 					break;
 				}
 			}
-			// do string conversion from date
-			$scope.nrt = Math.ceil(moment(data.nextRunIn).diff(moment(), 'minutes', true)) + ' minutes';
+			$scope.nextRunIn = data.nextRunIn;
+			if (!$scope.nrt) {
+				$interval(function() {
+					var d = moment($scope.nextRunIn).diff(moment(), 'milliseconds');
+					// do string conversion from date
+					$scope.nrt = moment(d).format('mm:ss');
+					if ((parseInt(d) % 60000) < 1000) {
+						$scope.gtsubs();
+					}
+				}, 1000);
+			}
 			// update subscriptions
 			$scope.subs = data.feeds;
 		}, function(err) {

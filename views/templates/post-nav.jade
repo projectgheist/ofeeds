@@ -1,26 +1,34 @@
 #ma(data-spy="affix",style="position:fixed;left:0")
-	.nav.navbar.navbar-default
+	.nav.navbar.navbar-default(role="navigation")
 		.container
-			.col-lg-2
-				.navbar-header
-					a.navbar-brand(href="/")
-						i.fa.fa-rss.fa-fw.fa-flip-horizontal
-						= config.title
-			.col-lg-6
-				form.navbar-form
-					.form-control-wrapper
-						input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style="width:100%;background-color:transparent;")
-						span.material-input
-			.navbar-right
-				.collapse.navbar-collapse
-					ul.nav.navbar-nav
-						li(ng-if="stream !== undefined")
+			.navbar-header
+				button.navbar-toggle.collapsed(type="button",data-toggle="collapse",data-target='#navbar-collapse')
+					span.sr-only Toggle navigation
+					span
+						i.fa.fa-fw.fa-bars
+				a.navbar-brand(href="/")
+					i.fa.fa-rss.fa-fw.fa-flip-horizontal
+					span.hidden-xs= config.title
+			.collapse.navbar-collapse#navbar-collapse
+				.col-sm-6
+					form.navbar-form(role="search")
+						.form-control-wrapper
+							input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style="width:100%;background-color:transparent;")
+							span.material-input
+				.col-sm-4
+					ul.nav.navbar-nav.navbar-right
+						li.hidden-sm(ng-if="stream !== undefined")
 							a(href="#",alt="Refresh",ng-click="rfrsh()") 
 								i.fa.fa-fw.fa-refresh#ar(ng-class="isSpinning() ? 'fa-spin' : ''")
 						li(ng-if="stream !== undefined")
 							a.dropdown-toggle(alt="Options",data-toggle="dropdown") 
 								i.fa.fa-fw.fa-ellipsis-v
 							ul.dropdown-menu
+								li.visible-sm(ng-if="stream !== undefined")
+									a(href="#",alt="Refresh",ng-click="rfrsh()") 
+										i.fa.fa-fw.fa-refresh#ar(ng-class="isSpinning() ? 'fa-spin' : ''")
+										| Refresh
+								li.visible-sm.divider
 								li
 									a(href="",ng-click="updateStyle('list')")
 										i.fa.fa-fw.fa-align-justify
@@ -44,10 +52,15 @@
 									a(href="")
 										i.fa.fa-fw.fa-info
 										| About feed
+								li.visible-sm.divider
+								li.visible-sm
+									a(href="https://github.com/projectgheist/ofeeds",target="_blank")
+										i.fa.fa-github.fa-fw.fa-lg
+										| Github repo
 						li(ng-if="canScroll()")
 							a.btn-info(alt="Scroll to top",ng-click="gotoTop()")
 								i.fa.fa-fw.fa-arrow-up
-						li
+						li.hidden-sm
 							a(href="https://github.com/projectgheist/ofeeds",target="_blank")
 								i.fa.fa-github.fa-fw.fa-lg
 						li.active

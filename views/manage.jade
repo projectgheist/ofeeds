@@ -35,7 +35,7 @@ div(ng-controller="AppFeeds")
 							td.text-center {{f.postCount}}
 							td
 								i.fa.fa-fw(ng:class="{true:'fa-check', false:'fa-times'}[f.crawlSuccesful]")
-								| {{f.crawlTime}}
+								| {{f.crawlFormatTime}}
 								br
 								| ({{f.crawlUpdate}})
 							td(ng-if="f.time === undefined")
