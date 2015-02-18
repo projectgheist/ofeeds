@@ -1,12 +1,14 @@
-nav.navbar.navbar-static-top.navbar-default.hidden-xs.hidden-sm
-	.container#top
-		.navbar-header
-			a.navbar-brand(ng-href='/')
-				i.fa.fa-rss.fa-fw.fa-flip-horizontal
-				| OFeeds
-		.navbar-collapse.collapse
-			ul.nav.navbar-nav.navbar-right
-				li 
-					a(href='/logout',target="_self")
-						i.fa.fa-fw.fa-power-off
-						| Logout
+#ma(data-spy="affix",style="position:fixed;left:0")
+	.nav.navbar.navbar-default(role="navigation")
+		.container
+			.col-sm-2
+				.navbar-header
+					button.navbar-toggle.collapsed(type="button",data-toggle="collapse",data-target='#navbar-collapse')
+						span.sr-only Toggle navigation
+						span
+							i.fa.fa-fw.fa-bars
+					a.navbar-brand(href="/")
+						i.fa.fa-rss.fa-fw.fa-flip-horizontal
+						span.hidden-xs= config.title
+			.collapse.navbar-collapse#navbar-collapse
+				block nav-collapse
