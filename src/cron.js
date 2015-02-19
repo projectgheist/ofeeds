@@ -72,7 +72,7 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 			post.feed		= feed;
 			// prevent the publish date to be overridden
 			if (!post.published) {
-				post.published = data.pubdate || mm();
+				post.published = mm(data['rss:pubdate']['#']) || mm();
 			}
 			// if feeds post variable doesn't exist, make it an array
 			feed.posts || (feed.posts = []);
