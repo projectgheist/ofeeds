@@ -71,8 +71,14 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 			post.categories = data.categories || undefined;
 			post.feed		= feed;
 			// prevent the publish date to be overridden
+			var pd = (data['rss:pubdate']['#'] || data.pubdate) || mm();
+			var ct = mm(pd).utcOffset(pd);
 			if (!post.published) {
-				post.published = data.pubdate || mm();
+				post.published = ct.format('YYYY-MM-DDTHH:mm:ss');
+				post.updated = post.published;
+			} else if (data.date && post.updated !== data.date) {
+				pd = data.date || mm();
+				post.updated = mm(pd).utcOffset(pd).format('YYYY-MM-DDTHH:mm:ss');
 			}
 			// if feeds post variable doesn't exist, make it an array
 			feed.posts || (feed.posts = []);
@@ -81,13 +87,13 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 			// return succesfully
 			rslv(post.save());
 		}, function(err) {
-			//console.log("ERROR!"+err);
-			rjct(err);
+			//console.log("FindOrCreatePost error:"+err);
+			rslv(err);
 		});
 	});
 };
 
-exports.RetrievePosts = function(posts, feed, stream) {
+exports.RetrievePosts = function(posts, guids, feed, stream) {
 	// data contains all the post information
 	var data;
 	while (data = stream.read()) {
@@ -183,12 +189,23 @@ exports.RetrievePosts = function(posts, feed, stream) {
 		data.images = images;
 		// store videos in object
 		data.videos = videos;
+		// get the guid of the post
+		var guid = (data.guid || data.link);
+		// does GUID already exist?
+		if (guids.indexOf(guid) > -1) {
+			// create a new unique one from the article information available
+			guid += ';' + (data.title || data.pubdate);
+		}
+		// add to array
+		guids.push(guid);
 		// add
-		posts.push(exports.FindOrCreatePost(feed,(data.guid || data.link),data));
+		posts.push(exports.FindOrCreatePost(feed,guid,data));
 	}
 };
 
-exports.UpdateFeed = function(feed,posts,resolve,reject) {
+/** function UpdateFeed
+ */
+exports.UpdateFeed = function(feed,posts,resolve) {
 	// wait for posts to finish saving
 	// then mark crawl success or failure
 	rs.all(posts).then(function() {
@@ -198,15 +215,8 @@ exports.UpdateFeed = function(feed,posts,resolve,reject) {
 		feed.lastModified = feed.failedCrawlTime = new Date();
 		return [feed, e];
 	}).then(function(a) {
-		// save feed in db
-		a[0].save();
-		// if error detected
-		if (a.length > 1 && a[1]) {
-			reject(a[1]);
-		} else {
-			// return feed
-			resolve(a[0]);
-		}
+		// return feed
+		resolve(a[0].save());
 	});
 };
 
@@ -224,16 +234,17 @@ exports.DeleteFeed = function(feed, err, resolve) {
 exports.FetchFeed = function(feed) {
 	// early escape if no feed is returned OR if was updated really recently
 	if (!feed ||
-		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
+		(false && feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
 		// return a new promise
 		return new rs.Promise(function(resolve, reject) { 
-			resolve(feed); 
+			resolve(); 
 		});
 	}
 	// return a new promise
 	return new rs.Promise(function(resolve, reject) {
 		// pre-define variables
 		var parseError = false,
+			postGUIDs = [],
 			posts = [];
 		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
 		var req = rq.get({
@@ -261,7 +272,7 @@ exports.FetchFeed = function(feed) {
 				//if (meta.xmlurl) {
 				//	feed.feedURL = meta.xmlurl;
 				//}
-				feed.favicon	= meta.favicon || (meta['atom:icon'] ? meta['atom:icon']['#'] : '');
+				feed.favicon	= meta.favicon || (meta['atom:icon'] && meta['atom:icon']['#']) || (meta.image && meta.image.url) || '';
 				feed.siteURL 	= meta.link || '';
 				feed.title 		= meta.title || '';
 				feed.description = meta.description || '';
@@ -276,7 +287,7 @@ exports.FetchFeed = function(feed) {
 				}
 			})
 			.on('readable', function () {
-				exports.RetrievePosts(posts,feed,this);
+				exports.RetrievePosts(posts,postGUIDs,feed,this);
 			})
 			.on('end', function() {
 				if (parseError) {
@@ -292,6 +303,8 @@ exports.FetchFeed = function(feed) {
 	});
 };
 
+/** function UpdateAllFeeds
+ */
 function UpdateAllFeeds(done) {
 	// declare options object
 	var opts = {};

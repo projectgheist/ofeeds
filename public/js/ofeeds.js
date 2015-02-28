@@ -653,15 +653,17 @@ app.controller('AppFeeds', function($scope, $http, $location, $interval, GetSubs
 					data.feeds[i].time = a[0];
 					data.feeds[i].date = a[1];
 				}
+				// retrieve the original posted feed url
+				data.feeds[i].feedURL = decodeURIComponent(data.feeds[i].id);
 				// create url
 				data.feeds[i].url = ['/subscription/feed/',encodeURIComponent(data.feeds[i].id),'/'].join('');
 				// make sure it has a title
 				if (data.feeds[i].title.length <= 0) {
 					// else use the feed url
-					data.feeds[i].title = decodeURIComponent(data.feeds[i].id);
+					data.feeds[i].title = data.feeds[i].feedURL;
 				}
 				// if reading-list found
-				if (decodeURIComponent(data.feeds[i].id) === 'label/reading-list') {
+				if (data.feeds[i].feedURL === 'label/reading-list') {
 					// set reading-list unread count
 					$scope.rlurc = data.feeds[i].unreadcount;
 					// remove item from array

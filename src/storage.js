@@ -142,7 +142,7 @@ exports.getPosts = function(streams, options) {
                 { tags: { $in: includeTags }}
             ],
             tags: { $nin: excludeTags },
-            published: {
+            updated: {
                 $gte: new Date(parseInt(options.minTime) || 0),
                 $lt: new Date(parseInt(options.maxTime) || Date.now())
             }

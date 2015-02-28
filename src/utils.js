@@ -2,6 +2,37 @@
  */
 var mg = require('mongoose'),
 	vd = require('validator');
+	
+exports.startsWith = function(val, str, out) {
+	// check if already an array, else make it an array
+    if (!Array.isArray(str)) {
+        str = [str];
+	}
+	for (var i in str) {
+		if (val.indexOf(str[i].toLowerCase()) === 0) {
+			out = str[i];
+			return true;
+		}
+	}
+	return false;
+};
+
+exports.stringReplace = function(val, str) {
+	// check if already an array, else make it an array
+    if (!Array.isArray(str)) {
+        str = [str];
+	}
+	var re;
+	for (var i in str) {
+		re = new RegExp('('+str[i]+')(?:.*?)','i');
+		val = val.replace(re, parseInt(i)+1);
+	}
+	return val;
+}
+
+exports.clamp = function(val, min, max) {
+  return Math.min(Math.max(val, min), max);
+};
 
 exports.fullURL = function(req) {
     return req.protocol + '://' + req.headers.host + req.url;

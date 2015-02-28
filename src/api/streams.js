@@ -38,7 +38,7 @@ function formatPosts(user, feed, posts, tags, obj) {
 				videos: post.videos
             },
             author: post.author,
-            published: ((mm().diff(mm(post.published), 'days') <= 7 ? mm(post.published).fromNow() : mm(post.published).format("D MMM")) || 0),
+            published: (post.published || 0),
             updated: (post.updated || 0),
             categories: pts.concat(post.categories),
             origin: {
@@ -119,7 +119,7 @@ app.get('/api/0/stream/contents*', function(req, res) {
         excludeTags: excludeTags,
         minTime: req.query.ot,
         maxTime: req.query.nt,
-        sort: (req.query.r === 'o') ? 'published' : '-published',
+        sort: (req.query.r === 'o') ? 'updated' : '-updated',
         limit: +req.query.n || 20,
         populate: ['feed','tags']
     }).then(function(posts) {

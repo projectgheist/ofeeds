@@ -20,6 +20,8 @@ div(ng-controller="AppFeeds")
 								i.fa.fa-bookmark-o.fa-fw
 							td.col-xs-4
 								input.form-control(type="text",value="{{f.title}}",style='background-color:transparent')
+								//--br
+								//--input.form-control(type="text",value="{{f.feedURL}}",style='background-color:transparent')
 							td.text-center {{f.postCount}}
 							td
 								i.fa.fa-fw(ng:class="{true:'fa-check', false:'fa-times'}[f.crawlSuccesful]")
