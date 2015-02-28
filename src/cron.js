@@ -65,20 +65,19 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 			post.summary	= (data.summary !== data.description) ? data.summary : '';
 			post.images		= data.images || undefined;
 			post.videos		= data.videos || undefined;
-			post.url		= data.link || '';
+			post.url		= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
 			post.author		= data.author || '';
 			post.commentsURL= data.comments || '';
 			post.categories = data.categories || undefined;
 			post.feed		= feed;
 			// prevent the publish date to be overridden
-			var pd = (data['rss:pubdate']['#'] || data.pubdate) || mm();
-			var ct = mm(pd).utcOffset(pd);
+			var pd = (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
 			if (!post.published) {
-				post.published = ct.format('YYYY-MM-DDTHH:mm:ss');
+				post.published = (mm(pd).isValid() ? mm(pd).utcOffset(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
 				post.updated = post.published;
 			} else if (data.date && post.updated !== data.date) {
-				pd = data.date || mm();
-				post.updated = mm(pd).utcOffset(pd).format('YYYY-MM-DDTHH:mm:ss');
+				pd = data.date;
+				post.updated = (mm(pd).isValid() ? mm(pd).utcOffset(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
 			}
 			// if feeds post variable doesn't exist, make it an array
 			feed.posts || (feed.posts = []);
@@ -234,7 +233,7 @@ exports.DeleteFeed = function(feed, err, resolve) {
 exports.FetchFeed = function(feed) {
 	// early escape if no feed is returned OR if was updated really recently
 	if (!feed ||
-		(false && feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
+		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
 		// return a new promise
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(); 
