@@ -349,6 +349,12 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			}
 			// loop all articles/items
 			for (var i in $scope.stream.items) {
+				// format date
+				if (moment().diff($scope.stream.items[i].published,'days') > 1) {
+					$scope.stream.items[i].formatted = moment($scope.stream.items[i].published).format('dd mmm');
+				} else {
+					$scope.stream.items[i].formatted = moment($scope.stream.items[i].published).fromNow();
+				}
 				// local reference to variable
 				var str = $scope.stream.items[i].content.content;
 				// check if string
