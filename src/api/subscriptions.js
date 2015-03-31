@@ -159,8 +159,12 @@ app.get('/api/0/subscription/list', function(req, res) {
 
 // search for feeds and preview them before adding them to their account
 app.get('/api/0/subscription/search', function(req, res) {
+	var u = req.query.q; // un-encoded
+	if (!ut.startsWith('http://', u)) {
+		u = 'http://' + u; // add prefix to the front of the string
+	}
 	// creat or find URL in db
-    actions.search(req, req.query.q).then(function(feeds) {
+    actions.search(req, u).then(function(feeds) {
 		var vs = [];
 		if (feeds) {
 			for (var i in feeds) {
@@ -209,6 +213,9 @@ app.post('/api/0/subscription/quickadd', function(req, res) {
         return;
 	}
 	var u = decodeURIComponent(req.query.q);
+	if (!ut.startsWith('http://', u)) {
+		u = 'http://' + u;
+	}
 	// Check if URL
     if (!ut.isUrl(u)) {
         return res.json({

@@ -2,12 +2,19 @@
  */
 var mg = require('mongoose'),
 	vd = require('validator');
-	
+
+/** function startsWith
+ * Checks if a string starts with a certain char/string
+ * @param val: char or string to search for in the input string
+ * @param str: input string/array of strings
+ * @param out: string value that starts with the defined val
+*/
 exports.startsWith = function(val, str, out) {
 	// check if already an array, else make it an array
     if (!Array.isArray(str)) {
         str = [str];
 	}
+	// loop array of strings
 	for (var i in str) {
 		if (val.indexOf(str[i].toLowerCase()) === 0) {
 			out = str[i];

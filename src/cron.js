@@ -73,11 +73,11 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 			// prevent the publish date to be overridden
 			var pd = (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
 			if (!post.published) {
-				post.published = (mm(pd).isValid() ? mm(pd).utcOffset(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+				post.published = (mm(pd).isValid() ? mm(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
 				post.updated = post.published;
 			} else if (data.date && post.updated !== data.date) {
 				pd = data.date;
-				post.updated = (mm(pd).isValid() ? mm(pd).utcOffset(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+				post.updated = (mm(pd).isValid() ? mm(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
 			}
 			// if feeds post variable doesn't exist, make it an array
 			feed.posts || (feed.posts = []);
@@ -86,7 +86,6 @@ exports.FindOrCreatePost = function(feed,guid,data) {
 			// return succesfully
 			rslv(post.save());
 		}, function(err) {
-			//console.log("FindOrCreatePost error:"+err);
 			rslv(err);
 		});
 	});
@@ -198,7 +197,7 @@ exports.RetrievePosts = function(posts, guids, feed, stream) {
 		// add to array
 		guids.push(guid);
 		// add
-		posts.push(exports.FindOrCreatePost(feed,guid,data));
+		posts.push(exports.FindOrCreatePost(feed, guid, data));
 	}
 };
 
@@ -286,7 +285,7 @@ exports.FetchFeed = function(feed) {
 				}
 			})
 			.on('readable', function () {
-				exports.RetrievePosts(posts,postGUIDs,feed,this);
+				exports.RetrievePosts(posts, postGUIDs, feed, this);
 			})
 			.on('end', function() {
 				if (parseError) {
@@ -295,7 +294,7 @@ exports.FetchFeed = function(feed) {
 					// save feed in db
 					resolve(feed.save());
 				} else {
-					exports.UpdateFeed(feed,posts,resolve,reject);
+					exports.UpdateFeed(feed, posts, resolve, reject);
 				}
 			});
 		});
