@@ -72,7 +72,7 @@ var actions = {
     }
 };
 
-// lists all of the feeds a user is subscribed to
+// lists all of the feeds in the database
 app.get('/api/0/feeds/list', function(req, res) {
 	var opts = {
 		// oldest feeds first
@@ -93,7 +93,7 @@ app.get('/api/0/feeds/list', function(req, res) {
 				title: 			f.title || '',
 				shortid: 		f.shortID,
 				crawlTime:		f.lastModified || undefined,
-				updated:		(f.posts && f.posts[f.posts.length-1].published) || undefined,
+				updated:		(f.posts && f.posts.length > 0 && f.posts[f.posts.length-1].published) || undefined,
 				crawlSuccesful:	r
 			};
 		});
