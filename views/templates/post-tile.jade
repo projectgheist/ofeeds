@@ -1,6 +1,7 @@
-.col-xs-12.col-md-3(style='height:384px;padding:0;overflow:hidden;')
-	a(href='{{post.alternate.href}}',target='_blank')
-		.tn(style='overflow:hidden;margin-bottom:10px;height:100%;')
-			img(ng-src="{{post.content.images.large.url}}")
-		div(style='position:absolute;bottom:0;background-color:white;opacity:0.6;padding:0 15px;width:100%;')
-			h4.text-overflow {{post.title}}
+a.col-lg-4(href='{{post.alternate.href}}',target='_blank')
+	.row
+		.col-lg-12(style="height:3em")
+			p {{post.title}}
+	.row
+		.col-lg-12
+			img(ng-src="{{post.content.images.other[post.content.images.large].url}}",style="width:100%",holderjs='holder.js/340x191/random')

@@ -15,19 +15,25 @@ var Agenda = require('agenda'),
 
 // @todo: functions need to be merged
 var actions = {
+	/**
+	 * @param url: un-encoded
+	 */
 	search: function(ctx, url) {
 		// Find or create feed for this URL in the database
 		return db.Feed.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: url}}] }).limit(6).then(function(results) {
-			if (results.length > 0) {
+			// feeds found that match the search expression
+			if (results.length > 0) { 
 				return results;
-			} else if (ut.isUrl(url)) {
-				return db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)}).then(cr.FetchFeed).then(function(f) { 
-					// return feed in array form
-					return [f]; 
-				});
-			} else {
-				return false;
 			}
+			if (!ut.startsWith(url, ['http://','https://'])) {
+				url = 'http://' + url; // add prefix to the front of the string
+			}
+			if (ut.isUrl(url)) {
+				return db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)}).then(cr.FetchFeed).then(function(f) {
+					return [f]; // return feed in array form
+				});
+			}
+			return false;
 		});
 	},
 	refresh: function(ctx, url) {
@@ -89,11 +95,11 @@ app.get('/api/0/feeds/list', function(req, res) {
 			return {
 				favicon:		f.favicon || '',
 				id: 			f.feedURL, // its already encoded
-				postCount:		f.posts.length || 0,
+				postCount:		f.posts ? f.posts.length : 0,
 				title: 			f.title || '',
 				shortid: 		f.shortID,
 				crawlTime:		f.lastModified || undefined,
-				updated:		(f.posts && f.posts.length > 0 && f.posts[f.posts.length-1].published) || undefined,
+				updated:		(f.posts && f.posts.length > 0) ? f.posts[f.posts.length-1].published : undefined,
 				crawlSuccesful:	r
 			};
 		});
@@ -159,12 +165,8 @@ app.get('/api/0/subscription/list', function(req, res) {
 
 // search for feeds and preview them before adding them to their account
 app.get('/api/0/subscription/search', function(req, res) {
-	var u = req.query.q; // un-encoded
-	if (!ut.startsWith('http://', u)) {
-		u = 'http://' + u; // add prefix to the front of the string
-	}
-	// creat or find URL in db
-    actions.search(req, u).then(function(feeds) {
+	// create or find URL in db
+    actions.search(req, req.query.q).then(function(feeds) {
 		var vs = [];
 		if (feeds) {
 			for (var i in feeds) {
@@ -213,7 +215,7 @@ app.post('/api/0/subscription/quickadd', function(req, res) {
         return;
 	}
 	var u = decodeURIComponent(req.query.q);
-	if (!ut.startsWith('http://', u)) {
+	if (!ut.startsWith(u, ['http://','https://'])) {
 		u = 'http://' + u;
 	}
 	// Check if URL

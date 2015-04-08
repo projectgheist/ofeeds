@@ -11,6 +11,7 @@
 	"express": "*",
 	"express-session": "*",
     "feedparser": "*",
+	"image-size": "*",
     "jade": "*",
     "mongoose": "*",
     "passport": "*",

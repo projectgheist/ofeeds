@@ -2,13 +2,12 @@
  * Global variables
  */
 var ta = [],
-	gTemplateID = 'list',
+	gTemplateID = '',
 	gTemplates = {
 		'list': ['/templates/post-compact','/templates/post-expand'],
 		'tile': ['/templates/post-tile'],
 		'mini': ['/templates/post-minimal','/templates/post-expand'],
 	};
-
 /**
  * On page load ready
  */
@@ -106,6 +105,16 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 		controller: 'AppStream'
 	});
 }]);
+app.directive('holderjs', function () {
+    return {
+        link: function (scope, element, attrs) {
+			if (!attrs.ngSrc) {
+				attrs.$set('data-src', attrs.holderjs);
+				Holder.run({ images: element.get(0), nocss: true });
+			}
+		}
+    };
+});
 app.directive('onLastRepeat', function() {
 	return function(scope, element, attrs) {
 		if (scope.$last) {
@@ -119,14 +128,13 @@ app.directive('ngInclude', function($compile) {
     return {
         restrict: 'A',
 		link: function(scope, element, attrs) {
-			var s = scope.$parent.$parent,
-				p = scope.$parent.post;
-			// Trigger when number of children changes,
-            // including by directives like ng-repeat
+			var s = scope.$parent.$parent, // scope
+				p = scope.$parent.post; // post info
+			// Trigger when number of children changes, including by directives like ng-repeat
             var watch = scope.$watch(function() {
                 return element.children().length;
             }, function() {
-                // Wait for templates to render
+                // Wait for templates to finish rendering
                 scope.$evalAsync(function() {
 					// set item id (can't do this in the template as it won't show up correctly in the document)
 					element.attr('id',p.uid);
@@ -149,7 +157,7 @@ app.directive('ngInclude', function($compile) {
 							var u = $(this).attr("href"),
 								r = new RegExp("(?:http:\/\/)?(?:www\.+)?([A-Za-z0-9\-]*)(\.tumblr\.com\/)"),
 								a = u.match(r);
-							// 
+							// has a tumblr link?
 							if (a && a.length > 0) {
 								// give it a tooltip
 								$(this).attr("data-toggle", "popover");
@@ -334,7 +342,7 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			}
 			// make sure it has a title
 			if (data.title.length > 0) {
-				// unfocus search box and set value
+				// defocus search box and set value
 				$('.typeahead').blur().val(data.title);
 			}
 			// what to do with the retrieved data
@@ -349,49 +357,57 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			}
 			// loop all articles/items
 			for (var i in $scope.stream.items) {
+				var ref = $scope.stream.items[i];
 				// format date
-				if (moment().diff($scope.stream.items[i].published,'days') > 1) {
-					$scope.stream.items[i].formatted = moment($scope.stream.items[i].published).format('dd mmm');
+				if (moment().diff(ref.published,'days') > 1) {
+					ref.formatted = moment(ref.published).format('ddd, hh:mm');
 				} else {
-					$scope.stream.items[i].formatted = moment($scope.stream.items[i].published).fromNow();
+					ref.formatted = moment(ref.published).fromNow();
 				}
 				// local reference to variable
-				var str = $scope.stream.items[i].content.content;
+				var str = ref.content.content;
 				// check if string
 				if (typeof str == 'string' || str instanceof String) {
 					// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
-					$scope.stream.items[i].content.content = $sce.trustAsHtml($scope.stream.items[i].content.content);
+					ref.content.content = $sce.trustAsHtml(ref.content.content);
 				}
-				if ($scope.cp && $scope.stream.items[i].uid === $scope.cp.uid) {
+				// set article's template
+				if ($scope.cp && ref.uid === $scope.cp.uid) {
 					$scope.expand($scope.stream.items[i]);
-				} else {
-					$scope.stream.items[i].template = gTemplates[gTemplateID][0];
+				} else if (gTemplateID !== '') {
+					ref.template = gTemplates[gTemplateID][0];
 				}
+				// store back
+				$scope.stream.items[i] = ref;
 			}
+			// update templates
+			$scope.updateStyle('tile');
 			// is message present?
 			if (m) {
-				// show message
-				ShowAlertMessage(m.t,m.m);
+				ShowAlertMessage(m.t, m.m); // show message
 			}
 		}, function(err) {
 			$scope.rf = false;
 		});
 	}
 	$scope.updateStyle = function(n) {
+		// if the same template id is set
 		if (gTemplateID === n) {
 			return;
 		}
+		// set new template id
 		gTemplateID = n;
+		// clear array
+		gTileIDs = [];
+		// set the template for all the items
 		for (var i in $scope.stream.items) {
 			$scope.stream.items[i].template = gTemplates[gTemplateID][0];
 		}
 	}
 	$scope.loadMore = function() {
-		// make sure
-		if (!$scope.stream || !$scope.stream.items ||
-			$scope.stream.items.length <= 0) {
-			// skip rest of function
-			return;
+		// make sure that articles exist
+		if (!$scope.stream || !$scope.stream.items || $scope.stream.items.length <= 0) {
+			return; // skip rest of function
 		}
 		// last post update time
 		var t = $scope.stream.items[$scope.stream.items.length-1].timestampUsec;

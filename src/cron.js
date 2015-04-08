@@ -9,7 +9,8 @@ var fp = require('feedparser'),
 	st = require('./storage'),
 	ut = require('./utils'),
 	mm = require('moment'),
-	mg = require('mongoose');
+	mg = require('mongoose'),
+	is = require('image-size');
 	
 var Agenda = require('agenda'),
 	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db(),true), collection: 'agendaJobs' }, 
@@ -47,46 +48,109 @@ ag.define('UpdateAllFeeds', { lockLifeTime: 1000 }, function(job, done) {
 });
 
 function ContainerImages() {
-	this.small = {};
-	this.large = {};
+	this.small = -1;
+	this.large = -1;
 	this.other = [];
+}
+
+exports.FindImgSizes = function(images) {
+	var p = [];
+	for (var i = 0; i < images.length; ++i) {
+		// return a new promise
+		p.push(new rs.Promise(function(resolve, reject) {
+			var ref = images[i];
+			ref.idx = i;
+			// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
+			var req = rq.get({
+				url: 		ref.url, 
+				headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'},
+				encoding:	null // converts the body to a buffer when null
+			}, function (err, res, body) {
+				if (err || res.statusCode !== 200) {
+					console.log('get error!: ' + err)
+					resolve(ref);
+				}
+			});
+			req.on('response', function(response) {
+				var buffer = new Buffer([]),	
+					dimensions = undefined;
+				response.on('data',function(data) {
+					if (dimensions === undefined) {
+						buffer = Buffer.concat([buffer, data]);
+						try {
+							dimensions = is(buffer);
+							ref.width = dimensions.width;
+							ref.height = dimensions.height;
+						} catch (err) {
+						}
+					}
+				})
+				.on('error', function(err) {
+					resolve(ref);
+				})
+				.on('end', function() {
+					resolve(ref);
+				});
+			});
+		}));
+	}
+	return p;
 }
 
 exports.FindOrCreatePost = function(feed,guid,data) {
     // return a new promise
-	return new rs.Promise(function(rslv,rjct) {
-        // find post in database
-		st
-        .findOrCreate(st.Post, {'feed':feed, 'guid':guid})
-        .then(function(post) {
-			post.guid		= guid;
-			post.title 		= ut.parseHtmlEntities(data.title || '');
-			post.body		= data.description || '';
-			post.summary	= (data.summary !== data.description) ? data.summary : '';
-			post.images		= data.images || undefined;
-			post.videos		= data.videos || undefined;
-			post.url		= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
-			post.author		= data.author || '';
-			post.commentsURL= data.comments || '';
-			post.categories = data.categories || undefined;
-			post.feed		= feed;
-			// prevent the publish date to be overridden
-			var pd = (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
-			if (!post.published) {
-				post.published = (mm(pd).isValid() ? mm(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
-				post.updated = post.published;
-			} else if (data.date && post.updated !== data.date) {
-				pd = data.date;
-				post.updated = (mm(pd).isValid() ? mm(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+	return new rs.Promise(function(resolve, reject) {
+		// retrieve images sizes
+		rs.all(exports.FindImgSizes(data.images.other)).then(function(out) {
+			data.images.other.length = 0; // clear array
+			for (var i in out) { // resort array by index
+				if (out[i].width <= 1 || out[i].height <= 1) {
+					continue;
+				}
+				var k = out[i].idx; // copy
+				delete out[i].idx; // remove key and value
+				if (data.images.other.length === 0) {
+					data.images.other.push(out[i]);
+				} else {
+					for (var j = 0; j < data.images.other.length; ++j) {
+						if (k > j) continue;
+						else data.images.other = data.images.other.splice(j, 0, out[i]);
+					}
+				}
 			}
-			// if feeds post variable doesn't exist, make it an array
-			feed.posts || (feed.posts = []);
-			// add post to posts array
-			feed.posts.addToSet(post);
-			// return succesfully
-			rslv(post.save());
-		}, function(err) {
-			rslv(err);
+			// find post in database
+			st
+			.findOrCreate(st.Post, {'feed':feed, 'guid':guid})
+			.then(function(post) {
+				post.guid		= guid; // required
+				post.title 		= ut.parseHtmlEntities(data.title || '');
+				post.body		= data.description || '';
+				post.summary	= (data.summary !== data.description) ? data.summary : '';
+				post.images		= data.images || undefined;
+				post.videos		= data.videos || undefined;
+				post.url		= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
+				post.author		= data.author || '';
+				post.commentsURL= data.comments || '';
+				post.categories = data.categories || undefined;
+				post.feed		= feed;
+				// prevent the publish date to be overridden
+				var pd = (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
+				if (!post.published) {
+					post.published = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+					post.updated = post.published;
+				} else if (data.date && post.updated !== data.date) {
+					pd = data.date;
+					post.updated = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+				}
+				// if feeds post variable doesn't exist, make it an array
+				feed.posts || (feed.posts = []);
+				// add post to posts array
+				feed.posts.addToSet(post);
+				// return successfully
+				resolve(post.save());
+			}, function(err) {
+				resolve(err);
+			});
 		});
 	});
 };
@@ -97,10 +161,19 @@ exports.RetrievePosts = function(posts, guids, feed, stream) {
 	while (data = stream.read()) {
 		var images = new ContainerImages(),
 			videos = [];
-		// Store orignal thumbnail url
-		images.small = (data.image !== undefined && data.image.url && data.image.url.length > 0) ? {'url':data.image.url,'width':data.image.width || 0,'height':data.image.height || 0} : undefined;
-		if (data['media:thumbnail'] !== null || data['media:content'] !== null) {
-			var media = [data['media:thumbnail'],data['media:content']];
+		// Store original thumbnail url
+		if (data.image !== undefined && data.image.url && data.image.url.length > 0) {
+			images.small = {
+				'url': data.image.url,
+				'width': (data.image.width || 0),
+				'height': (data.image.height || 0)
+			};
+		} else {
+			images.small = undefined;
+		}
+		if (data['media:thumbnail'] !== null ||
+			data['media:content'] !== null) {
+			var media = [data['media:thumbnail'], data['media:content']];
 			// loop array
 			for (var j in media) {
 				// local reference to array element
@@ -121,17 +194,13 @@ exports.RetrievePosts = function(posts, guids, feed, stream) {
 					}
 					// store image regardless of size
 					images.other.push(obj[i]['@']);
-					// early out
-					if (obj[i]['@'].width === 0) {
-						continue;
-					}
 					// get the smallest image
-					if (!images.small || !images.small.width || (parseInt(images.small.width) > parseInt(obj[i]['@'].width))) {
-						images.small = obj[i]['@'];
+					if (!images.small || !images.small.width) {
+						images.small = images.other.length - 1;
 					}
 					// get the largest
-					if (!images.large || !images.large.width || (parseInt(images.large.width) < parseInt(obj[i]['@'].width))) {
-						images.large = obj[i]['@'];
+					if (!images.large || !images.large.width) {
+						images.large = images.other.length - 1;
 					}
 				}
 			}
@@ -162,13 +231,13 @@ exports.RetrievePosts = function(posts, guids, feed, stream) {
 					}
 					// add to images array
 					images.other.push(obj);
-					// store small image
+					// store as small image
 					if (!images.small || !images.small.width) {
-						images.small = obj;
+						images.small = images.other.length - 1;
 					}
-					// store large image
+					// store as large image
 					if (!images.large || !images.large.width) {
-						images.large = obj;
+						images.large = images.other.length - 1;
 					}
 					break;
 				case 'A':
@@ -183,11 +252,11 @@ exports.RetrievePosts = function(posts, guids, feed, stream) {
 			// Parse the post description for image/video tags
 			pr.write(data.description.toString("utf8")).end();
 		}
-		// store images in object
+		// default image container
 		data.images = images;
 		// store videos in object
 		data.videos = videos;
-		// get the guid of the post
+		// get the GUID of the post
 		var guid = (data.guid || data.link);
 		// does GUID already exist?
 		if (guids.indexOf(guid) > -1) {
@@ -196,8 +265,8 @@ exports.RetrievePosts = function(posts, guids, feed, stream) {
 		}
 		// add to array
 		guids.push(guid);
-		// add
-		posts.push(exports.FindOrCreatePost(feed, guid, data));
+		// store data as ref
+		posts.push(exports.FindOrCreatePost(feed, guid, data)); // add
 	}
 };
 
@@ -246,7 +315,7 @@ exports.FetchFeed = function(feed) {
 			posts = [];
 		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
 		var req = rq.get({
-			timeout:	15000,
+			timeout:	1500,
 			url: 		decodeURIComponent(feed.feedURL), 
 			headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 		}, function (err, res, user) {
