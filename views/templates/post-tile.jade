@@ -1,7 +1,6 @@
-a.col-lg-4(href='{{post.alternate.href}}',target='_blank')
-	.row
-		.col-lg-12(style="height:3em")
-			p {{post.title}}
-	.row
-		.col-lg-12
-			img(ng-src="{{post.content.images.other[post.content.images.large].url}}",style="width:100%",holderjs='holder.js/340x191/random')
+.col-lg-4
+	.panel.panel-default
+		.panel-heading(style="height:190px")
+			img(ng-src="{{post.content.images.other[post.content.images.large].url}}",class='{{post.content.images.cssclass}}',holderjs='',style='width:100%;height:auto')
+		.panel-body(style="height:190px")
+			a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
