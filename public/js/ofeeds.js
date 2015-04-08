@@ -24,6 +24,10 @@ Mousetrap.bind('/', function() {
 	return false;
 });
 
+function clamp(val,min,max) {
+	return Math.min(Math.max(val, min), max);
+}
+
 function ShowAlertMessage(t, m) {
 	$('#a').removeClass('hidden').addClass(t);
 	$('#am').html(m);
@@ -109,7 +113,7 @@ app.directive('holderjs', function () {
     return {
         link: function (scope, element, attrs) {
 			if (!attrs.ngSrc) {
-				attrs.$set('data-src', attrs.holderjs);
+				attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/random'].join(''));
 				Holder.run({ images: element.get(0), nocss: true });
 			}
 		}
@@ -326,10 +330,8 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			return;
 		}
 		// set refresh page to TRUE
-		if (!$scope.rf) {
-			$scope.rf = true;
-		}
-		// ignore read articles if stated
+		$scope.rf = true;
+		// ignore read articles if flagged
 		if ($scope.ignoreReadArticles) {
 			$scope.params.xt = 'user/-/state/read';
 		}
@@ -357,12 +359,18 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			}
 			// loop all articles/items
 			for (var i in $scope.stream.items) {
+				// local reference to item
 				var ref = $scope.stream.items[i];
 				// format date
 				if (moment().diff(ref.published,'days') > 1) {
 					ref.formatted = moment(ref.published).format('ddd, hh:mm');
 				} else {
 					ref.formatted = moment(ref.published).fromNow();
+				}
+				console.log(ref.content.images)
+				if (ref.content.images.other.length > 0) {
+					var img = ref.content.images.other[ref.content.images.large >= 0 ? ref.content.images.large : ref.content.images.small];
+					ref.content.images.cssclass = (img.width > img.height) ? 'horizontal-image' : 'vertical-image';
 				}
 				// local reference to variable
 				var str = ref.content.content;
@@ -669,7 +677,7 @@ app.controller('AppFeeds', function($scope, $http, $location, $interval, GetSubs
 				data.feeds[i].crawlUpdate = (ot !== undefined) ? (moment().diff(ot, 'minutes') + ' minutes ago') : 'Never';
 				// format time for updated time
 				data.feeds[i].updated = (data.feeds[i].updated !== undefined) ? moment(data.feeds[i].updated).format('h:mm:ss A|ddd, DD MMM YYYY') : 'Never';
-				//
+				// split date string into multiple
 				if (data.feeds[i].updated.search('|') > -1) {
 					var a = data.feeds[i].updated.split('|');
 					data.feeds[i].time = a[0];
