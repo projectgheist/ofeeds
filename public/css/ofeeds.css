@@ -46,12 +46,14 @@
 	position:relative;
 }
 
-.vertical-image {
-	width:100%;
+.horizontal-image {
+	width: auto;
+	height: 100%;
 }
 
-.horizontal-image {
-	height:100%;
+.vertical-image {
+	width: 100%;
+	height: auto;
 }
 
 .rotate_text_90 {
@@ -226,6 +228,13 @@ hbinclude .bs-callout {
 
 .tt-suggestion.tt-is-under-cursor a {
 	color: #fff;
+}
+
+.panel-image {
+	width: 100%;
+	height: 190px;
+	overflow: hidden;
+	margin-bottom: 15px;
 }
 
 .tt-suggestion p {

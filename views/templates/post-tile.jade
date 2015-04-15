@@ -1,6 +1,7 @@
 .col-lg-4
 	.panel.panel-default
-		.panel-heading(style="height:190px")
-			img(ng-src="{{post.content.images.other[post.content.images.large].url}}",class='{{post.content.images.cssclass}}',holderjs='',style='width:100%;height:auto')
-		.panel-body(style="height:190px")
+		.panel-body(style="height:275px")
+			.panel-image
+				img(ng-src="{{post.content.images.other[post.content.images.large].url}}",width='{{post.content.images.other[post.content.images.large].width}}',height='{{post.content.images.other[post.content.images.large].height}}',holderjs='')
 			a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+			p.small by {{post.author}} at {{post.formatted}}

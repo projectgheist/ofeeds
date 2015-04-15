@@ -115,6 +115,20 @@ app.directive('holderjs', function () {
 			if (!attrs.ngSrc) {
 				attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/random'].join(''));
 				Holder.run({ images: element.get(0), nocss: true });
+			} else {
+				var x = (element.parent().width() / parseInt(attrs.width)) * parseInt(attrs.height);
+				if (x < element.parent().height()) {
+					element.addClass('horizontal-image');
+					var y = (element.parent().height() / parseInt(attrs.height)) * parseInt(attrs.width);
+					if (y > element.parent().width()) {
+						element.css('left',(element.parent().width() - y) / 2);
+					}
+				} else {
+					element.addClass('vertical-image');
+					if (x > element.parent().height()) {
+						element.css('top',(element.parent().height() - x) / 2);
+					}
+				}
 			}
 		}
     };
@@ -183,10 +197,6 @@ app.directive('ngInclude', function($compile) {
 					}
                 });
             });
-			// find thumbnail image
-			element.find('.tn img').one('load', function() {
-				s.stretchImg($(this),p);
-			});
 		}
     };
 });
@@ -246,29 +256,6 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 			e.removeClass('vertical-image');
 			$scope.makeHorizontal(e);
 		}
-	}
-	$scope.stretchImg = function(e,p) {
-		// retrieve real image size
-		var t = new Image();
-		t.src = e.attr("src");
-		// decide to make it a horizontal or vertical image
-		if (t.width > t.height) {
-			$scope.makeHorizontal(e);
-		} else {
-			$scope.makeVertical(e);
-		}
-		/*if (t.width > e.parent().width()) {
-			var o = (e.parent().width() - e.width()) / 2;
-			e.css('left', Math.min(o, 0) + 'px');
-		} 
-		if (t.height > e.parent().height()) {
-			console.log('d');
-			// make the same width as parent
-			e.width(e.parent().width());
-			// offset vertically if necessary
-			var o = (e.parent().height() - e.height()) / 2;
-			e.css('top', Math.min(o, 0) + 'px');
-		}*/
 	}
 	$scope.gotoTop = function() {
        $scope.scrollto('mah', 0);
@@ -366,11 +353,6 @@ app.controller('AppStream', function($rootScope, $scope, $http, $location, $rout
 					ref.formatted = moment(ref.published).format('ddd, hh:mm');
 				} else {
 					ref.formatted = moment(ref.published).fromNow();
-				}
-				console.log(ref.content.images)
-				if (ref.content.images.other.length > 0) {
-					var img = ref.content.images.other[ref.content.images.large >= 0 ? ref.content.images.large : ref.content.images.small];
-					ref.content.images.cssclass = (img.width > img.height) ? 'horizontal-image' : 'vertical-image';
 				}
 				// local reference to variable
 				var str = ref.content.content;
