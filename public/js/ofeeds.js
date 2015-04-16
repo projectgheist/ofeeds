@@ -12,6 +12,11 @@ var ta = [],
  * On page load ready
  */
 jQuery(document).ready(function($) {
+	new Layzr({ 
+		attr: 'data-layzr', 
+		retinaAttr: 'data-layzr-retina',
+		threshold: 0
+	});
 });
 
 // single keys
@@ -112,7 +117,7 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
 app.directive('holderjs', function () {
     return {
         link: function (scope, element, attrs) {
-			if (!attrs.ngSrc) {
+			if (!attrs.ngSrc && !attrs.layzr) {
 				attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/random'].join(''));
 				Holder.run({ images: element.get(0), nocss: true });
 			} else {
