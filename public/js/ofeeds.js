@@ -7,12 +7,13 @@ var ta = [],
 		'list': ['/templates/post-compact','/templates/post-expand'],
 		'tile': ['/templates/post-tile'],
 		'mini': ['/templates/post-minimal','/templates/post-expand'],
-	};
+	},
+	g_Layzr = {};
 /**
  * On page load ready
  */
 jQuery(document).ready(function($) {
-	new Layzr({ 
+	g_Layzr = new Layzr({ 
 		attr: 'data-layzr', 
 		retinaAttr: 'data-layzr-retina',
 		threshold: 0
@@ -134,6 +135,7 @@ app.directive('holderjs', function () {
 						element.css('top',(element.parent().height() - x) / 2);
 					}
 				}
+				g_Layzr.update(); // force image lazy loading update
 			}
 		}
     };

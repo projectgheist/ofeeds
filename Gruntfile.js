@@ -20,6 +20,7 @@ module.exports = function(grunt) {
 					'./bower_components/angular-resource/angular-resource.js',
 					'./bower_components/bootstrap/dist/js/bootstrap.js',
 					'./bower_components/bootstrap-material-design/dist/js/material.js',
+					'./bower_components/handlebars/handlebars.js',
 					'./bower_components/holderjs/holder.js',
 					'./bower_components/moment/moment.js',
 					'./bower_components/typeahead.js/dist/bloodhound.js',
