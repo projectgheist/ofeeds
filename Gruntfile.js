@@ -28,17 +28,20 @@ module.exports = function(grunt) {
 				dest: './public/js/<%= pkg.name %>-<%= pkg.version %>.js'
 			}
 		},
-		less: {
-			//...
-			/*development: {
-				options: {
-				  compress: true,  //minifying the result
-				},
-				files: {
-					//compiling frontend.less into frontend.css
-					"./public/css/frontend.css": "./app/assets/stylesheets/frontend.less",
-				}
-			}*/
+		cssmin: {
+			options: {
+				shorthandCompacting: false,
+				roundingPrecision: -1,
+				keepSpecialComments: 0
+			},
+			dist: {
+				src: [
+					'./bower_components/fontawesome/css/font-awesome.css',
+					'./bower_components/bootstrap/dist/css/bootstrap.css',
+					'./bower_components/bootstrap-material-design/dist/css/material.css'
+				],
+				dest: './public/css/<%= pkg.name %>-<%= pkg.version %>.min.css'
+			}
 		},
 		uglify: {
 			//...
@@ -56,11 +59,11 @@ module.exports = function(grunt) {
 	});
 	
 	// Plugin loading
+	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
 	// Task definition
-	grunt.registerTask('default', ['concat','uglify']);
+	grunt.registerTask('default', ['cssmin','concat','uglify']);
 };
