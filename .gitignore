@@ -45,6 +45,7 @@ Temporary Items
 
 # ignore nodejs library modules
 /node_modules
+/bower_components
 
 # ignore custom application launcher in Windows
 *.bat

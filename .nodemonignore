@@ -9,3 +9,4 @@
 *.ini         	# ignore any INI files
 *.json         	# ignore any JSON files
 *.gitignore    	# ignore any git ignore files
+Gruntfile.js    # ignore Grunt file

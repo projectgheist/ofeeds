@@ -1,17 +1,24 @@
 {
   "name": "OFeeds",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "scripts": {
     "start": "node app.js",
     "run": "node app.js"
   },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-concat": "~0.5.1",
+    "grunt-contrib-less": "~1.0.1",
+    "grunt-contrib-uglify": "~0.9.1",
+    "grunt-contrib-watch": "~0.6.1"
+  },
   "dependencies": {
-	"agenda": "*",
-	"express": "*",
-	"express-session": "*",
+    "agenda": "*",
+    "express": "*",
+    "express-session": "*",
     "feedparser": "*",
-	"image-size": "*",
+    "image-size": "*",
     "jade": "*",
     "mongoose": "*",
     "passport": "*",
@@ -20,21 +27,27 @@
     "rsvp": "*",
     "shortid": "*",
     "validator": "*",
-	"moment": "*"
+    "moment": "*"
   },
-  "readmeFilename": "README.md",
-  "description": "",
+  "description": "Warning: This is work in progress and not usable/stable yet!",
   "main": "app.js",
   "devDependencies": {},
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/projectgheist/ofeeds.git"
+  },
   "keywords": [
     "nodejs",
-	"rss"
+    "rss"
   ],
-  "author": "",
-  "license": "BSD",
+  "author": "projectgheist",
+  "license": "MIT",
   "subdomain": "",
   "engines": {
     "node": "0.10.x"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/projectgheist/ofeeds/issues"
+  },
+  "homepage": "https://github.com/projectgheist/ofeeds"
 }
