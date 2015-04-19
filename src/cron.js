@@ -335,7 +335,7 @@ exports.FetchFeed = function(feed) {
 			})
 			.on('end', function() {
 				if (err) {
-					if (err.message.match(/^Not a feed/)) {
+					if (err.message.match(/^Not a feed/)) { // if url as been flagged not to be a feed
 						resolve(feed.remove()); // remove feed from db
 					} else {
 						feed.lastModified = feed.failedCrawlTime = new Date();

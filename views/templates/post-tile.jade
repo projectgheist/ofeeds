@@ -1,9 +1,15 @@
 .col-lg-4
 	.panel.panel-default
-		.panel-body(style="min-height:275px")
+		.panel-body(style="min-height:425px;padding:0")
 			.panel-image(ng-repeat='image in post.content.images.other')
 				img(data-layzr="{{image.url}}",data-layzr-retina="{{image.url}}",width='{{image.width}}',height='{{image.height}}',holderjs='')
 			.panel-image(ng-if="post.content.images.other.length <= 0")
 				img(holderjs='')
-			a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
-			p.small by {{post.author}} at {{post.formatted}}
+			.panel-text(style="padding:15px")
+				h4 
+					a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+				p
+					span(ng-if="post.author")
+						i.fa.fa-user.fa-fw
+						| by {{post.author}}
+					span(ng-class="{'pull-right': !post.author}") {{post.author ? ' at' : ''}} {{post.formatted}}

@@ -16,7 +16,25 @@ jQuery(document).ready(function($) {
 	g_Layzr = new Layzr({ 
 		attr: 'data-layzr', 
 		retinaAttr: 'data-layzr-retina',
-		threshold: 0
+		threshold: 50,
+		callback: function() {
+			var e = $(this);
+				w = parseInt(e.attr('width')),
+				h = parseInt(e.attr('height'));
+			var x = (e.parent().width() / w) * h;
+			if (x < e.parent().height()) {
+				e.addClass('horizontal-image');
+				var y = (e.parent().height() / h) * w;
+				if (y > e.parent().width()) {
+					e.css('left',(e.parent().width() - y) / 2);
+				}
+			} else {
+				e.addClass('vertical-image');
+				if (x > e.parent().height()) {
+					e.css('top',(e.parent().height() - x) / 2);
+				}
+			}
+		}
 	});
 });
 
@@ -122,19 +140,6 @@ app.directive('holderjs', function () {
 				attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/random'].join(''));
 				Holder.run({ images: element.get(0), nocss: true });
 			} else {
-				var x = (element.parent().width() / parseInt(attrs.width)) * parseInt(attrs.height);
-				if (x < element.parent().height()) {
-					element.addClass('horizontal-image');
-					var y = (element.parent().height() / parseInt(attrs.height)) * parseInt(attrs.width);
-					if (y > element.parent().width()) {
-						element.css('left',(element.parent().width() - y) / 2);
-					}
-				} else {
-					element.addClass('vertical-image');
-					if (x > element.parent().height()) {
-						element.css('top',(element.parent().height() - x) / 2);
-					}
-				}
 				g_Layzr.update(); // force image lazy loading update
 			}
 		}
