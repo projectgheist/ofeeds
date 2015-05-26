@@ -1,5 +1,3 @@
-extends ../includes/nav
-
 block nav-collapse
 	.col-sm-6
 		form.navbar-form(role="search")
@@ -43,17 +41,6 @@ block nav-collapse
 						a(href="")
 							i.fa.fa-fw.fa-info
 							| About feed
-					li.visible-sm.divider
-					li.visible-sm
-						a(href="https://github.com/projectgheist/ofeeds",target="_blank")
-							i.fa.fa-github.fa-fw.fa-lg
-							| Github repo
 			li(ng-if="canScroll()")
 				a.btn-info(alt="Scroll to top",ng-click="gotoTop()")
 					i.fa.fa-fw.fa-arrow-up
-			li.hidden-sm
-				a(href="https://github.com/projectgheist/ofeeds",target="_blank")
-					i.fa.fa-github.fa-fw.fa-lg
-			li.active
-				a(href="/auth/google",target="_self") Sign in with&nbsp;
-					i.fa.fa-google-plus.fa-fw

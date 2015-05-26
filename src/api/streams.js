@@ -15,7 +15,7 @@ function formatPosts(user, feed, posts, tags, obj) {
 	// creates a new array with the posts 
     var items = posts.map(function(post) {
 		var isRead = 0,
-			pts = post.tags ? post.tags.map(function(t) {
+			pts = (post.tags.length > 0) ? post.tags.map(function(t) {
 				var r = t.stringID;
 				if (!isRead && r && ut.isRead(user,r)) {
 					isRead = 1;
@@ -47,7 +47,7 @@ function formatPosts(user, feed, posts, tags, obj) {
                 url: post.feed.feedURL
             },
             crawlTimeMsec: post.feed.successfulCrawlTime.getTime(),
-            timestampUsec: post.published.getTime(),
+            timestampUsec: post.published ? post.published.getTime() : post.feed.successfulCrawlTime.getTime(),
             likingUsers: [],
             comments: [],
             annotations: []
@@ -90,7 +90,6 @@ app.get('/api/0/stream/contents*', function(req, res) {
 			streams.push(req.query);
 		}
 	}
-
 	if (!streams) {
         return res.status(400).send('InvalidStream');
     }
@@ -126,8 +125,8 @@ app.get('/api/0/stream/contents*', function(req, res) {
 		var isFeed 	= (streams[0].type === 'feed'), // boolean: TRUE if feed
 			value 	= streams[0].value,				// string: site URL
 			hasPosts = (posts.length > 0 && posts[0]),	// boolean: TRUE if feed object
-			feed 	= hasPosts ? posts[0].feed : undefined,	// reference to feed db obj
-			obj 	= feed ? {
+			feed 	= hasPosts ? posts[0].feed : undefined;	// reference to feed db obj
+		var obj 	= feed ? {
 				id:           	encodeURIComponent(isFeed ? feed.stringID : ''),
 				feedURL:		decodeURIComponent(isFeed ? feed.feedURL : value),
 				title:        	isFeed ? feed.title        : value,
@@ -140,7 +139,7 @@ app.get('/api/0/stream/contents*', function(req, res) {
 				showOrigin:		false,
 				continuation: 	'TODO'
 			} : {};
-        if (!hasPosts) {
+        if (hasPosts === undefined) {
 			// Google Reader returns 404 response, we need a valid json response for infinite scrolling
 			res.json(obj);
         } else {

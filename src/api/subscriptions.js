@@ -20,21 +20,29 @@ var actions = {
 	 */
 	search: function(ctx, url) {
 		// Find or create feed for this URL in the database
-		return db.Feed.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: url}}] }).limit(6).then(function(results) {
-			// feeds found that match the search expression
-			if (results.length > 0) { 
-				return results;
-			}
-			if (!ut.startsWith(url, ['http://','https://'])) {
-				url = 'http://' + url; // add prefix to the front of the string
-			}
-			if (ut.isUrl(url)) {
-				return db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)}).then(cr.FetchFeed).then(function(f) {
-					return [f]; // return feed in array form
-				});
-			}
-			return false;
-		});
+		return db.Feed
+			.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: url}}] })
+			.limit(6)
+			.then(function(results) {
+				// feeds found that match the search expression
+				if (results.length > 0) { 
+					return results;
+				}
+				// make sure it starts with a certain prefix
+				if (!ut.startsWith(url, ['http://','https://'])) {
+					// add prefix to the front of the string
+					url = 'http://' + url;
+				}
+				if (ut.isUrl(url)) {
+					return db
+						.findOrCreate(db.Feed, { feedURL: encodeURIComponent(url) })
+						.then(cr.FetchFeed)
+						.then(function(f) {
+							return [f]; // return feed in array form
+						});
+				}
+				return false;
+			});
 	},
 	refresh: function(ctx, url) {
         // Find feed for this URL in the database
@@ -166,22 +174,24 @@ app.get('/api/0/subscription/list', function(req, res) {
 // search for feeds and preview them before adding them to their account
 app.get('/api/0/subscription/search', function(req, res) {
 	// create or find URL in db
-    actions.search(req, req.query.q).then(function(feeds) {
-		var vs = [];
-		if (feeds) {
-			for (var i in feeds) {
-				var d = feeds[i].description;
-				vs.push({
-					type:'feed',
-					value:feeds[i].feedURL,
-					title:feeds[i].title,
-					description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : '')
-					});
-			};
-		}
-		// always return something, don't make it return errors
-		res.json(vs);
-    });
+    actions
+		.search(req, req.query.q)
+		.then(function(feeds) {
+			var vs = [];
+			if (feeds) {
+				for (var i in feeds) {
+					var d = feeds[i].description;
+					vs.push({
+						type:'feed',
+						value:feeds[i].feedURL,
+						title:feeds[i].title,
+						description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : '')
+						});
+				};
+			}
+			// always return something, don't make it return errors
+			res.json(vs);
+		});
 });
 
 // fetch a feed

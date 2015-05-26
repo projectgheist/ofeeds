@@ -1,3 +1,2 @@
-include post-nav
-.col-xs-12.list-article-group(infinite-scroll='loadMore()',infinite-scroll-distance='2')
+div(infinite-scroll='loadMore()',infinite-scroll-distance='2')
 	.article(ng-repeat='post in stream.items',ng-include='post.template',on-last-repeat='')

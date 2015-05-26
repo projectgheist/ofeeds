@@ -47,20 +47,26 @@ ag.define('UpdateAllFeeds', { lockLifeTime: 1000 }, function(job, done) {
 	}
 });
 
+/**
+ */
 function ContainerImages() {
-	this.small = -1;
-	this.large = -1;
+	this.small = [];
+	this.large = [];
 	this.other = [];
-}
+};
 
-exports.FindImgSizes = function(images) {
-	var p = [];
-	for (var i in images) {
-		// return a new promise
-		p.push(new rs.Promise(function(resolve, reject) {
-			var ref = images[i];
-			// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
-			var req = rq.get({
+/** function FindImgSizePromise
+	 Retrieve image sizes
+ */
+function FindImgSizePromise(image, type) {
+	return new rs.Promise(function(resolve, reject) {
+		// local reference
+		var ref = image;
+		// set image type
+		ref.type = type;
+		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
+		rq
+			.get({
 				url: 		ref.url, 
 				headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'},
 				encoding:	null // converts the body to a buffer when null
@@ -68,126 +74,189 @@ exports.FindImgSizes = function(images) {
 				if (err || res.statusCode !== 200) {
 					resolve(ref);
 				}
-			});
-			req.on('response', function(response) {
+			})
+			.on('response', function(response) {
 				var buffer = new Buffer([]),	
 					dimensions = undefined;
-				response.on('data',function(data) {
-					if (dimensions === undefined) {
-						buffer = Buffer.concat([buffer, data]);
-						try {
-							dimensions = is(buffer);
-							ref.width = dimensions.width;
-							ref.height = dimensions.height;
-						} catch (err) {
+				response
+					.on('data',function(data) {
+						if (dimensions === undefined) {
+							buffer = Buffer.concat([buffer, data]);
+							try {
+								dimensions = is(buffer);
+								ref.width = dimensions.width;
+								ref.height = dimensions.height;
+							} catch (err) {
+							}
 						}
-					}
-				})
-				.on('error', function(err) {
-					resolve(ref);
-				})
-				.on('end', function() {
-					resolve(ref);
-				});
+					})
+					.on('error', function(err) {
+						resolve(ref);
+					})
+					.on('end', function() {
+						resolve(ref);
+					});
 			});
-		}));
+	});
+};
+
+/** function FindImgSizes
+	 Retrieve image sizes
+ */
+exports.FindImgSizes = function(images,type) {
+	var p = [];
+	for (var i in images.small) {
+		// return a new promise
+		p.push(FindImgSizePromise(images.small[i], 'small'));
+	}
+	for (var j in images.other) {
+		// return a new promise
+		p.push(FindImgSizePromise(images.other[j], 'other'));
 	}
 	return p;
 }
 
-exports.FindOrCreatePost = function(feed,guid,data) {
+/** function FindOrCreatePost
+ */
+exports.FindOrCreatePost = function(feed, guid, data) {
     // return a new promise
 	return new rs.Promise(function(resolve, reject) {
 		// retrieve images sizes
-		rs.all(exports.FindImgSizes(data.images.other)).then(function(out) {
-			data.images.other.length = 0; // clear array
-			var s = 1e16,
-				l = 0;
+		/*
+		.all(exports.FindImgSizes(data.images))
+		.then(function(out) {
+			// empty object
+			data.images = {small:[],other:[]};
+			// store in array
 			for (var i in out) {
-				if (out[i].width <= 1 || out[i].height <= 1) {
-					continue;
-				}
-				data.images.other.push(out[i]);
-				var a = out[i].width * out[i].height; // sum size
-				if (a < s) {
-					data.images.small = i;
-				}
-				if (a > l) {
-					data.images.large = i;
+				if (out[i].type === 'small') {
+					data.images.small.push(out[i]);
+				} else {
+					data.images.other.push(out[i]);
 				}
 			}
-			// find post in database
-			st
+		})
+		*/
+		// find post in database
+		st
 			.findOrCreate(st.Post, {'feed':feed, 'guid':guid})
 			.then(function(post) {
-				post.guid		= guid; // required
-				post.title 		= ut.parseHtmlEntities(data.title || '');
-				post.body		= data.description || '';
-				post.summary	= (data.summary !== data.description) ? data.summary : '';
-				post.images		= data.images || undefined;
-				post.videos		= data.videos || undefined;
-				post.url		= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
-				post.author		= data.author || '';
-				post.commentsURL= data.comments || '';
-				post.categories = data.categories || undefined;
-				post.feed		= feed;
-				// prevent the publish date to be overridden
-				var pd = (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
-				if (!post.published) {
-					post.published = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
-					post.updated = post.published;
-				} else if (data.date && post.updated !== data.date) {
-					pd = data.date;
-					post.updated = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
-				}
-				// if feeds post variable doesn't exist, make it an array
-				feed.posts || (feed.posts = []);
-				// add post to posts array
-				feed.posts.addToSet(post);
-				// return successfully
-				resolve(post.save());
-			}, function(err) {
-				resolve(err);
-			});
+			var ref = post[0];
+			ref.feed		= feed;
+			ref.guid		= guid; // required
+			ref.title 		= ut.parseHtmlEntities(data.title || '');
+			ref.body		= data.description || '';
+			ref.summary	= (data.summary !== data.description) ? data.summary : '';
+			ref.images		= data.images || undefined;
+			ref.videos		= data.videos || [];
+			// prevent the publish date to be overridden
+			ref.published 	= (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
+			ref.updated 	= mm();
+			ref.author		= data.author || '';
+			ref.url		= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
+			ref.commentsURL= data.comments || '';
+			ref.categories = data.categories || undefined;
+			/*if (!post.published) {
+				post.published = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+				post.updated = post.published;
+			} else if (data.date && post.updated !== data.date) {
+				pd = data.date;
+				post.updated = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+			}*/
+			// if feeds post variable doesn't exist, make it an array
+			feed.posts || (feed.posts = []);
+			// add post to posts array
+			feed.posts.addToSet(ref);
+			// return successfully
+			resolve(ref.save());
+		}, function(err) {
+			resolve();
 		});
 	});
 };
 
-exports.RetrievePosts = function(posts, guids, feed, stream) {
+/** function UpdateFeed
+ */
+exports.UpdateFeed = function(feed, posts, resolve) {
+	// wait for posts to finish saving then mark crawl success or failure
+	rs
+		.all(posts)
+		.then(function(d) {
+			feed.lastModified = feed.successfulCrawlTime = new Date();
+			feed.lastFailureWasParseFailure = false;
+			return [feed];
+		}, function(err) {
+			feed.lastModified = feed.failedCrawlTime = new Date();
+			feed.lastFailureWasParseFailure = true;
+			return [feed, e];
+		})
+		.then(function(a) {
+			// return feed
+			resolve(a[0].save());
+		});
+};
+
+/** function DeleteFeed
+ */
+exports.DeleteFeed = function(feed, err, resolve) {
+	// remove feed from db
+	resolve(feed.remove());
+	// prevent any additional code from executing
+	return false;
+};
+
+/** function AllowFetch
+	 if feed is valid AND if it was updated more then 2 minutes ago
+ */
+exports.AllowFetch = function(feed) {
+	return (feed && (true || !feed.successfulCrawlTime || (feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') > 2)));
+};
+
+/** function StoreMetaData
+ */
+function StoreMetaData(feed, meta) {
+	//if (meta.xmlurl) {
+	//	feed.feedURL = meta.xmlurl;
+	//}
+	feed.favicon	= meta.favicon || (meta['atom:icon'] && meta['atom:icon']['#']) || (meta.image && meta.image.url) || '';
+	feed.siteURL 	= meta.link || '';
+	feed.title 		= meta.title || '';
+	feed.description = meta.description || '';
+	feed.author 	= meta.author || '';
+	feed.language 	= meta.language || '';
+	feed.copywrite 	= meta.copywrite || '';
+	feed.categories = meta.categories || '';
+	
+	switch (meta.cloud.type) {
+		case 'hub':      // pubsubhubbub supported
+		case 'rsscloud': // rsscloud supported
+	}
+};
+
+/** function StorePosts
+ */
+function StorePosts(stream, feed, posts, guids) {
 	// data contains all the post information
-	var data;
+	var data,
+		ignoreImages = false;
 	while (data = stream.read()) {
 		var images = new ContainerImages(),
 			videos = [];
 		// Store original thumbnail url
-		if (data.image !== undefined && data.image.url && data.image.url.length > 0) {
-			images.other.push({ 'url': data.image.url });
+		if (data.image !== undefined &&
+			data.image.url &&
+			data.image.url.length > 0) {
+			images.small.push({ 'url': data.image.url });
 		}
-		if (data['media:thumbnail'] !== null ||
-			data['media:content'] !== null) {
-			var media = [data['media:thumbnail'], data['media:content']];
-			// loop array
-			for (var j in media) {
-				// local reference to array element
-				var obj = media[j];
-				// if not a valid object
-				if (!obj) {
-					continue;
-				}
-				// convert object to array if it isn't already
-				if (!Array.isArray(obj)) {
-					obj = [obj];
-				}
-				// NOTE: don't assume that integers are integers, they could actually be strings
-				for (var i in obj) {
-					// early out
-					if (obj[i]['@'].medium && obj[i]['@'].medium === 'document') {
-						continue;
-					}
-					// store image regardless of size
-					images.other.push(obj[i]['@']);
-				}
-			}
+		
+		// store thumbnail image
+		if (data['media:thumbnail'] !== undefined && data['media:thumbnail']['@'].medium && data['media:thumbnail']['@'].medium !== 'document') {
+			images.small.push(data['media:thumbnail']['@']);
+		}
+		
+		if (data['media:content'] !== undefined && data['media:content']['@'].medium && data['media:content']['@'].medium !== 'document') {
+			images.other.push(data['media:content']['@']);
+			ignoreImages=true;
 		}
 		// Retrieve all the images from the post description
 		if (data.description !== null) {
@@ -199,11 +268,15 @@ exports.RetrievePosts = function(posts, guids, feed, stream) {
 				// NOTE: tag names and attributes are all in CAPS
 				switch (tag.name) {
 				case 'IMG':
+					if (ignoreImages) {
+						break;
+					}
 					// create new image object
-					var obj = {'url':tag.attributes.SRC,'width':tag.attributes.WIDTH || 0,'height':tag.attributes.HEIGHT || 0}
+					var obj = {'url':tag.attributes.SRC,'width':tag.attributes.WIDTH || 0,'height':tag.attributes.HEIGHT || 0},
 						found = false;
 					// check if image already exists in list
 					for (var i in images.other) {
+						// url comparison
 						if (images.other[i].url === obj.url) {
 							found = true;
 							break; // stop for-loop
@@ -242,44 +315,15 @@ exports.RetrievePosts = function(posts, guids, feed, stream) {
 		// add to array
 		guids.push(guid);
 		// store data as ref
-		posts.push(exports.FindOrCreatePost(feed, guid, data)); // add
+		posts.push(exports.FindOrCreatePost(feed, guid, data));
 	}
-};
-
-/** function UpdateFeed
- */
-exports.UpdateFeed = function(feed,posts,resolve) {
-	// wait for posts to finish saving
-	// then mark crawl success or failure
-	rs.all(posts).then(function() {
-		feed.lastModified = feed.successfulCrawlTime = new Date();			
-		feed.lastFailureWasParseFailure = false;
-		return [feed];
-	}, function(err) {
-		feed.lastModified = feed.failedCrawlTime = new Date();
-		feed.lastFailureWasParseFailure = true;
-		return [feed, e];
-	}).then(function(a) {
-		// return feed
-		resolve(a[0].save());
-	});
-};
-
-/** function DeleteFeed
- */
-exports.DeleteFeed = function(feed, err, resolve) {
-	// remove feed from db
-	resolve(feed.remove());
-	// prevent any additional code from executing
-	return false;
 };
 
 /** function FetchFeed
  */
-exports.FetchFeed = function(feed) {	
-	// early escape if no feed is returned OR if was updated really recently
-	if (!feed ||
-		(feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') <= 1)) { // feed was updated less then 2 minutes ago
+exports.FetchFeed = function(feed) {
+	// is feed fetching allowed?
+	if (!exports.AllowFetch(feed)) {
 		// return a new promise
 		return new rs.Promise(function(resolve, reject) { 
 			resolve(); 
@@ -291,62 +335,50 @@ exports.FetchFeed = function(feed) {
 		var postGUIDs = [],
 			posts = [];
 		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
-		var req = rq.get({
-			timeout:	8192,
-			url: 		decodeURIComponent(feed.feedURL), 
-			headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
-		}, function (err, res, user) {
-			if ((err || res.statusCode != 200) && !feed.title) {
-				resolve(feed.remove()); // remove feed from db
-			}
-		});
-		req.on('response', function(res) {
-			var stream = this,
-				err;
-			stream
-			.pipe(new fp())
-			.on('error', function(error) {
-				console.log("// ----------------------------------------------------------------------------");
-				console.log("// Feedparser error: " + error);
-				console.log("\ton '" + decodeURIComponent(feed.feedURL) + "'");
-				// always handle errors
-				err = error;
-			})
-			.on('meta', function(meta) {
-				//if (meta.xmlurl) {
-				//	feed.feedURL = meta.xmlurl;
-				//}
-				feed.favicon	= meta.favicon || (meta['atom:icon'] && meta['atom:icon']['#']) || (meta.image && meta.image.url) || '';
-				feed.siteURL 	= meta.link || '';
-				feed.title 		= meta.title || '';
-				feed.description = meta.description || '';
-				feed.author 	= meta.author || '';
-				feed.language 	= meta.language || '';
-				feed.copywrite 	= meta.copywrite || '';
-				feed.categories = meta.categories || '';
-				
-				switch (meta.cloud.type) {
-					case 'hub':      // pubsubhubbub supported
-					case 'rsscloud': // rsscloud supported
+		rq
+			.get({
+				timeout:	8192,
+				url: 		decodeURIComponent(feed.feedURL), 
+				headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
+			}, function (err, res, user) {
+				// is it an invalid url?
+				if ((err || res.statusCode != 200) && !feed.title) {
+					// remove feed from db
+					resolve(feed.remove());
 				}
 			})
-			.on('readable', function () {
-				exports.RetrievePosts(posts, postGUIDs, feed, this);
-			})
-			.on('end', function() {
-				if (err) {
-					if (err.message.match(/^Not a feed/)) { // if url as been flagged not to be a feed
-						resolve(feed.remove()); // remove feed from db
-					} else {
-						feed.lastModified = feed.failedCrawlTime = new Date();
-						feed.lastFailureWasParseFailure = true;
-						resolve(feed.save()); // save feed in db
-					}
-				} else {
-					exports.UpdateFeed(feed, posts, resolve, reject);
-				}
+			.on('response', function(res) {
+				var stream = this,
+					err;
+				stream
+					.pipe(new fp())
+					.on('error', function(error) {
+						// always handle errors
+						err = error;
+					})
+					.on('meta', function(meta) {
+						StoreMetaData(feed, meta);
+					})
+					.on('readable', function () {
+						StorePosts(this, feed, posts, postGUIDs);
+					})
+					.on('end', function() {
+						if (err) {
+							// if url as been flagged not to be a feed
+							if (err.message.match(/^Not a feed/)) {
+								// remove feed from db
+								resolve(feed.remove());
+							} else {
+								feed.lastModified = feed.failedCrawlTime = new Date();
+								feed.lastFailureWasParseFailure = true;
+								// save feed in db
+								resolve(feed.save());
+							}
+						} else {
+							exports.UpdateFeed(feed, posts, resolve);
+						}
+					});
 			});
-		});
 	});
 };
 
@@ -354,7 +386,7 @@ exports.FetchFeed = function(feed) {
  */
 function UpdateAllFeeds(done) {
 	// declare options object
-	var opts = {};
+	var opts	= {};
 	// get oldest updated feeds
 	opts.query 	= {};
 	// oldest feeds first
@@ -363,34 +395,37 @@ function UpdateAllFeeds(done) {
 	opts.limit 	= 15;
 	// do database related things
 	st
-	.all(st.Feed, opts) // retrieve all feeds
-	.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
-	.then(function(feeds) {
-		var a = [];
-		// loop all found feeds
-		for (var i in feeds) {
-			// make sure that the feed has a valid url
-			if (feeds[i].feedURL !== undefined && feeds[i].feedURL.length > 0) {
-				// add fetch feed job to array
-				a.push(exports.FetchFeed(feeds[i]));
+		.all(st.Feed, opts) // retrieve all feeds
+		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
+		.then(function(feeds) {
+			var a = [];
+			// loop all found feeds
+			for (var i in feeds) {
+				// make sure that the feed has a valid url
+				if (feeds[i].feedURL !== undefined && feeds[i].feedURL.length > 0) {
+					// add fetch feed job to array
+					a.push(exports.FetchFeed(feeds[i]));
+				}
 			}
-		}
-		// if jobs present
-		if (a.length > 0) {
-			// run all jobs
-			rs.all(a).then(function() {
-				return st.all(st.Feed,{query:{ posts: null, numSubscribers: null, lastFailureWasParseFailure: true }}).then(function(r) {
-					var b = [];
-					for (var i in r) {
-						b.push(r[i].remove());
-					}
-					return rs.all(b);
-				});
-			}).then(function() { 
-				done(); 
-			});
-		} else {
-			done();
-		}
-	});
+			// if jobs present
+			if (a.length > 0) {
+				// run all jobs
+				rs
+					.all(a)
+					.then(function() {
+						return st.all(st.Feed,{query:{ posts: null, numSubscribers: null, lastFailureWasParseFailure: true }}).then(function(r) {
+							var b = [];
+							for (var i in r) {
+								b.push(r[i].remove());
+							}
+							return rs.all(b);
+						});
+					})
+					.then(function() { 
+						done(); 
+					});
+			} else {
+				done();
+			}
+		});
 };

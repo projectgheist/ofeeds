@@ -41,13 +41,16 @@ exports.all = function(model, options) {
 	return q;
 }
 
+/**
+	use an empty callback function as a fourth parameter
+ */
 exports.findOrCreate = function(model, item) {
-	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
-    return model.findOneAndUpdate(item, {}, {upsert: true}); 
+    return exports.updateOrCreate(model, item, item); 
 };
 
 exports.updateOrCreate = function(model, item, update) {
-    return model.findOneAndUpdate(item, update, {upsert: true});
+	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
+    return model.findOneAndUpdate(item, update, {upsert: true}, function() {});
 };
 
 /** function dropDatabase

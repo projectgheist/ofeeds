@@ -13,13 +13,14 @@ module.exports = function(grunt) {
 			},
 			dist: {
 				src: [
-					'./bower_components/jquery/dist/jquery.js', // needs to be included before bootstrap
+					'./bower_components/jquery/dist/jquery.js', // needs to be included before bootstrap and angularjs
 					'./bower_components/angular/angular.js',
 					'./bower_components/angular-route/angular-route.js',
 					'./bower_components/angular-sanitize/angular-sanitize.js',
 					'./bower_components/angular-resource/angular-resource.js',
 					'./bower_components/bootstrap/dist/js/bootstrap.js',
 					'./bower_components/bootstrap-material-design/dist/js/material.js',
+					'./bower_components/slideout.js/dist/slideout.js',
 					'./bower_components/handlebars/handlebars.js',
 					'./bower_components/holderjs/holder.js',
 					'./bower_components/moment/moment.js',
@@ -39,7 +40,8 @@ module.exports = function(grunt) {
 				src: [
 					'./bower_components/fontawesome/css/font-awesome.css',
 					'./bower_components/bootstrap/dist/css/bootstrap.css',
-					'./bower_components/bootstrap-material-design/dist/css/material.css'
+					'./bower_components/bootstrap-material-design/dist/css/material.css',
+					'./public/css/slideoutjs.css'
 				],
 				dest: './public/css/<%= pkg.name %>-<%= pkg.version %>.min.css'
 			}
@@ -56,6 +58,12 @@ module.exports = function(grunt) {
 		},
 		watch: {
 			//...
+			scripts: {
+				files: ['public/js/*.js', 'public/css/*.css'],
+				tasks: ['default'],
+				options: {
+				},
+			},
 		}
 	});
 	
