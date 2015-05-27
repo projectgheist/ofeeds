@@ -122,56 +122,56 @@ exports.FindOrCreatePost = function(feed, guid, data) {
     // return a new promise
 	return new rs.Promise(function(resolve, reject) {
 		// retrieve images sizes
-		/*
-		.all(exports.FindImgSizes(data.images))
-		.then(function(out) {
-			// empty object
-			data.images = {small:[],other:[]};
-			// store in array
-			for (var i in out) {
-				if (out[i].type === 'small') {
-					data.images.small.push(out[i]);
-				} else {
-					data.images.other.push(out[i]);
+		rs
+			.all(exports.FindImgSizes(data.images))
+			.then(function(out) {
+				// empty object
+				data.images = {small:[],other:[]};
+				// store in array
+				for (var i in out) {
+					if (out[i].type === 'small') {
+						data.images.small.push(out[i]);
+					} else {
+						data.images.other.push(out[i]);
+					}
 				}
-			}
-		})
-		*/
-		// find post in database
-		st
-			.findOrCreate(st.Post, {'feed':feed, 'guid':guid})
+			})
+			.then(function() {
+				// find post in database
+				return st.findOrCreate(st.Post, {'feed':feed, 'guid':guid});
+			})
 			.then(function(post) {
-			var ref = post[0];
-			ref.feed		= feed;
-			ref.guid		= guid; // required
-			ref.title 		= ut.parseHtmlEntities(data.title || '');
-			ref.body		= data.description || '';
-			ref.summary	= (data.summary !== data.description) ? data.summary : '';
-			ref.images		= data.images || undefined;
-			ref.videos		= data.videos || [];
-			// prevent the publish date to be overridden
-			ref.published 	= (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
-			ref.updated 	= mm();
-			ref.author		= data.author || '';
-			ref.url		= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
-			ref.commentsURL= data.comments || '';
-			ref.categories = data.categories || undefined;
-			/*if (!post.published) {
-				post.published = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
-				post.updated = post.published;
-			} else if (data.date && post.updated !== data.date) {
-				pd = data.date;
-				post.updated = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
-			}*/
-			// if feeds post variable doesn't exist, make it an array
-			feed.posts || (feed.posts = []);
-			// add post to posts array
-			feed.posts.addToSet(ref);
-			// return successfully
-			resolve(ref.save());
-		}, function(err) {
-			resolve();
-		});
+				var ref = post[0];
+				ref.feed		= feed;
+				ref.guid		= guid; // required
+				ref.title 		= ut.parseHtmlEntities(data.title || '');
+				ref.body		= data.description || '';
+				ref.summary	= (data.summary !== data.description) ? data.summary : '';
+				ref.images		= data.images || undefined;
+				ref.videos		= data.videos || [];
+				// prevent the publish date to be overridden
+				ref.published 	= (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
+				ref.updated 	= mm();
+				ref.author		= data.author || '';
+				ref.url		= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
+				ref.commentsURL= data.comments || '';
+				ref.categories = data.categories || undefined;
+				/*if (!post.published) {
+					post.published = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+					post.updated = post.published;
+				} else if (data.date && post.updated !== data.date) {
+					pd = data.date;
+					post.updated = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+				}*/
+				// if feeds post variable doesn't exist, make it an array
+				feed.posts || (feed.posts = []);
+				// add post to posts array
+				feed.posts.addToSet(ref);
+				// return successfully
+				resolve(ref.save());
+			}, function(err) {
+				resolve();
+			});
 	});
 };
 
@@ -268,7 +268,11 @@ function StorePosts(stream, feed, posts, guids) {
 				// NOTE: tag names and attributes are all in CAPS
 				switch (tag.name) {
 				case 'IMG':
-					if (ignoreImages) {
+					// ignoreImages OR width and height are 1 OR isn't a valid image extension
+					if (ignoreImages || 
+						parseInt(tag.attributes.WIDTH) <= 1 ||
+						parseInt(tag.attributes.HEIGHT) <= 1 ||
+						!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(tag.attributes.SRC)) {
 						break;
 					}
 					// create new image object
@@ -342,7 +346,7 @@ exports.FetchFeed = function(feed) {
 				headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 			}, function (err, res, user) {
 				// is it an invalid url?
-				if ((err || res.statusCode != 200) && !feed.title) {
+				if (err || res.statusCode !== 200) {
 					// remove feed from db
 					resolve(feed.remove());
 				}

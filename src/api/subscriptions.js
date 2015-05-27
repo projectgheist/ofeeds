@@ -36,7 +36,9 @@ var actions = {
 				if (ut.isUrl(url)) {
 					return db
 						.findOrCreate(db.Feed, { feedURL: encodeURIComponent(url) })
-						.then(cr.FetchFeed)
+						.then(function(a) {
+							return cr.FetchFeed(a[0]);
+						})
 						.then(function(f) {
 							return [f]; // return feed in array form
 						});
