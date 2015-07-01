@@ -119,6 +119,7 @@ exports.FindImgSizes = function(images,type) {
 /** function FindOrCreatePost
  */
 exports.FindOrCreatePost = function(feed, guid, data) {
+	//console.log("FindOrCreatePost");
     // return a new promise
 	return new rs.Promise(function(resolve, reject) {
 		// retrieve images sizes
@@ -236,28 +237,38 @@ function StoreMetaData(feed, meta) {
 /** function StorePosts
  */
 function StorePosts(stream, feed, posts, guids) {
+	//console.log("StorePosts");
 	// data contains all the post information
 	var data,
 		ignoreImages = false;
 	while (data = stream.read()) {
 		var images = new ContainerImages(),
 			videos = [];
+
 		// Store original thumbnail url
 		if (data.image !== undefined &&
 			data.image.url &&
 			data.image.url.length > 0) {
 			images.small.push({ 'url': data.image.url });
 		}
-		
-		// store thumbnail image
-		if (data['media:thumbnail'] !== undefined && data['media:thumbnail']['@'].medium && data['media:thumbnail']['@'].medium !== 'document') {
-			images.small.push(data['media:thumbnail']['@']);
+
+		// Used by DeviantArt
+		var thumbnails = data['media:thumbnail'];
+		if (!Array.isArray(thumbnails)) {
+			thumbnails = [thumbnails];
+		}
+		for (var i in thumbnails) {
+			// store thumbnail image
+			if (thumbnails[i]['@'] !== undefined && thumbnails[i]['@'].medium !== undefined && thumbnails[i]['@'].medium !== 'document') {
+				images.small.push(data['media:thumbnail']['@']);
+			}
 		}
 		
-		if (data['media:content'] !== undefined && data['media:content']['@'].medium && data['media:content']['@'].medium !== 'document') {
+		if (data['media:content'] !== undefined && data['media:content']['@'].medium !== undefined && data['media:content']['@'].medium !== 'document') {
 			images.other.push(data['media:content']['@']);
 			ignoreImages=true;
 		}
+		
 		// Retrieve all the images from the post description
 		if (data.description !== null) {
 			pr.onopentag = function(tag) {
@@ -326,6 +337,7 @@ function StorePosts(stream, feed, posts, guids) {
 /** function FetchFeed
  */
 exports.FetchFeed = function(feed) {
+	//console.log("FetchFeed (A):"+feed.feedURL);
 	// is feed fetching allowed?
 	if (!exports.AllowFetch(feed)) {
 		// return a new promise
@@ -333,6 +345,7 @@ exports.FetchFeed = function(feed) {
 			resolve(); 
 		});
 	}
+	//console.log("FetchFeed (B)");
 	// return a new promise
 	return new rs.Promise(function(resolve, reject) {
 		// pre-define variables

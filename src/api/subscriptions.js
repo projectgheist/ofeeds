@@ -19,6 +19,7 @@ var actions = {
 	 * @param url: un-encoded
 	 */
 	search: function(ctx, url) {
+		//console.log("Search:"+url);
 		// Find or create feed for this URL in the database
 		return db.Feed
 			.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: url}}] })

@@ -171,6 +171,10 @@
 				$scope.rf = false;
 				return;
 			}
+			// is still loading?
+			if ($scope.rf) {
+				return;
+			}
 			// set refresh page to TRUE
 			$scope.rf = true;
 			// ignore read articles if flagged
@@ -409,7 +413,7 @@
 			});
 			$scope.setaffix();
 		});
-		
+				
 		if (!$('.typeahead').parent().hasClass('twitter-typeahead')) {
 			var sb = new Bloodhound({
 				datumTokenizer: function(d) {

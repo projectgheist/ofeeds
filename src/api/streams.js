@@ -46,7 +46,7 @@ function formatPosts(user, feed, posts, tags, obj) {
                 title: post.feed.title,
                 url: post.feed.feedURL
             },
-            crawlTimeMsec: post.feed.successfulCrawlTime.getTime(),
+            crawlTimeMsec: post.feed.successfulCrawlTime ? post.feed.successfulCrawlTime.getTime() : post.published,
             timestampUsec: post.published ? post.published.getTime() : post.feed.successfulCrawlTime.getTime(),
             likingUsers: [],
             comments: [],
