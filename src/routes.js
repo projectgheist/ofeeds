@@ -6,19 +6,17 @@ var ex = require('express'),
 	ap = module.exports = ex();
 
 /** Parameter function */
-ap.param(function(name, fn) {
+function param(fn, req, next, id) {
 	if (fn instanceof RegExp) {
-		return function(req, res, next, val){
-			var captures;
-			if (captures = fn.exec(String(val))) {
-				req.params[name] = captures;
-				next();
-			} else {
-				next('route');
-			}
+		var captures;
+		if (captures = fn.exec(String(val))) {
+			req.params[id] = captures;
+			next();
+		} else {
+			next('route');
 		}
 	}
-});
+};
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
@@ -33,8 +31,12 @@ function ensureAuth(req, res, next) {
 }
 
 /** Parameter declarations */
-ap.param('uid', /^[0-9]+$/);
-ap.param('name', /^.*$/);
+ap.param('uid', function(req, res, next, id) {
+	param(/^[0-9]+$/, req, next, id);
+});
+ap.param('name', function(req, res, next, id) {
+	param(/^.*$/, req, next, id);
+});
 
 /** home route */
 ap.get("/", function(req, res) {
@@ -46,23 +48,32 @@ ap.get("/", function(req, res) {
 		});
 	}
 });
+
+/** login route */
 ap.get("/login", function(req, res) {
 	res.redirect('/');
 });
+
 /** logout route */
 ap.get("/logout", ensureAuth, function(req, res) {
 	req.logout(); 
 	res.redirect('/'); 
 });
+
+/** dashboard route */
 ap.get("/dashboard", ensureAuth, function(req, res) {
 	res.redirect('/subscription/user/reading-list');
 });
+
+/** manage route */
 ap.get("/manage", function(req, res) {
 	res.render('manage', { 
 		'config': cf.site,
 		'user': req.user
 	});
 });
+
+/** subscription route */
 ap.get("/subscription/*", function(req, res) {
 	res.render(req.isAuthenticated() ? 'dashboard' : 'landing', { 
 		'config': cf.site,
