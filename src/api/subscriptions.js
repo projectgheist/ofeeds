@@ -4,14 +4,10 @@ var ex = require('express'),
 	cr = require('../cron'),
 	mm = require('moment'),
 	cf = require('../../config'),
-	ut = require('../utils');
+	ut = require('../utils'),
+	ag = require('../wait');
 
 var app = module.exports = ex();
-
-var Agenda = require('agenda'),
-	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db(),true), collection: 'agendaJobs' }, 
-		defaultLockLifetime: 1000 
-	});
 
 // @todo: functions need to be merged
 var actions = {
@@ -34,6 +30,7 @@ var actions = {
 					// add prefix to the front of the string
 					url = 'http://' + url;
 				}
+				// is valid url?
 				if (ut.isUrl(url)) {
 					return db
 						.findOrCreate(db.Feed, { feedURL: encodeURIComponent(url) })
@@ -47,10 +44,16 @@ var actions = {
 				return false;
 			});
 	},
+	/**
+	 * @param url: un-encoded
+	 */
 	refresh: function(ctx, url) {
         // Find feed for this URL in the database
         return db.Feed.findOne({feedURL: url}).then(cr.FetchFeed);
 	},
+	/**
+	 * @param url: un-encoded
+	 */
     subscribe: function(ctx, url) {
         // Find or create feed for this URL in the database
         var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)}),
@@ -91,10 +94,11 @@ var actions = {
 
 // lists all of the feeds in the database
 app.get('/api/0/feeds/list', function(req, res) {
+	// declare feed options
 	var opts = {
-		// oldest feeds first
-		sort: { lastModified:1 }
+		sort: { lastModified:1 } // oldest feeds first
 	};
+	
 	db
 	.all(db.Feed, opts) // retrieve all feeds
 	.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
@@ -114,6 +118,7 @@ app.get('/api/0/feeds/list', function(req, res) {
 				crawlSuccesful:	r
 			};
 		});
+		// retrieve the time till the next job needs to run
 		ag.jobs({name: 'UpdateAllFeeds'}, function(err, jobs) {
 			return res.json({'nextRunIn':(jobs.length > 0 ? jobs[0].attrs.nextRunAt : ''), 'feeds':a});
 		});

@@ -29,7 +29,7 @@ ap.listen(cf.Port(), cf.IpAddr(), function(){
 
 /** startup/connect to database
  */
-require('./src/storage').setup()
+require('./src/storage').setup();
 
 /** GET / POST Pages
  */

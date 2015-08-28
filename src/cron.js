@@ -12,41 +12,6 @@ var fp = require('feedparser'),
 	mg = require('mongoose'),
 	is = require('image-size');
 	
-var Agenda = require('agenda'),
-	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db(),true), collection: 'agendaJobs' }, 
-		defaultLockLifetime: 1000 
-	});
-
-exports.setup = function() {
-	//console.log("// ----------------------------------------------------------------------------");
-	// purge all unreferenced jobs from db
-	ag.purge(function(err, numRemoved) {
-		//console.log('Amount of unreferenced jobs removed: ' + numRemoved);
-	});
-
-	// clear all pre-existing 'UpdateAllFeeds' jobs
-	ag.cancel({name: 'UpdateAllFeeds'}, function(err, numRemoved) {
-		//console.log("Amount of 'UpdateAllFeeds' jobs removed: " + numRemoved);
-	});
-
-	// set all jobs
-	ag.every('5 minutes','UpdateAllFeeds');
-
-	// start cron jobs
-	ag.start();
-};
-
-/** function UpdateAllFeeds
- */
-ag.define('UpdateAllFeeds', { lockLifeTime: 1000 }, function(job, done) {
-	// needs to have a database connection
-	if (mg.connection && mg.connection.db) {
-		UpdateAllFeeds(done);
-	} else {
-		done();
-	}
-});
-
 /**
  */
 function ContainerImages() {
@@ -119,7 +84,7 @@ exports.FindImgSizes = function(images,type) {
 /** function FindOrCreatePost
  */
 exports.FindOrCreatePost = function(feed, guid, data) {
-	//console.log("FindOrCreatePost");
+	//console.log("FindOrCreatePost (A)");
     // return a new promise
 	return new rs.Promise(function(resolve, reject) {
 		// retrieve images sizes
@@ -138,13 +103,12 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 				}
 			})
 			.then(function() {
-				// find post in database
+				// find or create post in database
 				return st.findOrCreate(st.Post, {'feed':feed, 'guid':guid});
 			})
 			.then(function(post) {
-				var ref = post[0];
-				ref.feed		= feed;
-				ref.guid		= guid; // required
+				//console.log("FindOrCreatePost (B)");
+				var ref = !ut.isArray(post) ? post : post[0];
 				ref.title 		= ut.parseHtmlEntities(data.title || '');
 				ref.body		= data.description || '';
 				ref.summary	= (data.summary !== data.description) ? data.summary : '';
@@ -179,20 +143,24 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 /** function UpdateFeed
  */
 exports.UpdateFeed = function(feed, posts, resolve) {
+	//console.log('UpdateFeed (A)');
 	// wait for posts to finish saving then mark crawl success or failure
 	rs
 		.all(posts)
 		.then(function(d) {
+			//console.log("UpdateFeed (Y)");
 			feed.lastModified = feed.successfulCrawlTime = new Date();
 			feed.lastFailureWasParseFailure = false;
 			return [feed];
 		}, function(err) {
+			//console.log("UpdateFeed (N)");
 			feed.lastModified = feed.failedCrawlTime = new Date();
 			feed.lastFailureWasParseFailure = true;
 			return [feed, e];
 		})
 		.then(function(a) {
-			// return feed
+			//console.log('Saved')
+			// save feed in db and return
 			resolve(a[0].save());
 		});
 };
@@ -237,7 +205,6 @@ function StoreMetaData(feed, meta) {
 /** function StorePosts
  */
 function StorePosts(stream, feed, posts, guids) {
-	//console.log("StorePosts");
 	// data contains all the post information
 	var data,
 		ignoreImages = false;
@@ -401,7 +368,7 @@ exports.FetchFeed = function(feed) {
 
 /** function UpdateAllFeeds
  */
-function UpdateAllFeeds(done) {
+exports.UpdateAllFeeds = function(done) {
 	// declare options object
 	var opts	= {};
 	// get oldest updated feeds
@@ -430,6 +397,7 @@ function UpdateAllFeeds(done) {
 				rs
 					.all(a)
 					.then(function() {
+						// retrieve any feeds that can be removed
 						return st.all(st.Feed,{query:{ posts: null, numSubscribers: null, lastFailureWasParseFailure: true }}).then(function(r) {
 							var b = [];
 							for (var i in r) {

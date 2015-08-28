@@ -77,6 +77,11 @@ exports.isRead = function(user,tag) {
 	return false;
 };
 
+// checks if value is an array
+exports.isArray = function(val) {
+	return Array.isArray(val);
+}
+
 // returns a string that points to the database url
 exports.getDBConnectionURL = function(obj,noPrefix) {
 	var r = '';

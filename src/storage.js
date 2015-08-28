@@ -26,9 +26,7 @@ exports.setup = function() {
     });
     db.once('open', function() {
         console.log('Connected to Mongo: '+cf.db().dbname+'!');
-		/** Cron jobs execution
-		 */
-		require('./cron').setup();
+		require('./wait')
     });
 };
 
@@ -54,7 +52,14 @@ exports.findOrCreate = function(model, item) {
 
 exports.updateOrCreate = function(model, item, update) {
 	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
-    return model.findOneAndUpdate(item, update, {upsert: true}, function() {});
+    return new rs.Promise(function(resolve, reject){
+		model.findOneAndUpdate(item, update, {upsert: true}, function(err, res) {
+			if (err) {
+				console.log(err);
+			}
+			resolve(res);
+		}); 
+	});
 };
 
 /** function dropDatabase
