@@ -7,9 +7,9 @@ var ex = require('express'),
 
 /** Parameter function */
 function param(fn, req, next, id) {
-	if (fn instanceof RegExp) {
+	if (fn instanceof RegExp) { // make sure it is a regular expression
 		var captures;
-		if (captures = fn.exec(String(val))) {
+		if (captures = fn.exec(String(req.originalUrl))) {
 			req.params[id] = captures;
 			next();
 		} else {
@@ -34,6 +34,7 @@ function ensureAuth(req, res, next) {
 ap.param('uid', function(req, res, next, id) {
 	param(/^[0-9]+$/, req, next, id);
 });
+
 ap.param('name', function(req, res, next, id) {
 	param(/^.*$/, req, next, id);
 });
