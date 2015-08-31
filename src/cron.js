@@ -382,7 +382,7 @@ exports.FetchFeed = function(feed) {
 /** function UpdateAllFeeds
  */
 exports.UpdateAllFeeds = function(done) {
-	console.log('UpdateAllFeeds');
+	//console.log('UpdateAllFeeds');
 	// declare options object
 	var opts	= {};
 	// get oldest updated feeds

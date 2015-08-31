@@ -193,13 +193,19 @@
 					// defocus search box and set value
 					$('.typeahead').blur().val(data.title);
 				}
+				// reset end of file reached
+				$scope.eof = false;
 				// what to do with the retrieved data
 				if ($scope.stream && 
-					$scope.stream.title === data.title &&
-					($scope.stream.items.length === 0 || data.items.length <= 0 || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))) {
+					($scope.stream.title && $scope.stream.title === data.title) &&
+					(($scope.stream.items && $scope.stream.items.length === 0) || (data.items.length <= 0) || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))
+					) {
 					if (data.items.length > 0) {
 						// append to the articles that were already in the array
 						$scope.stream.items = $scope.stream.items.concat(data.items);
+					} else {
+						// append end of stream reached
+						$scope.eof = true;
 					}
 				} else {
 					// copy retrieved articles to stream

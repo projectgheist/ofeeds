@@ -37,14 +37,14 @@ jQuery(document).ready(function($) {
 			}
 		}
 	});
-	
+
 	// create slideout navbar
 	g_Slideout = new Slideout({
 		'panel': document.getElementById('panel'),
 		'menu': document.getElementById('menu'),
-		'padding': $('#menu').outerWidth(),
-		'tolerance': 70
+		'padding': $('#menu').outerWidth()
 	});
+	
 	// navbar is visible by default
 	g_Slideout.open();
 });
