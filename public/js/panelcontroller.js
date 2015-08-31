@@ -185,20 +185,22 @@
 				// turn off refresh
 				$scope.rf = false;
 				// make sure variables exist
-				if (!data || !data.items || data.items.length <= 0) {
+				if (!data) {
 					return;
 				}
 				// make sure it has a title
-				if (data.title.length > 0) {
+				if (data.title && data.title.length > 0) {
 					// defocus search box and set value
 					$('.typeahead').blur().val(data.title);
 				}
 				// what to do with the retrieved data
 				if ($scope.stream && 
 					$scope.stream.title === data.title &&
-					($scope.stream.items.length === 0 || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))) {
-					// append to the articles that were already in the array
-					$scope.stream.items = $scope.stream.items.concat(data.items);
+					($scope.stream.items.length === 0 || data.items.length <= 0 || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))) {
+					if (data.items.length > 0) {
+						// append to the articles that were already in the array
+						$scope.stream.items = $scope.stream.items.concat(data.items);
+					}
 				} else {
 					// copy retrieved articles to stream
 					$scope.stream = data;
@@ -218,7 +220,13 @@
 					// check if string
 					if (typeof str == 'string' || str instanceof String) {
 						// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
-						ref.content.content = $sce.trustAsHtml(ref.content.content);
+						ref.content.content = $sce.trustAsHtml(str);
+					}
+					str = ref.content.summary;
+					// check if string
+					if (typeof str == 'string' || str instanceof String) {
+						// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
+						ref.content.summary = $sce.trustAsHtml(str);
 					}
 					// set article's template
 					if ($scope.cp && ref.uid === $scope.cp.uid) {
@@ -240,6 +248,8 @@
 			});
 		};
 		
+		/** selects a different page layout
+		*/
 		$scope.updateStyle = function(n) {
 			// if the same template id is set
 			if (gTemplateID === n) {
@@ -253,6 +263,8 @@
 			}
 		};
 		
+		/** retrieve more posts
+		*/
 		$scope.loadMore = function() {
 			// make sure that articles exist
 			if (!$scope.stream || !$scope.stream.items || $scope.stream.items.length <= 0 ||
@@ -273,6 +285,8 @@
 			
 		};
 		
+		/** scroll to the next article in the stream
+		*/
 		$scope.next = function() {
 			if (!$scope.cp && $scope.stream !== undefined && $scope.stream.items.length > 0) {
 				$scope.expand($scope.stream.items[0]);
@@ -286,6 +300,8 @@
 			}
 		};
 		
+		/** scroll to the previous article in the stream
+		*/
 		$scope.prev = function() {
 			if (!$scope.cp && $scope.stream !== undefined && $scope.stream.items.length > 0) {
 				$scope.expand($scope.stream.items[0]);
@@ -297,6 +313,8 @@
 			}
 		};
 		
+		/** Flag article as read/unread
+		*/
 		$scope.toggleRead = function(p) {
 			if (!p || p === undefined) {
 				return;
@@ -308,6 +326,8 @@
 			}
 		};
 		
+		/** Ignore read/unread flag when loading stream
+		*/
 		$scope.toggleIgnoreReadArticles = function() {
 			if ($scope.ignoreReadArticles) {
 				$scope.ignoreReadArticles = !$scope.ignoreReadArticles;
@@ -318,6 +338,8 @@
 			$scope.rfrsh();
 		};
 		
+		/** Flag article as read
+		*/
 		$scope.markAsRead = function(p) {
 			if (!$('#m').length || (!p || p === undefined)) {
 				return;
@@ -331,6 +353,8 @@
 			});
 		};
 		
+		/** Flag article as unread
+		*/
 		$scope.markAsUnread = function(p) {
 			if (!$('#m').length || (!p || p === undefined)) {
 				return;
@@ -344,6 +368,8 @@
 			});
 		};
 		
+		/** Check if article is read
+		*/
 		$scope.isRead = function(p) {
 			if (!$('#m').length) {
 				return false;

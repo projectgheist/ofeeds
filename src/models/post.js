@@ -15,7 +15,8 @@ var Post = mg.Schema({
     title: String,
 	// post html markup
     body: String,
-    summary: String,
+    // the first paragraph of the article
+	summary: String,
 	// object that contains URLs to images in the post
     images: mg.Schema.Types.Mixed,
 	// array of found video URLs

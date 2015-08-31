@@ -91,6 +91,7 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 		rs
 			.all(exports.FindImgSizes(data.images))
 			.then(function(out) {
+				//console.log("FindOrCreatePost (B)");
 				// empty object
 				data.images = {small:[],other:[]};
 				// store in array
@@ -103,15 +104,16 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 				}
 			})
 			.then(function() {
+				//console.log("FindOrCreatePost (C)");
 				// find or create post in database
 				return st.findOrCreate(st.Post, {'feed':feed, 'guid':guid});
 			})
 			.then(function(post) {
-				//console.log("FindOrCreatePost (B)");
+				//console.log("FindOrCreatePost (D)");
 				var ref = !ut.isArray(post) ? post : post[0];
 				ref.title 		= ut.parseHtmlEntities(data.title || '');
 				ref.body		= data.description || '';
-				ref.summary	= (data.summary !== data.description) ? data.summary : '';
+				ref.summary		= ((data.summary !== undefined && data.summary !== data.description) ? data.summary : data.description);
 				ref.images		= data.images || undefined;
 				ref.videos		= data.videos || [];
 				// prevent the publish date to be overridden
@@ -205,6 +207,7 @@ function StoreMetaData(feed, meta) {
 /** function StorePosts
  */
 function StorePosts(stream, feed, posts, guids) {
+	//console.log("StorePosts (A)");
 	// data contains all the post information
 	var data,
 		ignoreImages = false;
@@ -212,6 +215,7 @@ function StorePosts(stream, feed, posts, guids) {
 		var images = new ContainerImages(),
 			videos = [];
 
+		//console.log("StorePosts (B)");
 		// Store original thumbnail url
 		if (data.image !== undefined &&
 			data.image.url &&
@@ -219,6 +223,7 @@ function StorePosts(stream, feed, posts, guids) {
 			images.small.push({ 'url': data.image.url });
 		}
 
+		//console.log("StorePosts (C)");
 		// Used by DeviantArt
 		var thumbnails = data['media:thumbnail'];
 		if (!Array.isArray(thumbnails)) {
@@ -226,16 +231,19 @@ function StorePosts(stream, feed, posts, guids) {
 		}
 		for (var i in thumbnails) {
 			// store thumbnail image
-			if (thumbnails[i]['@'] !== undefined && thumbnails[i]['@'].medium !== undefined && thumbnails[i]['@'].medium !== 'document') {
+			if (thumbnails[i] !== undefined && thumbnails[i]['@'] !== undefined && thumbnails[i]['@'].medium !== undefined && thumbnails[i]['@'].medium !== 'document') {
 				images.small.push(data['media:thumbnail']['@']);
 			}
 		}
 		
-		if (data['media:content'] !== undefined && data['media:content']['@'].medium !== undefined && data['media:content']['@'].medium !== 'document') {
+		//console.log("StorePosts (D)");
+		// Can't remember why I'm doing this
+		if (data['media:content'] !== undefined && data['media:content']['@'] !== undefined && data['media:content']['@'].medium !== undefined && data['media:content']['@'].medium !== 'document') {
 			images.other.push(data['media:content']['@']);
 			ignoreImages=true;
 		}
 		
+		//console.log("StorePosts (E)");
 		// Retrieve all the images from the post description
 		if (data.description !== null) {
 			pr.onopentag = function(tag) {
@@ -281,12 +289,14 @@ function StorePosts(stream, feed, posts, guids) {
 				}
 			}
 			// Parse the post description for image/video tags
-			pr.write(data.description.toString("utf8")).end();
+			pr.write(data.description.toString("utf8")).close();
 		}
 		// default image container
 		data.images = images;
 		// store videos in object
 		data.videos = videos;
+		// store first paragraph
+		data.summary = paragraph;
 		// get the GUID of the post
 		var guid = (data.guid || data.link);
 		// does GUID already exist?
@@ -304,7 +314,7 @@ function StorePosts(stream, feed, posts, guids) {
 /** function FetchFeed
  */
 exports.FetchFeed = function(feed) {
-	//console.log("FetchFeed (A):"+feed.feedURL);
+	//console.log("FetchFeed (A)");
 	// is feed fetching allowed?
 	if (!exports.AllowFetch(feed)) {
 		// return a new promise
@@ -336,7 +346,7 @@ exports.FetchFeed = function(feed) {
 					err;
 				stream
 					.pipe(new fp())
-					.on('error', function(error) {
+					.on('error', function(error) {	
 						// always handle errors
 						err = error;
 					})
@@ -347,7 +357,9 @@ exports.FetchFeed = function(feed) {
 						StorePosts(this, feed, posts, postGUIDs);
 					})
 					.on('end', function() {
+						//console.log("FetchFeed (C)");
 						if (err) {
+							//console.log("FetchFeed (N): " + err);
 							// if url as been flagged not to be a feed
 							if (err.message.match(/^Not a feed/)) {
 								// remove feed from db
@@ -359,6 +371,7 @@ exports.FetchFeed = function(feed) {
 								resolve(feed.save());
 							}
 						} else {
+							//console.log("FetchFeed (Y)");
 							exports.UpdateFeed(feed, posts, resolve);
 						}
 					});
@@ -369,6 +382,7 @@ exports.FetchFeed = function(feed) {
 /** function UpdateAllFeeds
  */
 exports.UpdateAllFeeds = function(done) {
+	console.log('UpdateAllFeeds');
 	// declare options object
 	var opts	= {};
 	// get oldest updated feeds
@@ -395,19 +409,21 @@ exports.UpdateAllFeeds = function(done) {
 			if (a.length > 0) {
 				// run all jobs
 				rs
-					.all(a)
+					.all(a) // execute FetchFeed promises
+					/*
 					.then(function() {
-						// retrieve any feeds that can be removed
+						// retrieve any feeds that can be removed from being cron'd
 						return st.all(st.Feed,{query:{ posts: null, numSubscribers: null, lastFailureWasParseFailure: true }}).then(function(r) {
-							var b = [];
-							for (var i in r) {
-								b.push(r[i].remove());
+							var b = []; // declare new array
+							for (var i in r) { // loop results
+								b.push(r[i].remove()); // create a RemoveFeed promise
 							}
-							return rs.all(b);
+							return rs.all(b); // execute RemoveFeed promises
 						});
 					})
+					*/
 					.then(function() { 
-						done(); 
+						done();
 					});
 			} else {
 				done();

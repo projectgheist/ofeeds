@@ -15,12 +15,13 @@ var actions = {
 	 * @param url: un-encoded
 	 */
 	search: function(ctx, url) {
-		//console.log("Search:"+url);
+		//console.log("Search (A):" + url);
 		// Find or create feed for this URL in the database
 		return db.Feed
 			.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: url}}] })
 			.limit(6)
 			.then(function(results) {
+				//console.log("Search (B):" + url);
 				// feeds found that match the search expression
 				if (results.length > 0) { 
 					return results;
@@ -32,15 +33,20 @@ var actions = {
 				}
 				// is valid url?
 				if (ut.isUrl(url)) {
-					return db
-						.findOrCreate(db.Feed, { feedURL: encodeURIComponent(url) })
-						.then(function(a) {
-							return cr.FetchFeed(a[0]);
+					var item = { 'feedURL': encodeURIComponent(url) };
+					return db.findOrCreate(db.Feed, item).then(function(feed) {
+							//console.log("Search (C)");
+							return cr.FetchFeed(feed[0]);
+						}, function(err) {
+							//console.log("Search (D)");
+							console.log(err)
 						})
 						.then(function(f) {
+							//console.log("Search (D):" + url);
 							return [f]; // return feed in array form
 						});
 				}
+				//console.log("Search (E):" + url);
 				return false;
 			});
 	},
@@ -111,7 +117,7 @@ app.get('/api/0/feeds/list', function(req, res) {
 				favicon:		f.favicon || '',
 				id: 			f.feedURL, // its already encoded
 				postCount:		f.posts ? f.posts.length : 0,
-				title: 			f.title || '',
+				title: 			f.title || decodeURIComponent(f.feedURL),
 				shortid: 		f.shortID,
 				crawlTime:		f.lastModified || undefined,
 				updated:		(f.posts && f.posts.length > 0) ? f.posts[f.posts.length-1].published : undefined,

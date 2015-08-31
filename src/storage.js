@@ -52,14 +52,7 @@ exports.findOrCreate = function(model, item) {
 
 exports.updateOrCreate = function(model, item, update) {
 	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
-    return new rs.Promise(function(resolve, reject){
-		model.findOneAndUpdate(item, update, {upsert: true}, function(err, res) {
-			if (err) {
-				console.log(err);
-			}
-			resolve(res);
-		}); 
-	});
+    return model.findOneAndUpdate(item, update, {upsert: true, 'new': false});
 };
 
 /** function dropDatabase
@@ -122,10 +115,11 @@ exports.getTags = function(tags) {
 //   limit - the maximum number of items to return
 //   sort - the field to sort (see mongoose docs)
 exports.getPosts = function(streams, options) {
-	// use parameter or create empty object
+	// use parameter OR create empty object
     options || (options = {});
     // separate streams by type
-    var feeds = [], tags = [];
+    var feeds = [], 
+		tags = [];
 	// loop all items in stream
     for (var i in streams) {
 		if (streams[i].type === 'feed') {
@@ -136,7 +130,10 @@ exports.getPosts = function(streams, options) {
     };
 	// load the tags to include and exclude
     var includeTags, excludeTags;
-    return rs.all([exports.getTags(tags), exports.getTags(options.excludeTags)]).then(function(results) {
+    //
+	return rs
+	.all([exports.getTags(tags), exports.getTags(options.excludeTags)])
+	.then(function(results) {
 		includeTags = results[0];
         excludeTags = results[1];
         // find feeds given directly and by tag
@@ -166,19 +163,20 @@ exports.getPosts = function(streams, options) {
         if (options.sort) {
 			query.sort(options.sort);
 		}
-        if (options.count) {
+        /*if (options.count) {
             query.count();
-		}
+		}*/
         if (options.populate) {
 			// check if already an array, else make it an array
 			if (!Array.isArray(options.populate)) {
 				options.populate = [options.populate];
 			}
+			// loop items to populate in the query
 			for (var i in options.populate) {
             	query.populate(options.populate[i]);
 			}
 		}
-        return query;
+        return {'query':query,'feeds':rfeeds};
     });
 };
 

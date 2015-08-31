@@ -8,8 +8,8 @@ include includes/header
 			hr
 			ul.nav.nav-pills.nav-stacked
 				li(ng-repeat="s in subs", ng-class="isActive(s.url) ? 'active' : ''")
-					a(ng-href="{{s.url}}") {{s.title}}
-				li(ng-if="!subs")
+					a.text-overflow(ng-href="{{s.url}}") {{s.title}}
+				li(ng-if="!subs || subs.length <= 0")
 					a(ng-href="#") No feeds
 			hr
 			ul.nav.nav-pills.nav-stacked
@@ -33,6 +33,24 @@ include includes/header
 						.form-control-wrapper
 							input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style="width:100%;background-color:transparent;")
 						span.material-input
+			.row(ng-if="stream !== undefined")
+				.col-lg-12
+					.well
+						table.table.table-hover.table-condensed
+							thead
+								tr
+									td.col-lg-3
+							tbody
+								tr
+									td URL
+									td 
+										a(href="{{stream.feedURL}}", target="_blank") {{stream.feedURL}}
+								tr
+									td Updated
+									td {{stream.updated}}
+								tr
+									td Visible articles
+									td {{stream.items.length}}
 			div(ng-view="")
 	.modal.fade#myModal(ng-controller="modalController", tabindex="-1", role="dialog", aria-labelledby="myModalLabel", aria-hidden="true")
 		.modal-dialog

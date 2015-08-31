@@ -13,3 +13,5 @@
 						i.fa.fa-user.fa-fw
 						| by {{post.author}}
 					span(ng-class="{'pull-right': !post.author}") {{post.author ? ' at' : ''}} {{post.formatted}}
+				hr
+				p(ng-bind-html='post.content.summary')

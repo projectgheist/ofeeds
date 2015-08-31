@@ -26,10 +26,13 @@ ag.start();
 /** function UpdateAllFeeds
  */
 ag.define('UpdateAllFeeds', { lockLifeTime: 1000 }, function(job, done) {
+	//console.log('Declare UpdateAllFeeds (A)');
 	// needs to have a database connection
 	if (mg.connection && mg.connection.db) {
+		//console.log('Declare UpdateAllFeeds (Y)');
 		cr.UpdateAllFeeds(done);
 	} else {
+		//console.log('Declare UpdateAllFeeds (N)');
 		done();
 	}
 });
