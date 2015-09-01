@@ -15,15 +15,20 @@ exports.setup = function() {
     if (mg.connection.db) {
 		return;
 	}
+	// declare connection options
 	var options = { 
 		server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }, 
 		replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } } 
 	};
+	// try to connect to db
     mg.connect(ut.getDBConnectionURL(cf.db()), options);
-    var db = mg.connection;
+    // declare connection variable
+	var db = mg.connection;
+	// error event
     db.on('error', function(err) {
         console.log(err);
     });
+	// connection established event
     db.once('open', function() {
         console.log('Connected to Mongo: '+cf.db().dbname+'!');
 		require('./wait')
