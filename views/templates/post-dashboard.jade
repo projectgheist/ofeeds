@@ -3,6 +3,9 @@
 		h2 Recommended
 	.col-xs-6
 		h2 Recently added
+		.text-center(ng-if="!recent")
+			p Loading
+			i.fa.fa-circle-o-notch.fa-spin.fa-2x
 		ul(ng-repeat='feed in recent')
 			li 
 				a(href="{{feed.url}}") 
@@ -10,4 +13,7 @@
 					| {{feed.title}}
 .row
 	.col-xs-12
-		h2 Most popular
+		h2 Popular
+.row
+	.col-xs-12
+		h2 Recent

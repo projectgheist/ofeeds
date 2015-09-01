@@ -51,13 +51,17 @@ exports.all = function(model, options) {
 /**
 	use an empty callback function as a fourth parameter
  */
-exports.findOrCreate = function(model, item) {
-    return exports.updateOrCreate(model, item, item); 
+exports.findOrCreate = function(model, item, debug) {
+    return exports.updateOrCreate(model, item, item, debug); 
 };
 
-exports.updateOrCreate = function(model, item, update) {
+exports.updateOrCreate = function(model, item, update, debug) {
 	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
-    return model.findOneAndUpdate(item, update, {upsert: true, 'new': false});
+	var q = model.findOneAndUpdate(item, update, {upsert: true, 'new': true});
+	if (debug) {
+		console.log(q);
+	}
+    return q;
 };
 
 /** function dropDatabase

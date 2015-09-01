@@ -6,11 +6,14 @@ include includes/header
 				i.fa.fa-github.fa-fw.fa-4x 
 				| View on Github
 			hr
+			.text-center(ng-if="!subs")
+				p Loading
+				i.fa.fa-circle-o-notch.fa-spin.fa-2x
 			ul(ng-Ripple="{{subs.length}}")
+				li.withripple(ng-if="subs && subs.length <= 0")
+					a(href="#") No feeds
 				li.withripple(ng-repeat="s in subs", ng-class="isActive(s.url) ? 'active' : ''", data-target="{{s.url}}") 
 					a(href="{{s.url}}") {{s.title}}
-				li.withripple(ng-if="!subs || subs.length <= 0")
-					a(href="#") No feeds
 			hr
 			ul
 				if user

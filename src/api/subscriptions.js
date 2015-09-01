@@ -33,18 +33,22 @@ var actions = {
 				}
 				// is valid url?
 				if (ut.isUrl(url)) {
-					var item = { 'feedURL': encodeURIComponent(url) };
-					return db.findOrCreate(db.Feed, item).then(function(feed) {
-							//console.log("Search (C)");
-							return cr.FetchFeed(feed[0]);
-						}, function(err) {
-							//console.log("Search (D)");
-							console.log(err)
-						})
-						.then(function(f) {
-							//console.log("Search (D):" + url);
-							return [f]; // return feed in array form
-						});
+					return db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)})
+					.then(function(feed) {
+						//console.log("Search (C)");
+						if (feed) {
+							return cr.FetchFeed(!ut.isArray(feed) ? feed: feed[0]);
+						} else {
+							console.log("Search (NO FEED)");
+						}
+					}, function(err) {
+						//console.log("Search (D)");
+						console.log(err)
+					})
+					.then(function(f) {
+						//console.log("Search (D):" + url);
+						return [f]; // return feed in array form
+					});
 				}
 				//console.log("Search (E):" + url);
 				return false;

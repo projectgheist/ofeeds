@@ -120,9 +120,9 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 				ref.published 	= (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
 				ref.updated 	= mm();
 				ref.author		= data.author || '';
-				ref.url		= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
-				ref.commentsURL= data.comments || '';
-				ref.categories = data.categories || undefined;
+				ref.url			= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
+				ref.commentsURL	= data.comments || '';
+				ref.categories 	= data.categories || undefined;
 				/*if (!post.published) {
 					post.published = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
 					post.updated = post.published;
@@ -179,8 +179,8 @@ exports.DeleteFeed = function(feed, err, resolve) {
 /** function AllowFetch
 	 if feed is valid AND if it was updated more then 2 minutes ago
  */
-exports.AllowFetch = function(feed) {
-	return (feed && (true || !feed.successfulCrawlTime || (feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') > 2)));
+exports.AllowFetch = function(feed, debug) {
+	return (feed && (!feed.successfulCrawlTime || (feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') > 2)));
 };
 
 /** function StoreMetaData
@@ -213,7 +213,8 @@ function StorePosts(stream, feed, posts, guids) {
 		ignoreImages = false;
 	while (data = stream.read()) {
 		var images = new ContainerImages(),
-			videos = [];
+			videos = [],
+			paragraph;
 
 		//console.log("StorePosts (B)");
 		// Store original thumbnail url
@@ -337,8 +338,9 @@ exports.FetchFeed = function(feed) {
 			}, function (err, res, user) {
 				// is it an invalid url?
 				if (err || res.statusCode !== 200) {
+					console.log('REMOVE FEED: ' + feed.feedURL)
 					// remove feed from db
-					resolve(feed.remove());
+					//resolve(feed.remove());
 				}
 			})
 			.on('response', function(res) {
@@ -362,8 +364,9 @@ exports.FetchFeed = function(feed) {
 							//console.log("FetchFeed (N): " + err);
 							// if url as been flagged not to be a feed
 							if (err.message.match(/^Not a feed/)) {
+								console.log('REMOVE NOT FEED: ' + feed.feedURL)
 								// remove feed from db
-								resolve(feed.remove());
+								//resolve(feed.remove());
 							} else {
 								feed.lastModified = feed.failedCrawlTime = new Date();
 								feed.lastFailureWasParseFailure = true;
