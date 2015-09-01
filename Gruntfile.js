@@ -19,6 +19,7 @@ module.exports = function(grunt) {
 					'./bower_components/angular-sanitize/angular-sanitize.js',
 					'./bower_components/angular-resource/angular-resource.js',
 					'./bower_components/bootstrap/dist/js/bootstrap.js',
+					'./bower_components/bootstrap-material-design/dist/js/ripples.js',
 					'./bower_components/bootstrap-material-design/dist/js/material.js',
 					'./bower_components/slideout.js/dist/slideout.js',
 					'./bower_components/handlebars/handlebars.js',
@@ -40,7 +41,9 @@ module.exports = function(grunt) {
 				src: [
 					'./bower_components/fontawesome/css/font-awesome.css',
 					'./bower_components/bootstrap/dist/css/bootstrap.css',
+					'./bower_components/bootstrap-material-design/dist/css/roboto.css',
 					'./bower_components/bootstrap-material-design/dist/css/material.css',
+					'./bower_components/bootstrap-material-design/dist/css/ripples.css',
 					'./public/css/slideoutjs.css'
 				],
 				dest: './public/css/<%= pkg.name %>-<%= pkg.version %>.min.css'

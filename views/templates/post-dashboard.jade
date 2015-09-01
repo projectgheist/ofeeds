@@ -6,7 +6,7 @@
 		ul(ng-repeat='feed in recent')
 			li 
 				a(href="{{feed.url}}") 
-					img(src="{{feed.favicon}}")
+					img(src="{{feed.favicon}}", width="32", style="margin-right:15px")
 					| {{feed.title}}
 .row
 	.col-xs-12

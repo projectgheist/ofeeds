@@ -13,7 +13,8 @@
 		.directive('holderjs', holderjs)
 		.directive('onLastRepeat', onLastRepeat)
 		.directive('onResize', onResize)
-		.directive('ngInclude', ngInclude);
+		.directive('ngInclude', ngInclude)
+		.directive('ngRipple', ngRipple);
 
 	function appConfig($routeProvider, $locationProvider) {
 		$locationProvider.html5Mode(true);
@@ -64,6 +65,22 @@
 		}
 	};
 
+	function ngRipple() {
+		return {
+			restrict: 'A',
+			link: function(scope, element, attrs) {
+				// Trigger when number of children changes, including by directives like ng-repeat
+				scope.$watch(function() {
+					return element.children().length === parseInt(attrs['ngRipple']);
+				}, function() {
+					console.log('ngRipple')
+					// initialize material ripple
+					$.material.init();
+				});
+			}
+		};
+	};
+	
 	function ngInclude($compile) {
 		return {
 			restrict: 'A',
@@ -71,7 +88,7 @@
 				var s = scope.$parent.$parent, // scope
 					p = scope.$parent.post; // post info
 				// Trigger when number of children changes, including by directives like ng-repeat
-				var watch = scope.$watch(function() {
+				scope.$watch(function() {
 					return element.children().length;
 				}, function() {
 					// Wait for templates to finish rendering

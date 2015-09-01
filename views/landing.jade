@@ -6,20 +6,20 @@ include includes/header
 				i.fa.fa-github.fa-fw.fa-4x 
 				| View on Github
 			hr
-			ul.nav.nav-pills.nav-stacked
-				li(ng-repeat="s in subs", ng-class="isActive(s.url) ? 'active' : ''")
-					a.text-overflow(ng-href="{{s.url}}") {{s.title}}
-				li(ng-if="!subs || subs.length <= 0")
-					a(ng-href="#") No feeds
+			ul(ng-Ripple="{{subs.length}}")
+				li.withripple(ng-repeat="s in subs", ng-class="isActive(s.url) ? 'active' : ''", data-target="{{s.url}}") 
+					a(href="{{s.url}}") {{s.title}}
+				li.withripple(ng-if="!subs || subs.length <= 0")
+					a(href="#") No feeds
 			hr
-			ul.nav.nav-pills.nav-stacked
+			ul
 				if user
-					li 
+					li.withripple
 						a(href="#") Settings
-					li 
+					li.withripple
 						a(href="#") Logout
 				else
-					li
+					li.withripple
 						a(href="/auth/google", target="_self")
 							i.fa.fa-google-plus.fa-fw
 							| &nbsp;Sign in

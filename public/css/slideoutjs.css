@@ -8,9 +8,8 @@
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 	display: none;
-
 	/* Custom */
-	background-color: #1D1F20;
+	background-color: #fff;
 }
 
 .slideout-panel {
