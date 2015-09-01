@@ -12,11 +12,16 @@
 
 	function panelService($resource) {
 		return {
-			getElements: getElements
+			getElements: getElements,
+			getRecent: getRecent
 		};
 		
 		function getElements() {
 			return $resource('/api/0/stream/contents/', {type:'@type', params:'@params'}, { query:{ method: 'GET', isArray: false } });
+		}
+		
+		function getRecent() {
+			return $resource('/api/0/feeds/list', {n:5, r:'n'}, { query:{ method: 'GET', isArray: false } });
 		}
 	};
 
@@ -519,7 +524,17 @@
 				// retrieve posts
 				$scope.gtposts();
 			} else {
-				// console.log('loading')
+				// special for dashboard
+				if ($route.current.loadedTemplateUrl === '/templates/post-dashboard') {
+					panelService.getRecent().query({},function(data) {
+						if (data) {
+							$scope.recent = data.feeds;
+							for (var i in $scope.recent) {
+								$scope.recent[i].url = ['/subscription/feed/',encodeURIComponent($scope.recent[i].id),'/'].join('');
+							}
+						}
+					});
+				}
 			}
 		});
 

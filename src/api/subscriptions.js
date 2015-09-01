@@ -102,7 +102,8 @@ var actions = {
 app.get('/api/0/feeds/list', function(req, res) {
 	// declare feed options
 	var opts = {
-		sort: { lastModified:1 } // oldest feeds first
+		sort: { lastModified:(!req.query.r || req.query.r === 'o') ? 1 : -1 }, // oldest feeds first
+		limit: !req.query.n ? false : req.query.n // limit the amount of output feeds
 	};
 	
 	db

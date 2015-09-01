@@ -3,3 +3,11 @@
 		h2 Recommended
 	.col-xs-6
 		h2 Recently added
+		ul(ng-repeat='feed in recent')
+			li 
+				a(href="{{feed.url}}") 
+					img(src="{{feed.favicon}}")
+					| {{feed.title}}
+.row
+	.col-xs-12
+		h2 Most popular
