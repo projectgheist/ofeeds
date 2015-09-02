@@ -13,7 +13,7 @@
     vertical-align: middle;
 }
 
-#menu {
+#menu, .no-padding {
 	padding:0;
 }
 
@@ -251,6 +251,10 @@ hbinclude .bs-callout {
 }
 
 .tt-suggestion p {
+	margin: 0;
+}
+
+.no-margin {
 	margin: 0;
 }
 

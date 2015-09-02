@@ -2,20 +2,23 @@ include includes/header
 .container-fluid(ng-controller="panelController",style="overflow:hidden")
 	.row
 		.col-xs-3#menu(ng-controller="navController")
-			a(href="https://github.com/projectgheist/ofeeds",target="_blank")
-				i.fa.fa-github.fa-fw.fa-4x 
-				| View on Github
 			hr
-			.text-center(ng-if="!subs")
-				p Loading
-				i.fa.fa-circle-o-notch.fa-spin.fa-2x
+			div(ng-if="!subs")
+				include templates/loading
 			ul(ng-Ripple="{{subs.length}}")
 				li.withripple(ng-if="subs && subs.length <= 0")
 					a(href="#") No feeds
 				li.withripple(ng-repeat="s in subs", ng-class="isActive(s.url) ? 'active' : ''", data-target="{{s.url}}") 
-					a(href="{{s.url}}") {{s.title}}
+					a.text-overflow(href="{{s.url}}")
+						img(ng-if="s.favicon", src="{{s.favicon}}", width="32", style="margin-right:15px")
+						i.fa.fa-fw.fa-bookmark(ng-if="s.favicon === ''", style="margin-right:15px")
+						| {{s.title}}
 			hr
 			ul
+				li.withripple
+					a(href="https://github.com/projectgheist/ofeeds",target="_blank")
+						i.fa.fa-github.fa-fw
+						| View on Github
 				if user
 					li.withripple
 						a(href="#") Settings
@@ -26,16 +29,23 @@ include includes/header
 						a(href="/auth/google", target="_self")
 							i.fa.fa-google-plus.fa-fw
 							| &nbsp;Sign in
-		#panel(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'")
-			.row
-				.col-md-1
-					h4.text-center
-						i.fa.fa-align-justify.fa-fw(ng-click='nt()')
-				.col-md-11
-					form.navbar-form
-						.form-control-wrapper
-							input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style="width:100%;background-color:transparent;")
-						span.material-input
+		#panel(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'", style="padding:0")
+			.navbar.navbar-default(ng-class="stream !== undefined ? 'no-margin' : ''")
+				.container-fluid
+					.navbar-header
+						ul.nav.navbar-nav
+							li
+								a(href="#", ng-click='nt()')
+									i.fa.fa-align-justify.fa-fw
+						button.navbar-toggle(type="button", data-toggle="collapse", data-target=".navbar-collapse")
+					.collapse.navbar-collapse
+						form.navbar-form.navbar-left
+							.form-control-wrapper
+								input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed")
+						ul.nav.navbar-nav.navbar-right
+							li
+								a(href="#")
+									i.fa.fa-ellipsis-v.fa-fw
 			.row(ng-if="stream !== undefined")
 				.col-lg-12
 					.well
@@ -47,7 +57,7 @@ include includes/header
 								tr
 									td URL
 									td 
-										a(href="{{stream.feedURL}}", target="_blank") {{stream.feedURL}}
+										a.text-overflow(href="{{stream.feedURL}}", target="_blank") {{stream.feedURL}}
 								tr
 									td Updated
 									td {{stream.updated}}
