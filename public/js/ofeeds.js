@@ -47,6 +47,13 @@ jQuery(document).ready(function($) {
 	
 	// navbar is visible by default
 	g_Slideout.open();
+	
+	// have some nice font scaling.
+	$("body").flowtype({
+		minFont:12,
+		maxFont:32,
+		fontRatio:64
+	});
 });
 
 // single keys

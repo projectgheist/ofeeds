@@ -337,8 +337,10 @@ exports.FetchFeed = function(feed) {
 				headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 			}, function (err, res, user) {
 				// is it an invalid url?
-				if (err || res.statusCode !== 200) {
+				if ((err && !err.message.match(/^Error: ETIMEDOUT/)) || res.statusCode !== 200) {
 					console.log('REMOVE FEED: ' + feed.feedURL)
+					console.log('REMOVE FEED: ' + err)
+					console.log('REMOVE FEED: ' + res)
 					// remove feed from db
 					//resolve(feed.remove());
 				}
