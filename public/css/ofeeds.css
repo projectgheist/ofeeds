@@ -134,10 +134,17 @@
 	margin: 7px 0;
 }
 
+.text-overflow, .max-lines {
+	overflow:hidden; 
+	text-overflow: ellipsis;
+}
+
 .text-overflow {
 	white-space:nowrap; 
-	overflow:hidden; 
-	text-overflow:ellipsis;
+}
+
+.max-lines {
+	word-wrap: break-word;
 }
 
 /* Side notes for calling out things
@@ -275,4 +282,13 @@ hbinclude .bs-callout {
 }
 .pace-inactive {
   display: none;
+}
+
+/** Label badge
+*/
+.panel-label {
+	position: absolute;
+	top: 15px;
+    right: 30px;
+	z-index: 10;
 }

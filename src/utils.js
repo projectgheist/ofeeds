@@ -24,6 +24,15 @@ exports.startsWith = function(val, str, out) {
 	return false;
 };
 
+/**
+@param o: original string
+@param i: string to insert
+@param p: insert position
+*/
+exports.stringInsert = function(o, i, p) {
+	return [o.slice(0, p), i, o.slice(p)].join('');
+}
+
 exports.stringReplace = function(val, str) {
 	// check if already an array, else make it an array
     if (!Array.isArray(str)) {

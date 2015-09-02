@@ -113,7 +113,8 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 				var ref = !ut.isArray(post) ? post : post[0];
 				ref.title 		= ut.parseHtmlEntities(data.title || '');
 				ref.body		= data.description || '';
-				ref.summary		= ((data.summary !== undefined && data.summary !== data.description) ? data.summary : data.description);
+				ref.summary		= CleanupSummary((data.summary !== undefined && data.summary !== data.description) ? data.summary : data.description);
+				// clean up summary
 				ref.images		= data.images || undefined;
 				ref.videos		= data.videos || [];
 				// prevent the publish date to be overridden
@@ -140,6 +141,35 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 				resolve();
 			});
 	});
+};
+
+/** function CleanupSummary
+ */
+function CleanupSummary(data) {
+	// early escape
+	if (!data || data.length <= 0) {
+		resolve('');
+	}
+	
+	// remove new lines OR image tags
+	data = data.replace(/((<img).*?(>))|<br>|<\/*h\d>/gi, '');
+
+	// detect link tags
+	if (true) {
+		// remove all links
+		data = data.replace(/<a.*?(>)/gi, '');
+		data = data.replace(/<\/a>/gi, '');
+	} else {
+		// add new tab to all links
+		var p = /<a\s/gi; // needs to be a separate variable otherwise it will be an infinite loop 
+			e;
+		while (e = p.exec(data)) {
+			data = ut.stringInsert(data, 'target="_blank"', e.index + 3);
+		}
+	}
+	
+	// return values
+	return data.trim();
 };
 
 /** function UpdateFeed

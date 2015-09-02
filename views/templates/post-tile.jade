@@ -1,17 +1,27 @@
 .col-lg-4
 	.panel.panel-default
-		.panel-body(style="min-height:425px;padding:0")
-			.panel-image(ng-repeat='image in post.content.images.other',ng-click="showModal(post.uid)")
-				img(ng-src="{{image.url}}",data-layzr="{{image.url}}",data-layzr-retina="{{image.url}}",width='{{image.width}}',height='{{image.height}}',holderjs='')
-			.panel-image(ng-if="post.content.images.other.length <= 0")
-				img(holderjs='')
-			.panel-text(style="padding:15px")
-				h3 
-					a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
-				p
-					span(ng-if="post.author")
+		.panel-label
+			if user
+				span.label.label-primary(ng-if="!post.read") Unread
+			else
+				span.label.label-primary(ng-if="!post.read") New
+		.panel-image(ng-repeat='image in post.content.images.other',ng-click="showModal(post.uid)")		
+			img.withripple(ng-src="{{image.url}}",data-layzr="{{image.url}}",data-layzr-retina="{{image.url}}",width='{{image.width}}',height='{{image.height}}',holderjs='')
+		.panel-image(ng-if="post.content.images.other.length <= 0")
+			img(holderjs='')
+		.panel-text(style="padding:0 15px 15px 15px")
+			.row.max-lines.alert-primary
+				.col-xs-11(style="padding-right:0")
+					h2
+						a(href='{{post.alternate.href}}',target='_blank',style="") {{post.title}}
+				.col-xs-1(style="padding:0")
+					h2
+						a(href="#")
+							i.fa.fa-ellipsis-v.fa-fw
+			.row
+				.col-xs-6.text-overflow
+					a(href="#", ng-if="post.author")
 						i.fa.fa-user.fa-fw
-						| by {{post.author}}
-					span(ng-class="{'pull-right': !post.author}") {{post.author ? ' at' : ''}} {{post.formatted}}
-				hr
-				p(ng-bind-html='post.content.summary')
+						| {{post.author}}
+				.col-xs-6
+					span {{post.formatted}}

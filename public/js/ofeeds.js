@@ -49,10 +49,10 @@ jQuery(document).ready(function($) {
 	g_Slideout.open();
 	
 	// have some nice font scaling.
-	$("body").flowtype({
+	$('body').flowtype({
 		minFont:12,
-		maxFont:32,
-		fontRatio:64
+		maxFont:36,
+		fontRatio:96
 	});
 });
 
