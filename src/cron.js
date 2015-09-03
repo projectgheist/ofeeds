@@ -175,25 +175,24 @@ function CleanupSummary(data) {
 /** function UpdateFeed
  */
 exports.UpdateFeed = function(feed, posts, resolve) {
-	//console.log('UpdateFeed (A)');
+	console.log('UpdateFeed (A)');
 	// wait for posts to finish saving then mark crawl success or failure
 	rs
 		.all(posts)
-		.then(function(d) {
-			//console.log("UpdateFeed (Y)");
-			feed.lastModified = feed.successfulCrawlTime = new Date();
-			feed.lastFailureWasParseFailure = false;
+		.then(function() {
+			console.log("UpdateFeed (Y)");
+			feed.successfulCrawlTime = new Date();
 			return [feed];
-		}, function(err) {
-			//console.log("UpdateFeed (N)");
-			feed.lastModified = feed.failedCrawlTime = new Date();
-			feed.lastFailureWasParseFailure = true;
-			return [feed, e];
 		})
-		.then(function(a) {
-			//console.log('Saved')
+		.finally(function(a) {
+			console.log('Done - UpdateFeed')
+			// set new modified date
+			feed.lastModified = new Data();
 			// save feed in db and return
-			resolve(a[0].save());
+			resolve((a && a.length > 0) ? a[0].save() : true);
+		})
+		.catch(function(err) {
+			console.log("UpdateFeed (N): " + error);
 		});
 };
 
@@ -397,6 +396,7 @@ function PingFeed(feed) {
 			if ((err && !err.message.match(/^Error: ETIMEDOUT/)) || res.statusCode !== 200) {
 				console.log('REMOVE FEED: ' + feed.feedURL)
 				console.log('REMOVE FEED: ' + err)
+				res = {};
 				// remove feed from db
 				resolve();
 			} else {
@@ -413,24 +413,13 @@ function PingFeed(feed) {
 /** function FetchFeed
  */
 exports.FetchFeed = function(feed) {
-	//console.log("FetchFeed (A)");
 	// is feed fetching allowed?
 	if (!exports.AllowFetch(feed)) {
 		// return a new promise
-		return new rs.Promise(function(resolve, reject) { 
-			resolve(); 
-		});
+		return true;
 	}
-	//console.log("FetchFeed (B)");
 	// return a new promise
-	return new rs.Promise(function(resolve, reject) {
-		PingFeed(feed)
-		.then(function(r) {
-			resolve(r);
-		}, function() {
-			resolve();
-		});
-	});
+	return PingFeed(feed);
 };
 
 /** function UpdateAllFeeds
@@ -476,7 +465,8 @@ exports.UpdateAllFeeds = function(done) {
 						});
 					})
 					*/
-					.then(function() { 
+					.then(function() {
+						console.log('Done - UpdateAllFeeds');
 						done();
 					});
 			} else {
