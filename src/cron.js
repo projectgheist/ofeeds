@@ -342,6 +342,74 @@ function StorePosts(stream, feed, posts, guids) {
 	}
 };
 
+/**
+*/
+function PingFeed(feed) {
+	return new rs.Promise(function(resolve, reject) {
+		// pre-define variables
+		var postGUIDs = [],
+			posts = [],
+			feedparser = new fp(),
+			fp_err;
+		
+		feedparser
+		.on('error', function(error) {	
+			console.log(error)
+			// always handle errors
+			fp_err = error;
+		})
+		.on('meta', function(meta) {
+			StoreMetaData(feed, meta);
+		})
+		// when a post is detected
+		.on('readable', function () {
+			StorePosts(this, feed, posts, postGUIDs);
+		})
+		// when the end of the feed is reached
+		.on('end', function() {
+			console.log("FetchFeed (C)");
+			if (fp_err) {
+				console.log("FetchFeed (N): " + fp_err);
+				// if url as been flagged not to be a feed
+				if (fp_err.message.match(/^Not a feed/)) {
+					console.log('REMOVE NOT FEED: ' + feed.feedURL)
+					// remove feed from db
+					//resolve(feed.remove());
+				} else {
+					feed.lastModified = feed.failedCrawlTime = new Date();
+					feed.lastFailureWasParseFailure = true;
+					// save feed in db
+					resolve(feed.save());
+				}
+			} else {
+				console.log("FetchFeed (Y)");
+				exports.UpdateFeed(feed, posts, resolve);
+			}
+		});
+
+		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
+		rq.get({
+			timeout:	8192,
+			url: 		decodeURIComponent(feed.feedURL), 
+			headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
+		}, function (err, res, user) {
+			// is it an invalid url?
+			if ((err && !err.message.match(/^Error: ETIMEDOUT/)) || res.statusCode !== 200) {
+				console.log('REMOVE FEED: ' + feed.feedURL)
+				console.log('REMOVE FEED: ' + err)
+				// remove feed from db
+				resolve();
+			} else {
+				console.log('FEED detected')
+			}
+		})
+		.on('error', function(err) {
+			console.log(err);
+		})
+		.pipe(feedparser); // parse it through feedparser;
+	});
+}
+
 /** function FetchFeed
  */
 exports.FetchFeed = function(feed) {
@@ -356,61 +424,12 @@ exports.FetchFeed = function(feed) {
 	//console.log("FetchFeed (B)");
 	// return a new promise
 	return new rs.Promise(function(resolve, reject) {
-		// pre-define variables
-		var postGUIDs = [],
-			posts = [];
-		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
-		rq
-			.get({
-				timeout:	8192,
-				url: 		decodeURIComponent(feed.feedURL), 
-				headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
-			}, function (err, res, user) {
-				// is it an invalid url?
-				if ((err && !err.message.match(/^Error: ETIMEDOUT/)) || res.statusCode !== 200) {
-					console.log('REMOVE FEED: ' + feed.feedURL)
-					console.log('REMOVE FEED: ' + err)
-					console.log('REMOVE FEED: ' + res)
-					// remove feed from db
-					//resolve(feed.remove());
-				}
-			})
-			.on('response', function(res) {
-				var stream = this,
-					err;
-				stream
-					.pipe(new fp())
-					.on('error', function(error) {	
-						// always handle errors
-						err = error;
-					})
-					.on('meta', function(meta) {
-						StoreMetaData(feed, meta);
-					})
-					.on('readable', function () {
-						StorePosts(this, feed, posts, postGUIDs);
-					})
-					.on('end', function() {
-						//console.log("FetchFeed (C)");
-						if (err) {
-							//console.log("FetchFeed (N): " + err);
-							// if url as been flagged not to be a feed
-							if (err.message.match(/^Not a feed/)) {
-								console.log('REMOVE NOT FEED: ' + feed.feedURL)
-								// remove feed from db
-								//resolve(feed.remove());
-							} else {
-								feed.lastModified = feed.failedCrawlTime = new Date();
-								feed.lastFailureWasParseFailure = true;
-								// save feed in db
-								resolve(feed.save());
-							}
-						} else {
-							//console.log("FetchFeed (Y)");
-							exports.UpdateFeed(feed, posts, resolve);
-						}
-					});
-			});
+		PingFeed(feed)
+		.then(function(r) {
+			resolve(r);
+		}, function() {
+			resolve();
+		});
 	});
 };
 
