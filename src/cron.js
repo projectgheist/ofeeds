@@ -88,7 +88,7 @@ exports.FindOrCreatePost = function(feed, guid, data) {
     // return a new promise
 	return new rs.Promise(function(resolve, reject) {
 		// retrieve images sizes
-		rs
+		/*rs
 			.all(exports.FindImgSizes(data.images))
 			.then(function(out) {
 				//console.log("FindOrCreatePost (B)");
@@ -107,36 +107,42 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 				//console.log("FindOrCreatePost (C)");
 				// find or create post in database
 				return st.findOrCreate(st.Post, {'feed':feed, 'guid':guid});
-			})
+			})*/
+		st
+			.findOrCreate(st.Post, {'feed':feed, 'guid':guid})
 			.then(function(post) {
-				//console.log("FindOrCreatePost (D)");
-				var ref = !ut.isArray(post) ? post : post[0];
-				ref.title 		= ut.parseHtmlEntities(data.title || '');
-				ref.body		= data.description || '';
-				ref.summary		= CleanupSummary((data.summary !== undefined && data.summary !== data.description) ? data.summary : data.description);
-				// clean up summary
-				ref.images		= data.images || undefined;
-				ref.videos		= data.videos || [];
-				// prevent the publish date to be overridden
-				ref.published 	= (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
-				ref.updated 	= mm();
-				ref.author		= data.author || '';
-				ref.url			= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
-				ref.commentsURL	= data.comments || '';
-				ref.categories 	= data.categories || undefined;
-				/*if (!post.published) {
-					post.published = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
-					post.updated = post.published;
-				} else if (data.date && post.updated !== data.date) {
-					pd = data.date;
-					post.updated = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
-				}*/
-				// if feeds post variable doesn't exist, make it an array
-				feed.posts || (feed.posts = []);
-				// add post to posts array
-				feed.posts.addToSet(ref);
-				// return successfully
-				resolve(ref.save());
+				try {
+					//console.log("FindOrCreatePost (D)");
+					var ref = !ut.isArray(post) ? post : post[0];
+					ref.title 		= data.title ? ut.parseHtmlEntities(data.title).trim() : '';
+					ref.body		= data.description || '';
+					ref.summary		= CleanupSummary((data.summary !== undefined && data.summary !== data.description) ? data.summary : data.description);
+					// clean up summary
+					ref.images		= data.images || undefined;
+					ref.videos		= data.videos || [];
+					// prevent the publish date to be overridden
+					ref.published 	= (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
+					ref.updated 	= mm();
+					ref.author		= data.author || '';
+					ref.url			= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
+					ref.commentsURL	= data.comments || '';
+					ref.categories 	= data.categories || undefined;
+					/*if (!post.published) {
+						post.published = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+						post.updated = post.published;
+					} else if (data.date && post.updated !== data.date) {
+						pd = data.date;
+						post.updated = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
+					}*/
+					// if feeds post variable doesn't exist, make it an array
+					feed.posts || (feed.posts = []);
+					// add post to posts array
+					feed.posts.addToSet(ref);
+					// return successfully
+					resolve(ref.save());
+				} catch(e) {
+					console.log('POST STORE ERROR: ' + e)
+				}
 			}, function(err) {
 				resolve();
 			});
@@ -177,19 +183,21 @@ function CleanupSummary(data) {
 exports.UpdateFeed = function(feed, posts, resolve) {
 	console.log('UpdateFeed (A)');
 	// wait for posts to finish saving then mark crawl success or failure
+	var ss = Date.now();
 	rs
 		.all(posts)
 		.then(function() {
+			var se = Date.now() - ss;
 			console.log("UpdateFeed (Y)");
 			feed.successfulCrawlTime = new Date();
-			return [feed];
-		})
-		.finally(function(a) {
-			console.log('Done - UpdateFeed')
 			// set new modified date
-			feed.lastModified = new Data();
+			feed.lastModified = mm();
 			// save feed in db and return
-			resolve((a && a.length > 0) ? a[0].save() : true);
+			return feed.save();
+		})
+		.finally(function() {
+			console.log('Done - UpdateFeed: ' + feed.title)
+			resolve();
 		})
 		.catch(function(err) {
 			console.log("UpdateFeed (N): " + error);
@@ -220,7 +228,7 @@ function StoreMetaData(feed, meta) {
 	//}
 	feed.favicon	= meta.favicon || (meta['atom:icon'] && meta['atom:icon']['#']) || (meta.image && meta.image.url) || '';
 	feed.siteURL 	= meta.link || '';
-	feed.title 		= meta.title || '';
+	feed.title 		= meta.title ? ut.parseHtmlEntities(meta.title).trim() : '';
 	feed.description = meta.description || '';
 	feed.author 	= meta.author || '';
 	feed.language 	= meta.language || '';
@@ -341,7 +349,8 @@ function StorePosts(stream, feed, posts, guids) {
 	}
 };
 
-/**
+/** function PingFeed
+ @param feed: the database feed object
 */
 function PingFeed(feed) {
 	return new rs.Promise(function(resolve, reject) {
@@ -353,7 +362,7 @@ function PingFeed(feed) {
 		
 		feedparser
 		.on('error', function(error) {	
-			console.log(error)
+			console.log('FP error: ' + error)
 			// always handle errors
 			fp_err = error;
 		})
@@ -371,9 +380,8 @@ function PingFeed(feed) {
 				console.log("FetchFeed (N): " + fp_err);
 				// if url as been flagged not to be a feed
 				if (fp_err.message.match(/^Not a feed/)) {
-					console.log('REMOVE NOT FEED: ' + feed.feedURL)
 					// remove feed from db
-					//resolve(feed.remove());
+					resolve(feed.remove());
 				} else {
 					feed.lastModified = feed.failedCrawlTime = new Date();
 					feed.lastFailureWasParseFailure = true;
@@ -388,27 +396,28 @@ function PingFeed(feed) {
 
 		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
 		rq.get({
-			timeout:	8192,
+			timeout:	(1000 * 3),
 			url: 		decodeURIComponent(feed.feedURL), 
 			headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 		}, function (err, res, user) {
 			// is it an invalid url?
-			if ((err && !err.message.match(/^Error: ETIMEDOUT/)) || res.statusCode !== 200) {
-				console.log('REMOVE FEED: ' + feed.feedURL)
-				console.log('REMOVE FEED: ' + err)
-				res = {};
-				// remove feed from db
-				resolve();
-			} else {
-				console.log('FEED detected')
+			if ((err && err.code === 'ETIMEDOUT') || (res && res.statusCode !== 200)) {
+				console.log('REMOVE FEED: ' + feed.feedURL + ' | ' + err + ' | ' + (res ? res.statusCode : 'N/A'))
 			}
 		})
 		.on('error', function(err) {
-			console.log(err);
+			console.log('REQUEST ERROR: ' + feed.feedURL + ' | ' +err);
+			console.log('Done - UpdateFeed')
+			resolve();
 		})
 		.pipe(feedparser); // parse it through feedparser;
 	});
 }
+
+/** function ParseFeed
+ */
+exports.ParseFeed = function() {
+};
 
 /** function FetchFeed
  */
@@ -450,6 +459,7 @@ exports.UpdateAllFeeds = function(done) {
 			}
 			// if jobs present
 			if (a.length > 0) {
+				console.log('LENGTH OF JOBS: ' + a.length)
 				// run all jobs
 				rs
 					.all(a) // execute FetchFeed promises
@@ -465,8 +475,9 @@ exports.UpdateAllFeeds = function(done) {
 						});
 					})
 					*/
-					.then(function() {
-						console.log('Done - UpdateAllFeeds');
+					.then(function(err) {
+						console.log(err.length)
+						console.log('Done - UpdateAllFeeds!');
 						done();
 					});
 			} else {
