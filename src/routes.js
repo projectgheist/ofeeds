@@ -68,7 +68,7 @@ ap.get("/dashboard", ensureAuth, function(req, res) {
 
 /** manage route */
 ap.get("/manage", function(req, res) {
-	res.render('manage', { 
+	res.render('landing', { 
 		'config': cf.site,
 		'user': req.user
 	});

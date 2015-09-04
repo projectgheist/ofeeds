@@ -1,34 +1,7 @@
 include includes/header
 .container-fluid(ng-controller="panelController",style="overflow:hidden")
 	.row
-		.col-xs-3#menu(ng-controller="navController")
-			hr
-			div(ng-if="!subs")
-				include templates/loading
-			ul(ng-Ripple="{{subs.length}}")
-				li.withripple(ng-if="subs && subs.length <= 0")
-					a(href="#") No feeds
-				li.withripple(ng-repeat="s in subs", ng-class="isActive(s.url) ? 'active' : ''", data-target="{{s.url}}") 
-					a.text-overflow(href="{{s.url}}")
-						img(ng-if="s.favicon", src="{{s.favicon}}", width="32px", style="margin-right:15px")
-						i.fa.fa-fw.fa-bookmark(ng-if="s.favicon === ''", style="width:32px;margin-right:15px")
-						| {{s.title}}
-			hr
-			ul
-				li.withripple
-					a(href="https://github.com/projectgheist/ofeeds",target="_blank")
-						i.fa.fa-github.fa-fw(style="width:32px;margin-right:15px")
-						| View on Github
-				if user
-					li.withripple
-						a(href="#") Settings
-					li.withripple
-						a(href="#") Logout
-				else
-					li.withripple
-						a(href="/auth/google", target="_self")
-							i.fa.fa-google-plus.fa-fw(style="width:32px;margin-right:15px")
-							| &nbsp;Sign in
+		include includes/sidebar
 		#panel(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'", style="padding:0")
 			.navbar.navbar-default.navbar-static-top(ng-class="stream !== undefined ? 'no-margin' : ''")
 				.container-fluid

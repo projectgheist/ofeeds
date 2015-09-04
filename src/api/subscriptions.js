@@ -124,8 +124,8 @@ app.get('/api/0/feeds/list', function(req, res) {
 				postCount:		f.posts ? f.posts.length : 0,
 				title: 			f.title || decodeURIComponent(f.feedURL),
 				shortid: 		f.shortID,
-				crawlTime:		f.lastModified || undefined,
-				updated:		(f.posts && f.posts.length > 0) ? f.posts[f.posts.length-1].published : undefined,
+				crawlTime:		f.successfulCrawlTime || undefined,
+				updated:		f.lastModified || undefined,
 				crawlSuccesful:	r
 			};
 		});
@@ -181,7 +181,10 @@ app.get('/api/0/subscription/list', function(req, res) {
 			return rs.all(a);			
 		}).then(function(s) {
 			// add separate reading-list element
-			s.push({id:encodeURIComponent('label/reading-list'),unreadcount:tuc});
+			s.push({
+				id:encodeURIComponent('label/reading-list'),
+				unreadcount:tuc
+			});
 			// return json value
 			return res.json(s);
 		}, function(err) {

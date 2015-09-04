@@ -21,7 +21,6 @@
 		}
 		
 		function getRecent() {
-			return $resource('/api/0/feeds/list', {n:5, r:'n'}, { query:{ method: 'GET', isArray: false } });
 		}
 	};
 
@@ -505,36 +504,26 @@
 		
 		// on URL change
 		$scope.$on('$routeChangeSuccess', function() {
-			// $routeParams should be populated here
-			// if it has parameters AND not the same URL
-			if (Object.keys($routeParams).length > 0 &&
-				(!$scope.stream || encodeURIComponent($scope.stream.feedURL) !== $routeParams.value)) {
-				if ($scope.stream === undefined) {
-					// no longer undefined
-					$scope.stream = {};
-				}
-				// don't URL encode the values of param as they get converted later on anyway
-				var v = String($routeParams.value);
-				// declare variable
-				$scope.params = {
-					// set type
-					type: (String($routeParams.type) || 'feed'),
-					// remove trailing '*/' otherwise use normal url
-					value: (/\*(\/)*$/.test(v) ? v.substring(0, v.length - 1) : v)
-				};
-				// retrieve posts
-				$scope.gtposts();
+			// pre url change else post
+			if (Object.keys($routeParams).length <= 0) {
+				// reset the stream
+				$scope.stream = undefined;
 			} else {
-				// special for dashboard
-				if ($route.current.loadedTemplateUrl === '/templates/post-dashboard') {
-					panelService.getRecent().query({},function(data) {
-						if (data) {
-							$scope.recent = data.feeds;
-							for (var i in $scope.recent) {
-								$scope.recent[i].url = ['/subscription/feed/',encodeURIComponent($scope.recent[i].id),'/'].join('');
-							}
-						}
-					});
+				// post url change, $routeParams should be populated here
+				if (!$scope.stream || encodeURIComponent($scope.stream.feedURL) !== $routeParams.value) { // no stream present OR not the same stream
+					// reset the stream
+					$scope.stream = undefined;
+					// don't URL encode the values of param as they get converted later on anyway
+					var v = String($routeParams.value);
+					// declare variable
+					$scope.params = {
+						// set type
+						type: (String($routeParams.type) || 'feed'),
+						// remove trailing '*/' otherwise use normal url
+						value: (/\*(\/)*$/.test(v) ? v.substring(0, v.length - 1) : v)
+					};
+					// retrieve posts
+					$scope.gtposts();
 				}
 			}
 		});

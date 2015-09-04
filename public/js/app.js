@@ -19,23 +19,22 @@
 	function appConfig($routeProvider, $locationProvider) {
 		$locationProvider.html5Mode(true);
 		$routeProvider
-		.when('/stream/:value*\/', {
+		.when('/manage', {
 			templateUrl: function(urlattr) {
-				return '/templates/posts-list';
+				return '/templates/manage';
 			},
-			controller: 'panelController'
+			controller: 'overviewController'
 		})
 		.when('/subscription/:type/:value', {
 			templateUrl: function(urlattr) {
 				return '/templates/posts-list';
-			},
-			controller: 'panelController'
+			}
 		})
 		.otherwise({
 			templateUrl: function(urlattr) {
 				return '/templates/post-dashboard';
 			},
-			controller: 'panelController'
+			controller: 'dashboardController'
 		});
 	};
 	
@@ -73,7 +72,6 @@
 				scope.$watch(function() {
 					return element.children().length === parseInt(attrs['ngRipple']);
 				}, function() {
-					console.log('ngRipple')
 					// initialize material ripple
 					$.material.init();
 				});
