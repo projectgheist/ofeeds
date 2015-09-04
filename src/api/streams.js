@@ -141,7 +141,7 @@ app.get('/api/0/stream/contents*', function(req, res) {
 					description:	isFeed ? feed.description  : '',
 					direction: 		'ltr',
 					siteURL:      	isFeed ? feed.siteURL      : '',
-					updated:      	mm(isFeed ? feed.lastModified : Date.now()).format('dddd, MMMM Do YYYY, h:mm:ss A'),
+					updated:      	isFeed ? feed.lastModified : '',
 					self:         	ut.fullURL(req),
 					subscribed:		0,
 					showOrigin:		false,

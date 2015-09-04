@@ -115,15 +115,16 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 					//console.log("FindOrCreatePost (D)");
 					var ref = !ut.isArray(post) ? post : post[0];
 					ref.title 		= data.title ? ut.parseHtmlEntities(data.title).trim() : '';
+					console.log('title: ' + ref.title);
 					ref.body		= data.description || '';
 					ref.summary		= CleanupSummary((data.summary !== undefined && data.summary !== data.description) ? data.summary : data.description);
-					// clean up summary
 					ref.images		= data.images || undefined;
 					ref.videos		= data.videos || [];
 					// prevent the publish date to be overridden
-					ref.published 	= (data['rss:pubdate'] && data['rss:pubdate']['#']) || (data.meta && data.meta.pubdate) || data.pubdate;
+					ref.published 	= (data['rss:pubdate'] ? data['rss:pubdate']['#'] : (data.pubdate ? data.pubdate : data.meta.pubdate));
+					// time the post has been last modified
 					ref.updated 	= mm();
-					ref.author		= data.author || '';
+					ref.author		= data.author ? data.author.trim() : '';
 					ref.url			= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
 					ref.commentsURL	= data.comments || '';
 					ref.categories 	= data.categories || undefined;

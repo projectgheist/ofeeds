@@ -9,19 +9,21 @@
 			img.withripple(ng-src="{{image.url}}",data-layzr="{{image.url}}",data-layzr-retina="{{image.url}}",width='{{image.width}}',height='{{image.height}}',holderjs='')
 		.panel-image(ng-if="post.content.images.other.length <= 0")
 			img(holderjs='')
-		.panel-text(style="padding:0 15px 15px 15px")
-			.row.max-lines.alert-primary
-				.col-xs-11(style="padding-right:0")
-					h2
-						a(href='{{post.alternate.href}}',target='_blank',style="") {{post.title}}
-				.col-xs-1(style="padding:0")
-					h2
-						a(href="#")
-							i.fa.fa-ellipsis-v.fa-fw
+		.panel-text
 			.row
-				.col-xs-6.text-overflow
-					a(href="#", ng-if="post.author")
-						i.fa.fa-user.fa-fw
-						| {{post.author}}
-				.col-xs-6
-					span {{post.formatted}}
+				.col-xs-2
+					h3.text-right
+						a(href="#")
+							i.fa.fa-user.fa-fw
+				.col-xs-10
+					h3
+						.pull-right
+							a(href="#")
+								i.fa.fa-ellipsis-v.fa-fw
+						a(href='{{post.alternate.href}}',target='_blank',style="") {{post.title}}
+					p
+						span(ng-if="post.author")
+							a(href="#") {{post.author}} 
+							| ·&nbsp;
+						a(href="{{post.alternate.href}}") Continue reading
+						| &nbsp;·&nbsp;{{post.formatted}}

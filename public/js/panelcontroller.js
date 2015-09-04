@@ -221,11 +221,12 @@
 					// local reference to item
 					var ref = $scope.stream.items[i];
 					// format date
-					if (moment().diff(ref.published,'days') > 1) {
+					ref.formatted = ref.published;
+					/*if (moment().diff(ref.published,'days') > 1) {
 						ref.formatted = moment(ref.published).format('ddd, hh:mm');
 					} else {
 						ref.formatted = moment(ref.published).fromNow();
-					}
+					}*/
 					// local reference to variable
 					var str = ref.content.content;
 					// check if string

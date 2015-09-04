@@ -49,11 +49,13 @@ jQuery(document).ready(function($) {
 	g_Slideout.open();
 	
 	// have some nice font scaling.
+	/*
 	$('body').flowtype({
 		minFont:12,
 		maxFont:36,
 		fontRatio:96
 	});
+	*/
 });
 
 // single keys
