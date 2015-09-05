@@ -189,6 +189,51 @@ exports.getPosts = function(streams, options) {
     });
 };
 
+//
+exports.formatPosts = function(user,posts) {
+	return posts.map(function(post) {
+		var isRead = 0,
+			pts = (post.tags.length > 0) ? post.tags.map(function(t) {
+				var r = t.stringID;
+				if (!isRead && r && ut.isRead(user,r)) {
+					isRead = 1;
+				}
+				return r;
+        	}) : [];
+        return {
+            uid: post.shortID.toString(),
+			lid: post.longID.toString(),
+            title: post.title,
+			read: isRead,
+            alternate: {
+                href: post.url,
+                type: 'text/html'
+            },
+            content: {
+                direction: 'ltr',
+				summary: post.summary || '',
+                content: post.body,
+				images: post.images,
+				videos: post.videos
+            },
+            author: post.author,
+            published: (post.published || 0),
+            updated: (post.updated || 0),
+            categories: pts.concat(post.categories),
+            origin: {
+                streamId: post.feed.stringID,
+                title: post.feed.title,
+                url: post.feed.feedURL
+            },
+            crawlTimeMsec: post.feed.successfulCrawlTime ? post.feed.successfulCrawlTime.getTime() : post.published,
+            timestampUsec: post.published ? post.published.getTime() : post.feed.successfulCrawlTime.getTime(),
+            likingUsers: [],
+            comments: [],
+            annotations: []
+        }; 
+    });
+};
+
 // export the modules
 exports.User 	= require('./models/user');
 exports.Feed 	= require('./models/feed');

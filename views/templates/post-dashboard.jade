@@ -1,25 +1,43 @@
-.row
-	.col-xs-6
-		h2 Recommended
-		hr
-		include loading
-	.col-xs-6
-		h2 Recently added
-		hr
-		div(ng-if="!recent")
+.col-xs-12
+	.row
+		.col-xs-6
+			.well
+				h2 Recommended
+				hr
+				include loading
+		.col-xs-6
+			.well
+				h2 Recently added
+				hr
+				div(ng-if="!rf")
+					include loading
+				ul.list-unstyled(ng-repeat='feed in rf')
+					li 
+						a(href="{{feed.url}}") 
+							img(src="{{feed.favicon}}", ng-if="feed.favicon", width="32", style="margin-right:15px")
+							i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon", style="width:32px;margin-right:15px")
+							| {{feed.title}}
+						span.pull-right {{feed.creation}}
+	.row
+		.col-xs-12
+			h2 Popular
+			hr
 			include loading
-		ul(ng-repeat='feed in recent')
-			li 
-				a(href="{{feed.url}}") 
-					img(src="{{feed.favicon}}", width="32", style="margin-right:15px")
-					| {{feed.title}}
-.row
-	.col-xs-12
-		h2 Popular
-		hr
-		include loading
-.row
-	.col-xs-12
-		h2 Recent
-		hr
-		include loading
+	.row
+		.col-xs-12
+			h2 Recent
+			hr
+			div(ng-if="!rp")
+				include loading
+			.panel.panel-default(ng-repeat='post in rp')
+				.panel-heading
+					a(href="{{post.alternate.href}}") {{post.title}}
+					span(ng-if="post.author")
+						| &nbsp;·&nbsp;
+						a(href="#") {{post.author}} 
+					| &nbsp;·&nbsp;{{post.published}}
+				.panel-body
+					.col-xs-4
+						img(src="{{post.content.images.other[0].url}}")
+					.col-xs-8
+						| {{post.content.summary}}

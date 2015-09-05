@@ -102,11 +102,41 @@ var actions = {
     }
 };
 
+app.get('/api/0/posts', function(req, res) {
+	var opts = {
+		sort: { published:(!req.query.r || req.query.r !== 'o') ? -1 : 1 }, // newest first
+		limit: req.query.n || 5 // limit the amount of output feeds
+	};
+	
+	db
+	.all(db.Post, opts) // retrieve all feeds
+	.then(function(posts) {
+		res.json(db.formatPosts({}, posts));
+	});
+});
+
 // lists all of the feeds in the database
 app.get('/api/0/feeds/list', function(req, res) {
+	var s = {};
+	if (!req.query.r || req.query.r === 'o') {
+		s.lastModified = 1; // oldest first
+	} else {
+		switch (req.query.r) {
+			case 'n': // newest
+				s.lastModified = -1; // newest first
+				break;
+			case 'a': // creation time
+				s.creationTime = -1; // newest feed first
+				break;
+			default:
+				s.lastModified = -1; // newest first
+				break;
+		}
+	}
+
 	// declare feed options
 	var opts = {
-		sort: { lastModified:(!req.query.r || req.query.r === 'o') ? 1 : -1 }, // oldest feeds first
+		sort: s, 
 		limit: !req.query.n ? false : req.query.n // limit the amount of output feeds
 	};
 	
@@ -126,7 +156,8 @@ app.get('/api/0/feeds/list', function(req, res) {
 				shortid: 		f.shortID,
 				crawlTime:		f.successfulCrawlTime || undefined,
 				updated:		f.lastModified || undefined,
-				crawlSuccesful:	r
+				crawlSuccesful:	r,
+				creation:		f.creationTime
 			};
 		});
 		// retrieve the time till the next job needs to run
@@ -173,7 +204,8 @@ app.get('/api/0/subscription/list', function(req, res) {
 						shortid: 		f.shortID,
 						categories: 	categories,
 						crawlTime:		f.successfulCrawlTime,
-						updated:		f.lastModified
+						updated:		f.lastModified,
+						creation:		f.creationTime
 					};
 				}, function(err) {
 				});

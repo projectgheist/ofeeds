@@ -12,11 +12,16 @@
 
 	function dashboardService($resource) {
 		return {
-			recent: recent
+			recentFeeds: recentFeeds,
+			recentPosts: recentPosts
 		};
 		
-		function recent() {
-			return $resource('/api/0/feeds/list', {n:5, r:'n'}, { query:{ method: 'GET', isArray: false } });
+		function recentFeeds() {
+			return $resource('/api/0/feeds/list', {n:5, r:'a'}, { query:{ method: 'GET', isArray: false } });
+		}
+		
+		function recentPosts() {
+			return $resource('/api/0/posts', {n:5, r:'n'}, { query:{ method: 'GET', isArray: true } });
 		}
 	};
 
@@ -26,12 +31,17 @@
 	];
 
 	function dashboardController($scope, dashboardService) {
-		dashboardService.recent().query(function(data) {
-			if (Object.keys(data).length > 0) {
-				$scope.recent = data.feeds;
-				for (var i in $scope.recent) {
-					$scope.recent[i].url = ['/subscription/feed/',encodeURIComponent($scope.recent[i].id),'/'].join('');
+		dashboardService.recentFeeds().query(function(data) {
+			if (data && data.feeds && data.feeds.length > 0) {
+				$scope.rf = data.feeds;
+				for (var i in $scope.rf) {
+					$scope.rf[i].url = ['/subscription/feed/',encodeURIComponent($scope.rf[i].id),'/'].join('');
 				}
+			}
+		});
+		dashboardService.recentPosts().query(function(data) {
+			if (data.length > 0) {
+				$scope.rp = data;
 			}
 		});
 	}

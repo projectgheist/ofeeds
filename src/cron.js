@@ -115,13 +115,12 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 					//console.log("FindOrCreatePost (D)");
 					var ref = !ut.isArray(post) ? post : post[0];
 					ref.title 		= data.title ? ut.parseHtmlEntities(data.title).trim() : '';
-					console.log('title: ' + ref.title);
 					ref.body		= data.description || '';
 					ref.summary		= CleanupSummary((data.summary !== undefined && data.summary !== data.description) ? data.summary : data.description);
 					ref.images		= data.images || undefined;
 					ref.videos		= data.videos || [];
 					// prevent the publish date to be overridden
-					ref.published 	= (data['rss:pubdate'] ? data['rss:pubdate']['#'] : (data.pubdate ? data.pubdate : data.meta.pubdate));
+					ref.published 	= SelectPublishedDate(ref, data);
 					// time the post has been last modified
 					ref.updated 	= mm();
 					ref.author		= data.author ? data.author.trim() : '';
@@ -149,6 +148,22 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 			});
 	});
 };
+
+/** function SelectPublishedDate
+ */
+function SelectPublishedDate(prev, data) {
+	if (data['rss:pubdate']) {
+		return data['rss:pubdate']['#'];
+	} else if (data.pubdate) {
+		return data.pubdate;
+	} else if (!prev.published && data.meta && data.meta.pubdate) {
+		return data.meta.pubdate;
+	} else if (!prev.published) {
+		return mm();
+	} else {
+		return prev.published;
+	}
+}
 
 /** function CleanupSummary
  */

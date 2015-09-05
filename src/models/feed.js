@@ -31,6 +31,7 @@ var Feed = mg.Schema({
     failedCrawlTime: Date,
     lastFailureWasParseFailure: { type: Boolean, default: false },
     lastModified: { type: Date, default: Date.now },
+    creationTime: { type: Date, default: Date.now },
 });
 
 Feed.virtual('stringID').get(function() {
