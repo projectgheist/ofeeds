@@ -110,33 +110,41 @@ app.get('/api/0/posts', function(req, res) {
 	
 	db
 	.all(db.Post, opts) // retrieve all feeds
+	.populate('feed') // replacing the specified paths in the document with document(s) from other collection(s)
 	.then(function(posts) {
-		res.json(db.formatPosts({}, posts));
+		var fp = db.formatPosts({}, posts); // formatted posts
+		return res.json(fp);
 	});
 });
 
 // lists all of the feeds in the database
 app.get('/api/0/feeds/list', function(req, res) {
-	var s = {};
+	var s;
 	if (!req.query.r || req.query.r === 'o') {
-		s.lastModified = 1; // oldest first
+		s = {lastModified: 1}; // oldest first
 	} else {
 		switch (req.query.r) {
 			case 'n': // newest
-				s.lastModified = -1; // newest first
+				s = {lastModified: -1}; // newest first
+				break;
+			case 's': // creation time
+				s = [
+					['numSubscribers',-1], // highest number first
+					['title',1] // alphabetical
+					];
 				break;
 			case 'a': // creation time
-				s.creationTime = -1; // newest feed first
+				s = {creationTime: -1}; // newest feed first
 				break;
 			default:
-				s.lastModified = -1; // newest first
+				s = {lastModified: -1}; // newest first
 				break;
 		}
 	}
 
 	// declare feed options
 	var opts = {
-		sort: s, 
+		sort: s,
 		limit: !req.query.n ? false : req.query.n // limit the amount of output feeds
 	};
 	

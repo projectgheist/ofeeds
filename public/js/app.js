@@ -14,7 +14,8 @@
 		.directive('onLastRepeat', onLastRepeat)
 		.directive('onResize', onResize)
 		.directive('ngInclude', ngInclude)
-		.directive('ngRipple', ngRipple);
+		.directive('ngRipple', ngRipple)
+		.directive('ngImgLoaded', ngImgLoaded);
 
 	function appConfig($routeProvider, $locationProvider) {
 		$locationProvider.html5Mode(true);
@@ -49,6 +50,9 @@
 					});
 				} else {
 					g_Layzr.update(); // force image lazy loading update
+					element.bind('load', function() {
+						fit(element[0], element.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
+					});
 				}
 			}
 		}
@@ -74,6 +78,17 @@
 				}, function() {
 					// initialize material ripple
 					$.material.init();
+				});
+			}
+		};
+	};
+	
+	function ngImgLoaded() {
+		return {
+			restrict: 'A',
+			link: function(scope, element, attrs) {
+				element.bind('load', function() {
+					fit(element[0], element.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
 				});
 			}
 		};

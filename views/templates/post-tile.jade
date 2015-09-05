@@ -6,7 +6,7 @@
 			else
 				span.label.label-primary(ng-if="!post.read") New
 		.panel-image(ng-repeat='image in post.content.images.other',ng-click="showModal(post.uid)")
-			img.withripple(ng-src="{{image.url}}",data-layzr="{{image.url}}",data-layzr-retina="{{image.url}}",width='{{image.width}}',height='{{image.height}}',holderjs='')
+			img(ng-src="{{image.url}}",data-layzr="{{image.url}}",holderjs='')
 		.panel-image(ng-if="post.content.images.other.length <= 0")
 			img(holderjs='')
 		.panel-text

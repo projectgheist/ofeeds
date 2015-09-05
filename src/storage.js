@@ -223,6 +223,7 @@ exports.formatPosts = function(user,posts) {
             origin: {
                 streamId: post.feed.stringID,
                 title: post.feed.title,
+                favicon: post.feed.favicon,
                 url: post.feed.feedURL
             },
             crawlTimeMsec: post.feed.successfulCrawlTime ? post.feed.successfulCrawlTime.getTime() : post.published,

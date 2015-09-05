@@ -85,26 +85,6 @@
 			});
 		};
 		
-		/*$scope.makeHorizontal = function(e) {
-			// make element use the horizontal CSS
-			e.addClass('horizontal-image');
-			if (e.width() > e.parent().width()) {
-				e.css('left',Math.min(0,(e.parent().width() - e.width()) / 2));
-			} else if (e.width() < e.parent().width()) {
-				e.removeClass('horizontal-image');
-				$scope.makeVertical(e);
-			}
-		}
-		$scope.makeVertical = function(e) {
-			e.addClass('vertical-image');
-			if (e.height() > e.parent().height()) {
-				e.css('top',Math.min(0,(e.parent().height() - e.height()) / 2));
-			} else if (e.height() < e.parent().height()) {
-				e.removeClass('vertical-image');
-				$scope.makeHorizontal(e);
-			}
-		}*/
-		
 		// scroll back to top
 		$scope.gotoTop = function() {
 		   $scope.scrollto('mah', 0);

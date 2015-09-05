@@ -4,7 +4,15 @@
 			.well
 				h2 Recommended
 				hr
-				include loading
+				div(ng-if="!pf")
+					include loading
+				ul.list-unstyled(ng-repeat='feed in pf')
+					li 
+						a(href="{{feed.url}}") 
+							img(src="{{feed.favicon}}", ng-if="feed.favicon", width="32", style="margin-right:15px")
+							i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon", style="width:32px;margin-right:15px")
+							| {{feed.title}}
+						span.pull-right {{feed.creation}}
 		.col-xs-6
 			.well
 				h2 Recently added
@@ -20,24 +28,28 @@
 						span.pull-right {{feed.creation}}
 	.row
 		.col-xs-12
-			h2 Popular
-			hr
-			include loading
-	.row
-		.col-xs-12
 			h2 Recent
 			hr
 			div(ng-if="!rp")
 				include loading
 			.panel.panel-default(ng-repeat='post in rp')
 				.panel-heading
-					a(href="{{post.alternate.href}}") {{post.title}}
-					span(ng-if="post.author")
-						| &nbsp;·&nbsp;
-						a(href="#") {{post.author}} 
-					| &nbsp;·&nbsp;{{post.published}}
+					.row
+						.col-xs-4
+							.text-overflow
+								a(href="{{post.origin.url}}") 
+									img(src="{{post.origin.favicon}}", ng-if="post.origin.favicon", width="32", style="margin-right:15px")
+									i.fa.fa-fw.fa-bookmark(ng-if="!post.origin.favicon", style="width:32px;margin-right:15px")
+									| {{post.origin.title}}
+						.col-xs-8
+							.text-overflow
+								a(href="{{post.alternate.href}}",target="_blank") {{post.title}}
+							span(ng-if="post.author")
+								a(href="#") {{post.author}} 
+								| &nbsp;·
+							| &nbsp;{{post.published}}
 				.panel-body
-					.col-xs-4
-						img(src="{{post.content.images.other[0].url}}")
+					.col-xs-4(style="height:190px;overflow:hidden")
+						img(ng-src="{{post.content.images.other[0].url}}",data-layzr="{{post.content.images.other[0].url}}",holderjs='')
 					.col-xs-8
-						| {{post.content.summary}}
+						div(ng-bind-html="post.content.summary")

@@ -27,7 +27,8 @@ module.exports = function(grunt) {
 					'./bower_components/Flowtype.js/flowtype.js',
 					'./bower_components/moment/moment.js',
 					'./bower_components/typeahead.js/dist/bloodhound.js',
-					'./bower_components/typeahead.js/dist/typeahead.jquery.js'
+					'./bower_components/typeahead.js/dist/typeahead.jquery.js',
+					'./public/js/fit.js'
 				],
 				dest: './public/js/<%= pkg.name %>-<%= pkg.version %>.js'
 			}

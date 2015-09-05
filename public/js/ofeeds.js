@@ -15,27 +15,8 @@ var ta = [],
  */
 jQuery(document).ready(function($) {
 	g_Layzr = new Layzr({ 
-		attr: 'data-layzr', 
-		retinaAttr: 'data-layzr-retina',
-		threshold: 50,
-		callback: function() {
-			var e = $(this);
-				w = parseInt(e.attr('width')),
-				h = parseInt(e.attr('height'));
-			var x = (e.parent().width() / w) * h;
-			if (x < e.parent().height()) {
-				e.addClass('horizontal-image');
-				var y = (e.parent().height() / h) * w;
-				if (y > e.parent().width()) {
-					e.css('left',(e.parent().width() - y) / 2);
-				}
-			} else {
-				e.addClass('vertical-image');
-				if (x > e.parent().height()) {
-					e.css('top',(e.parent().height() - x) / 2);
-				}
-			}
-		}
+		attr: 'data-layzr',
+		threshold: 50
 	});
 
 	// create slideout navbar
