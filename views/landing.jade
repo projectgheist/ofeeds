@@ -3,7 +3,7 @@ include includes/header
 	.row
 		.col-xs-12.no-padding
 			.text-center
-				#alert.alert.alert-dismissible.no-margin.hidden(role="alert",ng-class="'alert-'+alertType")
+				#alert.alert.alert-dismissible.no-margin.hidden(role="alert",ng-class="alertType")
 					button.close(data-dismiss="alert",aria-label="Close")
 						span(aria-hidden="true") &times;
 					p(ng-bind-html="alertMessage")

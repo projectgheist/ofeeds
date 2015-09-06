@@ -141,7 +141,7 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 					// return successfully
 					resolve(ref.save());
 				} catch(e) {
-					console.log('POST STORE ERROR: ' + e)
+					//console.log('POST STORE ERROR: ' + e)
 				}
 			}, function(err) {
 				resolve();
@@ -197,14 +197,14 @@ function CleanupSummary(data) {
 /** function UpdateFeed
  */
 exports.UpdateFeed = function(feed, posts, resolve) {
-	console.log('UpdateFeed (A)');
+	//console.log('UpdateFeed (A)');
 	// wait for posts to finish saving then mark crawl success or failure
 	var ss = Date.now();
 	rs
 		.all(posts)
 		.then(function() {
 			var se = Date.now() - ss;
-			console.log("UpdateFeed (Y)");
+			//console.log("UpdateFeed (Y)");
 			feed.successfulCrawlTime = new Date();
 			// set new modified date
 			feed.lastModified = mm();
@@ -212,11 +212,11 @@ exports.UpdateFeed = function(feed, posts, resolve) {
 			return feed.save();
 		})
 		.finally(function() {
-			console.log('Done - UpdateFeed: ' + feed.title)
-			resolve();
+			//console.log('Done - UpdateFeed: ' + feed.title)
+			resolve(feed);
 		})
 		.catch(function(err) {
-			console.log("UpdateFeed (N): " + error);
+			//console.log("UpdateFeed (N): " + error);
 		});
 };
 
@@ -378,7 +378,7 @@ function PingFeed(feed) {
 		
 		feedparser
 		.on('error', function(error) {	
-			console.log('FP error: ' + error)
+			//console.log('FP error: ' + error)
 			// always handle errors
 			fp_err = error;
 		})
@@ -391,9 +391,9 @@ function PingFeed(feed) {
 		})
 		// when the end of the feed is reached
 		.on('end', function() {
-			console.log("FetchFeed (C)");
+			//console.log("FetchFeed (C)");
 			if (fp_err) {
-				console.log("FetchFeed (N): " + fp_err);
+				//console.log("FetchFeed (N): " + fp_err);
 				// if url as been flagged not to be a feed
 				if (fp_err.message.match(/^Not a feed/)) {
 					// remove feed from db
@@ -405,7 +405,7 @@ function PingFeed(feed) {
 					resolve(feed.save());
 				}
 			} else {
-				console.log("FetchFeed (Y)");
+				//console.log("FetchFeed (Y)");
 				exports.UpdateFeed(feed, posts, resolve);
 			}
 		});
@@ -422,8 +422,8 @@ function PingFeed(feed) {
 			}
 		})
 		.on('error', function(err) {
-			console.log('REQUEST ERROR: ' + feed.feedURL + ' | ' +err);
-			console.log('Done - UpdateFeed')
+			//console.log('REQUEST ERROR: ' + feed.feedURL + ' | ' +err);
+			//console.log('Done - UpdateFeed')
 			resolve();
 		})
 		.pipe(feedparser); // parse it through feedparser;
@@ -475,7 +475,7 @@ exports.UpdateAllFeeds = function(done) {
 			}
 			// if jobs present
 			if (a.length > 0) {
-				console.log('LENGTH OF JOBS: ' + a.length)
+				//console.log('LENGTH OF JOBS: ' + a.length)
 				// run all jobs
 				rs
 					.all(a) // execute FetchFeed promises
@@ -492,8 +492,7 @@ exports.UpdateAllFeeds = function(done) {
 					})
 					*/
 					.then(function(err) {
-						console.log(err.length)
-						console.log('Done - UpdateAllFeeds!');
+						//console.log('Done - UpdateAllFeeds!');
 						done();
 					});
 			} else {

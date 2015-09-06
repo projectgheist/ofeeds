@@ -2,6 +2,7 @@
 
 # ignore nodejs library modules
 /node_modules
+/bower_components
 
 # ignore dot files
 .*

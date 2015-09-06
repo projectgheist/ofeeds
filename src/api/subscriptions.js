@@ -33,22 +33,24 @@ var actions = {
 				}
 				// is valid url?
 				if (ut.isUrl(url)) {
-					return db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)})
-					.then(function(feed) {
-						//console.log("Search (C)");
-						if (feed) {
-							return cr.FetchFeed(!ut.isArray(feed) ? feed: feed[0]);
-						} else {
-							console.log("Search (NO FEED)");
-						}
-					}, function(err) {
-						//console.log("Search (D)");
-						console.log(err)
-					})
-					.then(function(f) {
-						//console.log("Search (D):" + url);
-						return [f]; // return feed in array form
-					});
+					return db
+						.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)})
+						.then(function(feed) {
+							//console.log("Search (C)");
+							if (feed) {
+								return cr.FetchFeed(!ut.isArray(feed) ? feed: feed[0]);
+							} else {
+								//console.log("Search (NO FEED)");
+							}
+						}, function(err) {
+							//console.log("Search (D)");
+							//console.log(err)
+						})
+						.then(function(f) {
+							//console.log("Search (D):" + url);
+							// return feed
+							return { 'data':[f], 'type': f.posts.length ? 'success' : 'danger' };
+						});
 				}
 				//console.log("Search (E):" + url);
 				return false;
@@ -242,15 +244,21 @@ app.get('/api/0/subscription/search', function(req, res) {
     actions
 		.search(req, req.query.q)
 		.then(function(feeds) {
-			var vs = [];
-			if (feeds) {
+			var vs = [],
+				at = false; // alert type?
+			if (!ut.isArray(feeds)) {
+				at = feeds.type;
+				feeds = feeds.data;
+			}
+			if (feeds && feeds.length) {
 				for (var i in feeds) {
 					var d = feeds[i].description;
 					vs.push({
 						type:'feed',
 						value:feeds[i].feedURL,
 						title:feeds[i].title,
-						description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : '')
+						description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : ''),
+						alert: at
 						});
 				};
 			}

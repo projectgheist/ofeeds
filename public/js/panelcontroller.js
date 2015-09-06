@@ -39,12 +39,14 @@
 		 @param m: message to relay
 		*/
 		$scope.showAlert = function(t,m) {
-			$scope.alertType = t;
-			$scope.alertMessage = $sce.trustAsHtml(m);
-			var a = $("#alert");
-			a.removeClass('hidden');
-			a.fadeTo(5000, 500).slideUp(500, function() {
-				a.alert('close');
+			$rootScope.$apply(function () {
+				$scope.alertType = ['alert-',t].join('');
+				$scope.alertMessage = $sce.trustAsHtml(m);
+				var a = $("#alert");
+				a.removeClass('hidden');
+				a.fadeTo(5000, 500).slideUp(500, function() {
+					a.alert('close');
+				});
 			});
 		};
 		
@@ -77,10 +79,10 @@
 		};
 		
 		// go to a subscription
-		$scope.gotostream = function(obj,refresh) {
+		$scope.gotostream = function(obj) {
 			// go to subscription local url
-			$timeout(function() {
-				$location.path(['/subscription/feed/',obj.value,'/'].join(''));
+			$rootScope.$apply(function() {
+				$location.path(['/subscription/feed/',obj.value].join(''));
 			});
 		};
 		
@@ -102,6 +104,7 @@
 		};
 		
 		// search for a subscription
+		/*
 		$scope.gotoFeed = function(r) {
 			$http.get('/api/0/subscription/search',{ params:{ q: r } })
 			.success(function(data, status, headers, config) {
@@ -110,6 +113,7 @@
 			.error(function(data, status, headers, config) {
 			});
 		};
+		*/
 		
 		// scroll back to top
 		$scope.gotoTop = function() {
@@ -303,10 +307,6 @@
 			}
 		};
 		
-		$scope.lmf = function() {
-			
-		};
-		
 		/** scroll to the next article in the stream
 		*/
 		$scope.next = function() {
@@ -479,8 +479,12 @@
 					},
 					filter: function(a) {
 						ta = [];
+						// loop through retrieved info
 						for (var i in a) {
 							if (a[i].title !== '') ta.push(a[i]);
+							if (a[i].alert) {
+								$scope.showAlert(a[i].alert, (a[i].alert === 'success' ? 'Feed was added successfully.' : 'Failed to add feed.'));
+							}
 						}
 						return ta; 
 					}
@@ -499,12 +503,14 @@
 					empty: '<p class="tt-empty"><i class="fa fa-times fa-fw"></i>&nbsp;No results found!</p>',
 					suggestion: Handlebars.compile('<p><i class="fa fa-bookmark-o fa-fw"></i>&nbsp;<strong>{{title}}</strong><br>{{description}}</p>')
 				}
-			}).on('typeahead:selected', function(obj, datum) {
-				if ($('#m').length) {
-					$scope.gotosub(datum);
-				} else {
-					$scope.gotostream(datum,true);
-				}
+			})
+			.on('typeahead:asyncrequest', function() {
+			})
+			.on('typeahead:asynccancel typeahead:asyncreceive', function(a) {
+			})
+			.on('typeahead:selected', function(obj, datum) { // when option is selected from dropdown
+				// change the page
+				$scope.gotostream(datum);
 				// lose focus
 				$('.typeahead').blur();
 			});
