@@ -1,8 +1,15 @@
 include includes/header
-.container-fluid(ng-controller="panelController",style="overflow:hidden")
+.container-fluid(ng-controller="panelController")
+	.row
+		.col-xs-12.no-padding
+			.text-center
+				#alert.alert.alert-dismissible.no-margin.hidden(role="alert",ng-class="'alert-'+alertType")
+					button.close(data-dismiss="alert",aria-label="Close")
+						span(aria-hidden="true") &times;
+					p(ng-bind-html="alertMessage")
 	.row
 		include includes/sidebar
-		#panel(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'", style="padding:0")
+		#panel.well-white(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'")
 			.navbar.navbar-default.navbar-static-top(ng-class="stream !== undefined ? 'no-margin' : ''")
 				.container-fluid
 					.navbar-header
@@ -16,31 +23,42 @@ include includes/header
 							.form-control-wrapper
 								input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed")
 						ul.nav.navbar-nav.navbar-right
-							li
-								a(href="#")
+							li.dropdown
+								a.dropdown-toggle(href="#",data-toggle="dropdown")
 									i.fa.fa-ellipsis-v.fa-fw
-			.row(ng-if="stream !== undefined")
-				.col-lg-12
-					.well
-						table.table-condensed
-							thead
-								tr
-									td.col-xs-4
-							tbody
-								tr
-									td URL
-									td 
-										a.text-overflow(href="{{stream.feedURL}}", target="_blank") {{stream.feedURL}}
-								tr
-									td Creation
-									td {{stream.creation}}
-								tr
-									td Updated
-									td {{stream.updated}}
-								tr
-									td Visible articles
-									td {{stream.items.length}}
-			div(ng-view="")
+								ul.dropdown-menu
+									li(ng-click="")
+										a(href="#")
+											| List
+									li(ng-click="")
+										a(href="#")
+											| Long
+									li(ng-click="")
+										a(href="#")
+											| Tiled
+			.container-fluid
+				.row(ng-if="stream !== undefined")
+					.col-lg-12
+						.well
+							table.table-condensed
+								thead
+									tr
+										td.col-xs-4
+								tbody
+									tr
+										td URL
+										td 
+											a.text-overflow(href="{{stream.feedURL}}", target="_blank") {{stream.feedURL}}
+									tr
+										td Creation
+										td {{stream.creation}}
+									tr
+										td Updated
+										td {{stream.updated}}
+									tr
+										td Visible articles
+										td {{stream.items.length}}
+				div(ng-view="")
 	.modal.fade#myModal(ng-controller="modalController", tabindex="-1", role="dialog", aria-labelledby="myModalLabel", aria-hidden="true")
 		.modal-dialog
 			.modal-content

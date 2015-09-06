@@ -76,59 +76,61 @@ app.get('/api/0/stream/contents*', function(req, res) {
         return res.status(400).send('InvalidTag');
 	}
 	// load posts
-    db.getPosts(streams, {
-        excludeTags: excludeTags,
-        minTime: req.query.ot,
-        maxTime: req.query.nt,
-        sort: [['published',(req.query.r === 'o') ? 1 : -1],['_id',1]],
-        limit: +req.query.n || 20,
-        populate: ['feed','tags']
-    }).then(function(item) {
-		//console.log('stream/contents (A)')
-		item.query.exec().then(function(posts) {
-			//console.log('stream/contents (B)')
-			//console.log(posts.length)
-			var isFeed 	= (streams[0].type === 'feed'), // boolean: TRUE if feed
-				value 	= streams[0].value,				// string: site URL
-				hasPosts = (posts.length > 0 && posts[0]), // boolean: TRUE if feed object
-				feed 	= !ut.isArray(item.feeds) ? item.feeds : item.feeds[0]; // reference to feed db obj
-			var obj 	= feed ? {
-					id:           	encodeURIComponent(isFeed ? feed.stringID : ''),
-					feedURL:		decodeURIComponent(isFeed ? feed.feedURL : value),
-					title:        	isFeed ? feed.title        : value,
-					description:	isFeed ? feed.description  : '',
-					direction: 		'ltr',
-					siteURL:      	isFeed ? feed.siteURL      : '',
-					updated:      	isFeed ? feed.lastModified : '',
-					self:         	ut.fullURL(req),
-					creation: 		isFeed ? feed.creationTime : '',
-					subscribed:		0,
-					showOrigin:		false,
-					continuation: 	'TODO'
-				} : {};
-			if (hasPosts === undefined) {
-				//console.log('stream/contents (N)')
-				var feedURL = ut.isArray(streams) && streams.length > 0 ? streams[0].value : undefined;
-				// Google Reader returns 404 response, we need a valid json response for infinite scrolling
-				res.json({
-					feedURL: feedURL,
-					updated: '',
-					title: 'Unknown ('+feedURL+')',
-					items: []
-				});
-			} else {
-				//console.log('stream/contents (Y)')
-				if (req.user) {
-					var r = ut.parseTags('user/-/state/reading-list', req.user)[0];
-					return db.Tag.find(r).then(function(tags) {
-						res.json(formatPosts(req.user, feed, posts, tags, obj))
+    db
+		.getPosts(streams, {
+			excludeTags: excludeTags,
+			minTime: req.query.ot,
+			maxTime: req.query.nt,
+			sort: [['published',(req.query.r === 'o') ? 1 : -1],['_id',1]],
+			limit: +req.query.n || 20,
+			populate: ['feed','tags']
+		})
+		.then(function(item) {
+			//console.log('stream/contents (A)')
+			item.query.exec().then(function(posts) {
+				//console.log('stream/contents (B)')
+				//console.log(posts.length)
+				var isFeed 	= (streams[0].type === 'feed'), // boolean: TRUE if feed
+					value 	= streams[0].value,				// string: site URL
+					hasPosts = (posts.length > 0 && posts[0]), // boolean: TRUE if feed object
+					feed 	= !ut.isArray(item.feeds) ? item.feeds : item.feeds[0]; // reference to feed db obj
+				var obj 	= feed ? {
+						id:           	encodeURIComponent(isFeed ? feed.stringID : ''),
+						feedURL:		decodeURIComponent(isFeed ? feed.feedURL : value),
+						title:        	isFeed ? feed.title        : value,
+						description:	isFeed ? feed.description  : '',
+						direction: 		'ltr',
+						siteURL:      	isFeed ? feed.siteURL      : '',
+						updated:      	isFeed ? feed.lastModified : '',
+						self:         	ut.fullURL(req),
+						creation: 		isFeed ? feed.creationTime : '',
+						subscribed:		0,
+						showOrigin:		false,
+						continuation: 	'TODO'
+					} : {};
+				if (hasPosts === undefined) {
+					//console.log('stream/contents (N)')
+					var feedURL = ut.isArray(streams) && streams.length > 0 ? streams[0].value : undefined;
+					// Google Reader returns 404 response, we need a valid json response for infinite scrolling
+					res.json({
+						feedURL: feedURL,
+						updated: '',
+						title: 'Unknown ('+feedURL+')',
+						items: []
 					});
 				} else {
-					res.json(formatPosts({}, feed, posts, [], obj))
+					//console.log('stream/contents (Y)')
+					if (req.user) {
+						var r = ut.parseTags('user/-/state/reading-list', req.user)[0];
+						return db.Tag.find(r).then(function(tags) {
+							res.json(formatPosts(req.user, feed, posts, tags, obj))
+						});
+					} else {
+						res.json(formatPosts({}, feed, posts, [], obj))
+					}
 				}
-			}
-		}, function(err) {
-			return res.status(500).send(err);
+			}, function(err) {
+				return res.status(500).send(err);
+			});
 		});
-	});
 });

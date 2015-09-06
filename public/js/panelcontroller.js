@@ -13,14 +13,10 @@
 	function panelService($resource) {
 		return {
 			getElements: getElements,
-			getRecent: getRecent
 		};
 		
 		function getElements() {
 			return $resource('/api/0/stream/contents/', {type:'@type', params:'@params'}, { query:{ method: 'GET', isArray: false } });
-		}
-		
-		function getRecent() {
 		}
 	};
 
@@ -38,16 +34,46 @@
 	];
 
 	function panelController($rootScope, $scope, $http, $location, $route, $routeParams, $anchorScroll, $sce, $timeout, panelService) {
-		// toggle the slideout of the nav sidebar
+		/** function showAlert
+		 @param t: type of alert (eg. warning, danger)
+		 @param m: message to relay
+		*/
+		$scope.showAlert = function(t,m) {
+			$scope.alertType = t;
+			$scope.alertMessage = $sce.trustAsHtml(m);
+			var a = $("#alert");
+			a.removeClass('hidden');
+			a.fadeTo(5000, 500).slideUp(500, function() {
+				a.alert('close');
+			});
+		};
+		
+		/** function isAlertVisible
+		*/
+		$scope.isAlertVisible = function() {
+			return $('#alert').is(':visible');
+		};
+		
+		$scope.navToggle = true;
+		
+		/** function navToggle
+		 * toggle the slideout of the nav sidebar
+		 */
 		$scope.nt = function() {
-			g_Slideout.toggle();
+			if (g_Slideout && Object.keys(g_Slideout).length > 0) {
+				g_Slideout.toggle();
+				$scope.navToggle = g_Slideout.isOpen();
+			} else {
+				$scope.navToggle = !$scope.navToggle;
+			}
 		};
 		
 		// is slideout open
 		$scope.isNavVisible = function() {
-			if (Object.keys(g_Slideout).length > 0) {
+			if (g_Slideout && Object.keys(g_Slideout).length > 0) {
 				return g_Slideout.isOpen();
-			}
+			} 
+			return $scope.navToggle;
 		};
 		
 		// go to a subscription
@@ -119,13 +145,13 @@
 					$scope.cp = undefined;
 					// get new latest items
 					$scope.gtposts({
-						t:'alert-success',
+						t:'success',
 						m:['<strong>Successfully</strong> refreshed feed (',$scope.stream.title,')'].join(' ')
 					});
 				},
 				function(err) {
 					// show error message
-					ShowAlertMessage('alert-danger',['An <strong>error</strong> occured when trying to refresh feed (',$scope.stream.title,')'].join(' '));
+					$scope.showAlert('danger',['An <strong>error</strong> occured when trying to refresh feed (',$scope.stream.title,')'].join(' '));
 					// turn off spinner
 					scope.rf = false;
 			});
@@ -139,13 +165,13 @@
 			// submit new feed URL to server
 			FeedSubmit.save({q: $scope.stream.feedURL},function(data) {
 				// show message
-				ShowAlertMessage('alert-success',['<strong>Successfully</strong> subscribed to feed (',$scope.stream.title,')'].join(' '));
+				$scope.showAlert('success',['<strong>Successfully</strong> subscribed to feed (',$scope.stream.title,')'].join(' '));
 				// set stream as subscribed
 				$scope.stream.subscribed = true;
 				// notify sidebar to update
 				$rootScope.$broadcast('updateSubs');
 			}, function(err) {
-				ShowAlertMessage('alert-danger',['An <strong>error</strong> occured when trying to subscribe to',$scope.stream.title].join(' '));
+				$scope.showAlert('danger',['An <strong>error</strong> occured when trying to subscribe to',$scope.stream.title].join(' '));
 			});
 		};
 		
@@ -206,6 +232,13 @@
 					} else {
 						ref.formatted = moment(ref.published).fromNow();
 					}*/
+					if (ref.author) {
+						// shorten the author name
+						var author = /(by\s)(\w*\s\w*)/i.exec(ref.author);
+						if (author) {
+							ref.author = author[2];
+						}
+					}
 					// local reference to variable
 					var str = ref.content.content;
 					// check if string
@@ -225,14 +258,12 @@
 					} else if (gTemplateID !== '') {
 						ref.template = gTemplates[gTemplateID][0];
 					}
-					// store back
-					$scope.stream.items[i] = ref;
 				}
 				// update templates
 				$scope.updateStyle('tile');
 				// is message present?
 				if (m) {
-					ShowAlertMessage(m.t, m.m); // show message
+					$scope.showAlert(m.t, m.m); // show message
 				}
 			}, function(err) {
 				$scope.rf = false;
@@ -408,7 +439,7 @@
 			}
 		};
 		
-		// re-activate affix
+		/*// re-activate affix
 		$scope.setaffix = function() {
 			$(window).off('.affix');
 			$('#ma').width($('body').width())
@@ -429,7 +460,7 @@
 				$(this).attr("target","_blank");
 			});
 			$scope.setaffix();
-		});
+		});*/
 				
 		if (!$('.typeahead').parent().hasClass('twitter-typeahead')) {
 			var sb = new Bloodhound({

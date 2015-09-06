@@ -161,9 +161,9 @@ exports.getPosts = function(streams, options) {
             ],
             tags: { $nin: excludeTags },
             updated: {
-                $gte: new Date(parseInt(options.minTime) || 0),
-                $lt: new Date(parseInt(options.maxTime) || Date.now())
-            }
+				$gte: new Date(parseInt(options.minTime) || 0),
+				$lt: (options.maxTime ? new Date(parseInt(options.maxTime)) : undefined)
+			}
         });
 		
         if (options.limit) {

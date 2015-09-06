@@ -21,14 +21,14 @@ module.exports = function(grunt) {
 					'./bower_components/bootstrap/dist/js/bootstrap.js',
 					'./bower_components/bootstrap-material-design/dist/js/ripples.js',
 					'./bower_components/bootstrap-material-design/dist/js/material.js',
-					'./bower_components/slideout.js/dist/slideout.js',
 					'./bower_components/handlebars/handlebars.js',
 					'./bower_components/holderjs/holder.js',
 					'./bower_components/Flowtype.js/flowtype.js',
 					'./bower_components/moment/moment.js',
 					'./bower_components/typeahead.js/dist/bloodhound.js',
 					'./bower_components/typeahead.js/dist/typeahead.jquery.js',
-					'./public/js/fit.js'
+					'./public/js/fit.js',
+					'./public/js/jquery.texttailor.js'
 				],
 				dest: './public/js/<%= pkg.name %>-<%= pkg.version %>.js'
 			}
@@ -46,7 +46,6 @@ module.exports = function(grunt) {
 					'./bower_components/bootstrap-material-design/dist/css/roboto.css',
 					'./bower_components/bootstrap-material-design/dist/css/material.css',
 					'./bower_components/bootstrap-material-design/dist/css/ripples.css',
-					'./public/css/slideoutjs.css'
 				],
 				dest: './public/css/<%= pkg.name %>-<%= pkg.version %>.min.css'
 			}

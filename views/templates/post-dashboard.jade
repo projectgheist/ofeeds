@@ -3,32 +3,35 @@
 		.col-xs-6
 			.well
 				h2 Recommended
+				small Number of subscribers / Alphabetical
 				hr
 				div(ng-if="!pf")
 					include loading
 				ul.list-unstyled(ng-repeat='feed in pf')
 					li 
-						a(href="{{feed.url}}") 
-							img(src="{{feed.favicon}}", ng-if="feed.favicon", width="32", style="margin-right:15px")
-							i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon", style="width:32px;margin-right:15px")
+						a.text-overflow(href="{{feed.url}}") 
+							.pull-left(style="width:32px;height:16px;margin-right:15px")
+								img(ng-src="{{feed.favicon}}", ng-if="feed.favicon", style="height:100%")
+								i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon")
 							| {{feed.title}}
-						span.pull-right {{feed.creation}}
 		.col-xs-6
 			.well
 				h2 Recently added
+				small Database add time
 				hr
 				div(ng-if="!rf")
 					include loading
 				ul.list-unstyled(ng-repeat='feed in rf')
 					li 
-						a(href="{{feed.url}}") 
-							img(src="{{feed.favicon}}", ng-if="feed.favicon", width="32", style="margin-right:15px")
-							i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon", style="width:32px;margin-right:15px")
+						a.text-overflow(href="{{feed.url}}")
+							.pull-left(style="width:32px;height:16px;margin-right:15px")
+								img(ng-src="{{feed.favicon}}", ng-if="feed.favicon", style="height:100%")
+								i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon")
 							| {{feed.title}}
-						span.pull-right {{feed.creation}}
 	.row
 		.col-xs-12
-			h2 Recent
+			h2 Most recent articles
+			small Database add time
 			hr
 			div(ng-if="!rp")
 				include loading
@@ -37,19 +40,20 @@
 					.row
 						.col-xs-4
 							.text-overflow
-								a(href="{{post.origin.url}}") 
-									img(src="{{post.origin.favicon}}", ng-if="post.origin.favicon", width="32", style="margin-right:15px")
+								a(href="{{post.origin.url}}")
+									img(ng-src="{{post.origin.favicon}}", ng-if="post.origin.favicon", width="32", style="margin-right:15px")
 									i.fa.fa-fw.fa-bookmark(ng-if="!post.origin.favicon", style="width:32px;margin-right:15px")
 									| {{post.origin.title}}
 						.col-xs-8
-							.text-overflow
-								a(href="{{post.alternate.href}}",target="_blank") {{post.title}}
+							a(href="{{post.alternate.href}}",target="_blank") {{post.title}}
+							| &nbsp;·
 							span(ng-if="post.author")
+								| &nbsp;
 								a(href="#") {{post.author}} 
 								| &nbsp;·
 							| &nbsp;{{post.published}}
 				.panel-body
-					.col-xs-4(style="height:190px;overflow:hidden")
-						img(ng-src="{{post.content.images.other[0].url}}",data-layzr="{{post.content.images.other[0].url}}",holderjs='')
+					.col-xs-4(style="height:360px;overflow:hidden")
+						img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
 					.col-xs-8
 						div(ng-bind-html="post.content.summary")

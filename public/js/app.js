@@ -10,12 +10,14 @@
 			'AppService'
 		])
 		.config(appConfig)
+		// directive names are only allowed to have one capitalized letter in them
 		.directive('holderjs', holderjs)
-		.directive('onLastRepeat', onLastRepeat)
-		.directive('onResize', onResize)
-		.directive('ngInclude', ngInclude)
 		.directive('ngRipple', ngRipple)
-		.directive('ngImgLoaded', ngImgLoaded);
+		.directive('ngTextfit', ngTextfit);
+		//.directive('onLastRepeat', onLastRepeat)
+		//.directive('onResize', onResize)
+		//.directive('ngInclude', ngInclude)
+		//.directive('ngImgLoaded', ngImgLoaded)
 
 	function appConfig($routeProvider, $locationProvider) {
 		$locationProvider.html5Mode(true);
@@ -41,19 +43,29 @@
 	
 	function holderjs() {
 		return {
+			restrict: 'A', // attribute
 			link: function (scope, element, attrs) {
-				if (!attrs.ngSrc && !attrs.layzr) {
-					attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/random'].join(''));
-					Holder.run({ 
-						images: element.get(0),
-						nocss: true 
-					});
-				} else {
-					g_Layzr.update(); // force image lazy loading update
-					element.bind('load', function() {
-						fit(element[0], element.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
-					});
-				}
+				scope.$watch(function () {
+					return scope.isNavVisible();
+				}, function() {
+					setTimeout(function() { // requires a 1ms delay for some reason
+						// set holderjs data
+						attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/random'].join(''));
+						// run holderjs
+						Holder.run({ images: $(element)[0] });
+						// image link detected?
+						if (element.attr('data-layzr')) {
+							// remove holderjs attributes
+							element.css('width', '');
+							element.css('height', '');
+							// force image lazy loading update
+							g_Layzr.update();
+						} else if (element.attr('src')) {
+							// fit image to parent
+							fit(element[0], element.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
+						}
+					}, 1);
+				});
 			}
 		}
 	};
@@ -70,7 +82,7 @@
 
 	function ngRipple() {
 		return {
-			restrict: 'A',
+			restrict: 'A', // attribute
 			link: function(scope, element, attrs) {
 				// Trigger when number of children changes, including by directives like ng-repeat
 				scope.$watch(function() {
@@ -81,11 +93,29 @@
 				});
 			}
 		};
-	};
+	}
+	
+	function ngTextfit() {
+		return {
+			restrict: 'A', // attribute
+			link: function(scope, element, attrs) {
+				scope.$watch(function () {
+					return scope.isNavVisible();
+				}, function() {
+					setTimeout(function() { // requires a 1ms delay for some reason
+						element.textTailor({
+							minFont: 12,
+							justify: true
+						});
+					}, 1);
+				});
+			}
+		};
+	}
 	
 	function ngImgLoaded() {
 		return {
-			restrict: 'A',
+			restrict: 'A', // attribute
 			link: function(scope, element, attrs) {
 				element.bind('load', function() {
 					fit(element[0], element.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
@@ -95,6 +125,7 @@
 	};
 	
 	function ngInclude($compile) {
+		console.log('ngI')
 		return {
 			restrict: 'A',
 			link: function(scope, element, attrs) {

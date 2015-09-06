@@ -50,7 +50,7 @@
 }
 
 .panel-text {
-	padding:0 15px 15px 15px;
+	padding:15px;
 }
 
 .container-full {
@@ -254,6 +254,12 @@ hbinclude .bs-callout {
 
 .tt-suggestion.tt-is-under-cursor a {
 	color: #fff;
+}
+
+#panel {
+	padding: 0;
+	position: absolute;
+	right: 0;
 }
 
 .panel-image {

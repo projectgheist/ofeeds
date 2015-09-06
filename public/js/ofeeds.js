@@ -16,27 +16,40 @@ var ta = [],
 jQuery(document).ready(function($) {
 	g_Layzr = new Layzr({ 
 		attr: 'data-layzr',
-		threshold: 50
+		threshold: 50,
+		callback: function() {
+			var self = $(this);
+			// wait for the image to finish loading
+			self.bind('load', function() {
+				// remove holderjs attributes
+				self.removeAttr('data-src');
+				self.removeAttr('data-holder-rendered');
+				// remove layzr attributes
+				self.removeAttr('data-layzr');
+				// fit image to parent
+				fit(self[0], self.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
+			});
+		}
 	});
 
 	// create slideout navbar
+	/*
 	g_Slideout = new Slideout({
 		'panel': document.getElementById('panel'),
 		'menu': document.getElementById('menu'),
 		'padding': $('#menu').outerWidth()
 	});
+	*/
 	
 	// navbar is visible by default
-	g_Slideout.open();
+	//g_Slideout.open();
 	
 	// have some nice font scaling.
-	/*
-	$('body').flowtype({
+	$('.alert').flowtype({
 		minFont:12,
 		maxFont:36,
 		fontRatio:96
 	});
-	*/
 });
 
 // single keys
@@ -51,12 +64,4 @@ Mousetrap.bind('/', function() {
 
 function clamp(val,min,max) {
 	return Math.min(Math.max(val, min), max);
-}
-
-function ShowAlertMessage(t, m) {
-	$('#a').removeClass('hidden').addClass(t);
-	$('#am').html(m);
-	$("#a").fadeTo(5000, 500).slideUp(500, function() {
-		$("#a").alert('close');
-	});
 }

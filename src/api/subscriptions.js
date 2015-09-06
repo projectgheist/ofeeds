@@ -109,25 +109,28 @@ app.get('/api/0/posts', function(req, res) {
 	};
 	
 	db
-	.all(db.Post, opts) // retrieve all feeds
-	.populate('feed') // replacing the specified paths in the document with document(s) from other collection(s)
-	.then(function(posts) {
-		var fp = db.formatPosts({}, posts); // formatted posts
-		return res.json(fp);
-	});
+		.all(db.Post, opts) // retrieve all feeds
+		.populate('feed') // replacing the specified paths in the document with document(s) from other collection(s)
+		.then(function(posts) {
+			var fp = db.formatPosts({}, posts); // formatted posts
+			return res.json(fp);
+		});
 });
 
 // lists all of the feeds in the database
 app.get('/api/0/feeds/list', function(req, res) {
 	var s;
-	if (!req.query.r || req.query.r === 'o') {
-		s = {lastModified: 1}; // oldest first
+	if (!req.query.r) {
+		s = {title: 1}; // alphabetical
 	} else {
 		switch (req.query.r) {
-			case 'n': // newest
-				s = {lastModified: -1}; // newest first
+			case 'n':
+				s = {lastModified: 1}; // newest first
 				break;
-			case 's': // creation time
+			case 'o':
+				s = {lastModified: -1}; // oldest first
+				break;
+			case 's': // number of subscribers
 				s = [
 					['numSubscribers',-1], // highest number first
 					['title',1] // alphabetical
@@ -137,7 +140,7 @@ app.get('/api/0/feeds/list', function(req, res) {
 				s = {creationTime: -1}; // newest feed first
 				break;
 			default:
-				s = {lastModified: -1}; // newest first
+				s = {lastModified: 1}; // newest first
 				break;
 		}
 	}

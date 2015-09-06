@@ -7,7 +7,7 @@
         .service('overviewService', overviewService);
 
 	overviewService.$inject = [
-		'$resource'
+		'$resource',
 	];
 
 	function overviewService($resource) {
@@ -22,23 +22,37 @@
 
     overviewController.$inject = [
 		'$scope', 
-		'overviewService'
+		'overviewService',
+		'$timeout',
+		'$interval',
 	];
 
-	function overviewController($scope, overviewService) {
-		overviewService.getElements().query(function(data) {
-			$scope.subs = data.feeds;
-			for (var i in $scope.subs) {
-				var ref = $scope.subs[i];
-				ref.url = ['/subscription/feed/',encodeURIComponent(ref.id)].join('');
-				ref.crawlFormatTime = moment(ref.crawlTime).format();
-				ref.date = moment(ref.updated).format('DD MMM YYYY');
-				ref.time = moment(ref.updated).format('HH:mm Z');
-				ref = $scope.subs[i];
-			}
-		});
+	function overviewController($scope, overviewService, $timeout, $interval) {
+		$scope.fetch = function() {
+			overviewService.getElements().query(function(data) {
+				$scope.cron = moment(data.nextRunIn).format();
+				$timeout($scope.fetch, 1000 * 60 * ($scope.diff+1));
+				$scope.subs = data.feeds;
+				for (var i in $scope.subs) {
+					var ref = $scope.subs[i];
+					ref.url = ['/subscription/feed/',encodeURIComponent(ref.id)].join('');
+					ref.crawlFormatTime = moment(ref.crawlTime).format();
+					ref.date = moment(ref.updated).format('DD MMM YYYY');
+					ref.time = moment(ref.updated).format('HH:mm Z');
+					ref = $scope.subs[i];
+				}
+			});
+		};
 		
 		$scope.rfrsh = function(v) {
 		};
+		
+		$scope.fetch();
+		
+		$interval(function() {
+			if ($scope.cron) {
+				$scope.diff = moment($scope.cron).diff(moment(), 'seconds');
+			}
+		}, 1000);
 	}
 })();

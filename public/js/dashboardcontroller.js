@@ -58,11 +58,20 @@
 		dashboardService.recentPosts().query(function(data) {
 			data = JSON.parse(angular.toJson(data));
 			if (data.length > 0) {
+				// local reference to item
 				$scope.rp = data;
 				for (var i in $scope.rp) {
+					var ref = $scope.rp[i];
+					if (ref.author) {
+						// shorten the author name
+						var author = /(by\s)(\w*\s\w*)/i.exec(ref.author);
+						if (author) {
+							ref.author = author[2];
+						}
+					}
 					// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
-					$scope.rp[i].content.summary = $sce.trustAsHtml($scope.rp[i].content.summary);
-					$scope.rp[i].origin.url = ['/subscription/feed/',encodeURIComponent($scope.rp[i].origin.url),'/'].join('');
+					ref.content.summary = $sce.trustAsHtml(ref.content.summary);
+					ref.origin.url = ['/subscription/feed/',encodeURIComponent(ref.origin.url),'/'].join('');
 				}
 			}
 		});

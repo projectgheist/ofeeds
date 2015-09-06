@@ -1,4 +1,7 @@
 .col-lg-12
+	h1 Information
+	hr
+	p Next update time: {{diff}}
 	table.table.table-striped.table-hover
 		thead
 			tr
@@ -11,7 +14,8 @@
 		tbody
 			tr(ng-repeat='f in subs',ng:class="{true:'', false:'danger'}[f.crawlSuccesful]")
 				td
-					i.fa.fa-bookmark-o.fa-fw
+					img(ng-src="{{f.favicon}}", ng-if="f.favicon", style="height:16px")
+					i.fa.fa-fw.fa-bookmark(ng-if="!f.favicon")
 				td.col-xs-4
 					input.form-control(type="text",value="{{f.title}}",style='background-color:transparent')
 					//--br
@@ -27,7 +31,10 @@
 					br
 					| {{f.time}}
 				td.col-xs-4.text-center
-					a.btn.btn-primary(href="{{f.url}}",target="_blank") View
-					button.btn.btn-primary(type="button",ng-click="rfrsh(f.id)") Refresh
+					a.btn.btn-primary(href="{{f.url}}",title="View")
+						i.fa.fa-external-link
+					button.btn.btn-primary(type="button",title="Refresh",ng-click="rfrsh(f.id)")
+						i.fa.fa-refresh
 					if user !== undefined && user.isAdmin
-						button.btn.btn-primary(type="button") Remove
+						button.btn.btn-primary(type="button",title="Remove")
+							i.fa.fa-times

@@ -6,24 +6,15 @@
 			else
 				span.label.label-primary(ng-if="!post.read") New
 		.panel-image(ng-repeat='image in post.content.images.other',ng-click="showModal(post.uid)")
-			img(ng-src="{{image.url}}",data-layzr="{{image.url}}",holderjs='')
+			img(data-layzr="{{image.url}}",holderjs='')
 		.panel-image(ng-if="post.content.images.other.length <= 0")
 			img(holderjs='')
 		.panel-text
-			.row
-				.col-xs-2
-					h3.text-right
-						a(href="#")
-							i.fa.fa-user.fa-fw
-				.col-xs-10
-					h3
-						.pull-right
-							a(href="#")
-								i.fa.fa-ellipsis-v.fa-fw
-						a(href='{{post.alternate.href}}',target='_blank',style="") {{post.title}}
-					p
-						span(ng-if="post.author")
-							a(href="#") {{post.author}} 
-							| ·&nbsp;
-						a(href="{{post.alternate.href}}",target="_blank") Continue reading
-						| &nbsp;·&nbsp;{{post.formatted}}
+			p
+				span(ng-if="post.author")
+					a(href="#") {{post.author}} 
+					| ·&nbsp;
+				| {{post.formatted}}
+			hr
+			h3(style="height:52px",ng-textfit='')
+				a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
