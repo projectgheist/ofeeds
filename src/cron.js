@@ -167,18 +167,24 @@ function SelectPublishedDate(prev, data) {
 
 /** function CleanupSummary
  */
-function CleanupSummary(data) {
-	// early escape
+function CleanupSummary(data,debug) {
+	// early escape on no string
 	if (!data || data.length <= 0) {
 		resolve('');
 	}
 	
 	// remove new lines OR image tags
 	data = data.replace(/((<img).*?(>))|<br>|<\/*h\d>/gi, '');
+	
+	// remove scripts
+	data = data.replace(/(<script)[\s\S]*?(<\/script>)/gi, '');
+	
+	// remove iframes
+	data = data.replace(/(<iframe)[\s\S]*?(\/iframe>)/gi, '');
 
 	// detect link tags
 	if (true) {
-		// remove all links
+		// remove all link tags
 		data = data.replace(/<a.*?(>)/gi, '');
 		data = data.replace(/<\/a>/gi, '');
 	} else {
@@ -423,7 +429,7 @@ function PingFeed(feed) {
 		})
 		.on('error', function(err) {
 			//console.log('REQUEST ERROR: ' + feed.feedURL + ' | ' +err);
-			//console.log('Done - UpdateFeed')
+			//console.log('Done - UpdateFeed: ' + feed.feedURL)
 			resolve();
 		})
 		.pipe(feedparser); // parse it through feedparser;
