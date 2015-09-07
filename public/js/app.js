@@ -12,6 +12,7 @@
 		.config(appConfig)
 		// directive names are only allowed to have one capitalized letter in them
 		.directive('holderjs', holderjs)
+		.directive('withripple', ['$rootScope','$location',withripple])
 		.directive('ngRipple', ngRipple)
 		.directive('ngTextfit', ngTextfit);
 		//.directive('onLastRepeat', onLastRepeat)
@@ -70,6 +71,21 @@
 		}
 	};
 	
+	function withripple(rootScope, location) {
+		return {
+			restrict: 'C', // class
+			link: function(scope, element, attrs) {
+				element.bind('click', function() {
+					if (location.path() !== element.attr('data-target')) {
+						rootScope.$apply(function() {
+							location.path(element.attr('data-target'));
+						});
+					}
+				});
+			}
+		};
+	};
+
 	function onLastRepeat() {
 		return function(scope, element, attrs) {
 			if (scope.$last) {

@@ -80,10 +80,13 @@
 		
 		// go to a subscription
 		$scope.gotostream = function(obj) {
-			// go to subscription local url
-			$rootScope.$apply(function() {
-				$location.path(['/subscription/feed/',obj.value].join(''));
-			});
+			var url = ['/subscription/feed/',obj.value].join('');
+			if ($location.path() !== url) {
+				// go to subscription local url
+				$rootScope.$apply(function() {
+					$location.path(url);
+				});
+			}
 		};
 		
 		//
@@ -478,13 +481,21 @@
 						return q;
 					},
 					filter: function(a) {
-						ta = [];
+						var ta = [],
+							m;
 						// loop through retrieved info
 						for (var i in a) {
 							if (a[i].title !== '') ta.push(a[i]);
+							// is alert present?
 							if (a[i].alert) {
-								$scope.showAlert(a[i].alert, (a[i].alert === 'success' ? 'Feed was added successfully.' : 'Failed to add feed.'));
+								if (a[i].alert === 'success') {
+									m = 'Feed was added successfully.';
+								} else {
+									m = 'Failed to add feed.';
+								}
+								$scope.showAlert(a[i].alert, m);
 							}
+							// update sidebar?
 						}
 						return ta; 
 					}

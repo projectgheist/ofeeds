@@ -10,8 +10,8 @@
 	ul(ng-Ripple="{{subs.length}}")
 		li.withripple(ng-if="subs && subs.length <= 0")
 			a(href="#") No feeds
-		li.withripple(ng-repeat="s in subs", ng-class="isActive(s.url) ? 'active' : ''", data-target="{{s.url}}") 
-			a(href="{{s.url}}")
+		li.withripple(ng-repeat="s in subs", ng-class="isActive(s.url) ? 'active' : ''", data-target="/subscription/feed/{{s.id}}") 
+			a(href="#")
 				.pull-left(style="width:32px;height:16px;margin-right:15px")
 					img(ng-if="s.favicon", ng-src="{{s.favicon}}", style="height:100%")
 					i.fa.fa-fw.fa-bookmark(ng-if="!s.favicon")
