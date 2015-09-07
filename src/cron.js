@@ -127,13 +127,6 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 					ref.url			= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
 					ref.commentsURL	= data.comments || '';
 					ref.categories 	= data.categories || undefined;
-					/*if (!post.published) {
-						post.published = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
-						post.updated = post.published;
-					} else if (data.date && post.updated !== data.date) {
-						pd = data.date;
-						post.updated = (mm(pd).isValid() ? mm.utc(pd) : mm()).format('YYYY-MM-DDTHH:mm:ss');
-					}*/
 					// if feeds post variable doesn't exist, make it an array
 					feed.posts || (feed.posts = []);
 					// add post to posts array
@@ -151,16 +144,21 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 
 /** function SelectPublishedDate
  */
-function SelectPublishedDate(prev, data) {
-	if (data['rss:pubdate']) {
-		return data['rss:pubdate']['#'];
+function SelectPublishedDate(prev,data,debug) {
+	if (data['rss:pubdate'] && data['rss:pubdate']['#']) {
+		if (debug) console.log('rss:pubdate: ' + data['rss:pubdate']['#']);
+		return mm(new Date(data['rss:pubdate']['#']));
 	} else if (data.pubdate) {
-		return data.pubdate;
+		if (debug) console.log('pubdate: ' + data.pubdate);
+		return mm(new Date(data.pubdate));
 	} else if (!prev.published && data.meta && data.meta.pubdate) {
-		return data.meta.pubdate;
+		if (debug) console.log('meta.pubdate: ' + data.meta.pubdate);
+		return mm(new Date(data.meta.pubdate));
 	} else if (!prev.published) {
+		if (debug) console.log('now');
 		return mm();
 	} else {
+		if (debug) console.log('prev');
 		return prev.published;
 	}
 }
