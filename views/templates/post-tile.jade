@@ -5,14 +5,14 @@
 				span.label.label-primary(ng-if="!post.read") Unread
 			else
 				span.label.label-primary(ng-if="!post.read") New
-		.panel-image(ng-repeat='image in post.content.images.other',ng-click="showModal(post.uid)")
-			img(data-layzr="{{image.url}}",holderjs='')
-		.panel-image(ng-if="post.content.images.other.length <= 0")
+		.panel-image(ng-if='post.content.images.other.length',ng-click="showModal(post.uid)")
+			img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
+		.panel-image(ng-if="!post.content.images.other.length")
 			img(holderjs='')
 		.panel-text
 			p
 				span(ng-if="post.author")
-					a(href="#") {{post.author}} 
+					a(href="#") by {{post.author}} 
 					| ·&nbsp;
 				| {{post.formatted}}
 			hr
