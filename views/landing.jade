@@ -19,23 +19,25 @@ include includes/header
 									i.fa.fa-align-justify.fa-fw
 						button.navbar-toggle(type="button", data-toggle="collapse", data-target=".navbar-collapse")
 					.collapse.navbar-collapse
-						form.navbar-form.navbar-left
-							.form-control-wrapper
-								input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed")
 						ul.nav.navbar-nav.navbar-right
 							li.dropdown
 								a.dropdown-toggle(href="#",data-toggle="dropdown")
 									i.fa.fa-ellipsis-v.fa-fw
 								ul.dropdown-menu
-									li(ng-click="")
+									li(ng-click="updateStyle('list')")
 										a(href="#")
 											| List
-									li(ng-click="")
+									li(ng-click="updateStyle('mini')")
 										a(href="#")
 											| Long
-									li(ng-click="")
+									li(ng-click="updateStyle('tile')")
 										a(href="#")
 											| Tiled
+						form.navbar-form
+							.form-group(style="display:inline")
+								.input-group(style="display:table")
+									.input-group-addon.no-padding(style="width:0.1%")
+									input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style='width:100%')
 			.container-fluid
 				.row(ng-if="stream !== undefined")
 					.col-lg-12
