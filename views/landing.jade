@@ -10,7 +10,7 @@ include includes/header
 	.row
 		include includes/sidebar
 		#panel.well-white(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'")
-			.navbar.navbar-default.navbar-static-top(ng-class="stream !== undefined ? 'no-margin' : ''")
+			.navbar.navbar-default.navbar-static-top
 				.container-fluid
 					.navbar-header
 						ul.nav.navbar-nav
@@ -40,26 +40,27 @@ include includes/header
 									input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style='width:100%')
 			.container-fluid
 				.row(ng-if="stream !== undefined")
-					.col-lg-12
-						.well
-							table.table-condensed
-								thead
-									tr
-										td.col-xs-4
-								tbody
-									tr
-										td URL
-										td 
-											a.text-overflow(href="{{stream.feedURL}}", target="_blank") {{stream.feedURL}}
-									tr
-										td Creation
-										td {{stream.creation}}
-									tr
-										td Updated
-										td {{stream.updated}}
-									tr
-										td Visible articles
-										td {{stream.items.length}}
+					.col-xs-12
+						table.table.shadow-z-1
+							thead
+								tr
+									th(style='width:30%') Title
+									th(style='width:70%') Values
+							tbody
+								tr
+									td URL
+									td
+										a(href="{{stream.feedURL}}", target="_blank")
+											ng-Textoverflow {{stream.feedURL}}
+								tr
+									td Creation
+									td {{stream.creation}}
+								tr
+									td Updated
+									td {{stream.updated}}
+								tr
+									td Visible articles
+									td {{stream.items.length}}
 				div(ng-view="")
 	.modal.fade#myModal(ng-controller="modalController", tabindex="-1", role="dialog", aria-labelledby="myModalLabel", aria-hidden="true")
 		.modal-dialog

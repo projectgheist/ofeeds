@@ -172,7 +172,7 @@ function CleanupSummary(data,debug) {
 	}
 	
 	// remove new lines OR image tags
-	data = data.replace(/((<img).*?(>))|<br>|<\/*h\d>/gi, '');
+	data = data.replace(/((<img).*?(>))|<br\s*\/?>|<\/*h\d>/gi, '');
 	
 	// remove scripts
 	data = data.replace(/(<script)[\s\S]*?(<\/script>)/gi, '');

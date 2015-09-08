@@ -233,7 +233,7 @@
 					// local reference to item
 					var ref = $scope.stream.items[i];
 					// format date
-					ref.formatted = ref.published;
+					ref.formatted = moment(ref.published).fromNow();
 					/*if (moment().diff(ref.published,'days') > 1) {
 						ref.formatted = moment(ref.published).format('ddd, hh:mm');
 					} else {
@@ -264,10 +264,10 @@
 						$scope.expand($scope.stream.items[i]);
 					} else if (gTemplateID !== '') {
 						ref.template = gTemplates[gTemplateID][0];
+					} else {
+						ref.template = gTemplates['tile'][0];
 					}
 				}
-				// update templates
-				$scope.updateStyle('tile');
 				// is message present?
 				if (m) {
 					$scope.showAlert(m.t, m.m); // show message

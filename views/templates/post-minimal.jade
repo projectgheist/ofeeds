@@ -1,12 +1,22 @@
-.row
-	.col-xs-10
-		h3.text-overflow 
-			a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
-		h4 {{post.published}} &nbsp;//&nbsp;
-			a(href='',ng-click='toggle(post)') Expand post
-	.col-xs-2
-		a(href='{{post.alternate.href}}',target='_blank')
-			img(ng-src="{{post.content.images.large.url}}",style="max-width:100%;height:auto;margin-bottom:10px;")
-.row
-	.col-xs-12
-		.line-separator
+.panel.panel-default
+	.panel-heading
+		.row
+			.col-xs-4
+				.text-overflow
+					a(href="{{post.origin.url}}")
+						img(ng-src="{{post.origin.favicon}}", ng-if="post.origin.favicon", width="32", style="margin-right:15px")
+						i.fa.fa-fw.fa-bookmark(ng-if="!post.origin.favicon", style="width:32px;margin-right:15px")
+						| {{post.origin.title}}
+			.col-xs-8
+				a(href="{{post.alternate.href}}",target="_blank") {{post.title}}
+				| &nbsp;·
+				span(ng-if="post.author")
+					| &nbsp;
+					a(href="#") {{post.author}} 
+					| &nbsp;·
+				| &nbsp;{{post.formatted}}
+	.panel-body
+		.col-xs-4(style="height:360px;overflow:hidden")
+			img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
+		.col-xs-8
+			div(ng-bind-html="post.content.summary")

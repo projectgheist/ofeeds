@@ -34,9 +34,10 @@
 		'$scope', 
 		'dashboardService',
 		'$sce', 
+		'$interval', 
 	];
 
-	function dashboardController($scope, dashboardService, $sce) {
+	function dashboardController($scope, dashboardService, $sce, $interval) {
 		dashboardService.recentFeeds().query(function(data) {
 			if (data && data.feeds && data.feeds.length > 0) {
 				$scope.rf = data.feeds;
@@ -55,25 +56,34 @@
 			}
 		});
 		
-		dashboardService.recentPosts().query(function(data) {
-			data = JSON.parse(angular.toJson(data));
-			if (data.length > 0) {
-				// local reference to item
-				$scope.rp = data;
-				for (var i in $scope.rp) {
-					var ref = $scope.rp[i];
-					if (ref.author) {
-						// shorten the author name
-						var author = /(by\s)(\w*\s\w*)/i.exec(ref.author);
-						if (author) {
-							ref.author = author[2];
+		$scope.recentPosts = function() {
+			dashboardService.recentPosts().query(function(data) {
+				data = JSON.parse(angular.toJson(data));
+				if (data.length > 0) {
+					// local reference to item
+					$scope.rp = data;
+					for (var i in $scope.rp) {
+						var ref = $scope.rp[i];
+						if (ref.author) {
+							// shorten the author name
+							var author = /(by\s)(\w*\s\w*)/i.exec(ref.author);
+							if (author) {
+								ref.author = author[2];
+							}
 						}
+						// format date
+						ref.formatted = moment(ref.published).fromNow();
+						// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
+						ref.content.summary = $sce.trustAsHtml(ref.content.summary);
+						ref.origin.url = ['/subscription/feed/',encodeURIComponent(ref.origin.url),'/'].join('');
 					}
-					// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
-					ref.content.summary = $sce.trustAsHtml(ref.content.summary);
-					ref.origin.url = ['/subscription/feed/',encodeURIComponent(ref.origin.url),'/'].join('');
 				}
-			}
-		});
+			});
+		}
+		
+		// retrieve recent posts
+		$scope.recentPosts();
+		// define interval to refresh recent posts
+		$interval($scope.recentPosts, 2 * 1000 * 60, false);
 	}
 })();

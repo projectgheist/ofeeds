@@ -9,7 +9,8 @@
 .text-center {
 	text-align: center;
 }
-.table>tbody>tr>td {
+.table>tbody>tr>td, .table>thead>tr>th {
+	padding: 15px;
     vertical-align: middle;
 }
 
@@ -139,12 +140,12 @@
 	margin: 7px 0;
 }
 
-.text-overflow, .max-lines {
+ng-Textoverflow, .max-lines {
 	overflow:hidden; 
 	text-overflow: ellipsis;
 }
 
-.text-overflow {
+ng-Textoverflow {
 	white-space:nowrap; 
 }
 

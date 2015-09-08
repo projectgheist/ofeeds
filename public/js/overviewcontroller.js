@@ -30,8 +30,10 @@
 	function overviewController($scope, overviewService, $timeout, $interval) {
 		$scope.fetch = function() {
 			overviewService.getElements().query(function(data) {
-				$scope.cron = moment(data.nextRunIn).format();
-				$timeout($scope.fetch, 1000 * 60 * ($scope.diff+1));
+				$scope.cron = data.nextRunIn;
+				// diff in time
+				var d = moment($scope.cron).diff(moment(),'milliseconds');
+				$timeout($scope.fetch, (d + 5000));
 				$scope.subs = data.feeds;
 				for (var i in $scope.subs) {
 					var ref = $scope.subs[i];
@@ -39,7 +41,6 @@
 					ref.crawlFormatTime = moment(ref.crawlTime).format();
 					ref.date = moment(ref.updated).format('DD MMM YYYY');
 					ref.time = moment(ref.updated).format('HH:mm Z');
-					ref = $scope.subs[i];
 				}
 			});
 		};
@@ -51,7 +52,10 @@
 		
 		$interval(function() {
 			if ($scope.cron) {
-				$scope.diff = moment($scope.cron).diff(moment(), 'seconds');
+				// diff in time
+				var d = moment($scope.cron).diff(moment(),'milliseconds');
+				// do string conversion from date
+				$scope.diff = moment(d).format('mm:ss');
 			}
 		}, 1000);
 	}

@@ -14,7 +14,8 @@
 		.directive('holderjs', holderjs)
 		.directive('withripple', ['$rootScope','$location',withripple])
 		.directive('ngRipple', ngRipple)
-		.directive('ngTextfit', ngTextfit);
+		.directive('ngTextfit', ngTextfit)
+		.directive('ngTextoverflow', ngTextoverflow);
 		//.directive('onLastRepeat', onLastRepeat)
 		//.directive('onResize', onResize)
 		//.directive('ngInclude', ngInclude)
@@ -69,6 +70,16 @@
 				});
 			}
 		}
+	};
+
+	function ngTextoverflow() {
+		return {
+			restrict: 'E', // class
+			link: function(scope, element, attrs) {
+				setTimeout(function() {
+				}, 1);
+			}
+		};
 	};
 	
 	function withripple(rootScope, location) {
