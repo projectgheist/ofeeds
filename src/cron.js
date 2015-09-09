@@ -171,20 +171,18 @@ function CleanupSummary(data,debug) {
 		resolve('');
 	}
 	
-	// remove new lines OR image tags
-	data = data.replace(/((<img).*?(>))|<br\s*\/?>|<\/*h\d>/gi, '');
-	
-	// remove scripts
-	data = data.replace(/(<script)[\s\S]*?(<\/script>)/gi, '');
-	
-	// remove iframes
-	data = data.replace(/(<iframe)[\s\S]*?(\/iframe>)/gi, '');
+	data = data
+		.replace(/((<img).*?(>))|<hr>|<\/*h\d>/gi, '') // remove headings OR separator OR image tags
+		.replace(/<br[\s\S]*?>/gi, ' ') // remove new lines
+		.replace(/(<script)[\s\S]*?(<\/script>)/gi, '') // remove scripts
+		.replace(/(<iframe)[\s\S]*?(\/iframe>)/gi, ''); // remove iframes
 
 	// detect link tags
 	if (true) {
 		// remove all link tags
-		data = data.replace(/<a.*?(>)/gi, '');
-		data = data.replace(/<\/a>/gi, '');
+		data = data
+			.replace(/<a.*?(>)/gi, '')
+			.replace(/<\/a>/gi, '');
 	} else {
 		// add new tab to all links
 		var p = /<a\s/gi; // needs to be a separate variable otherwise it will be an infinite loop 
