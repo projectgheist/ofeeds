@@ -3,6 +3,7 @@
 /.git/*			# ignore all git changes
 /node_modules/* # ignore all external submodules
 /public/*     	# static files
+/private/*     	# static files
 /views/*     	# static files
 ./README.md   	# a specific file
 *.css         	# ignore any CSS files
