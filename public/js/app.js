@@ -12,7 +12,7 @@
 		.config(appConfig)
 		// directive names are only allowed to have one capitalized letter in them
 		.directive('holderjs', holderjs)
-		.directive('withripple', ['$rootScope','$location',withripple])
+		.directive('withripple', ['$rootScope','$window','$location',withripple])
 		.directive('ngRipple', ngRipple)
 		.directive('ngTextfit', ngTextfit)
 		.directive('ngTextoverflow', ngTextoverflow);
@@ -82,15 +82,19 @@
 		};
 	};
 	
-	function withripple(rootScope, location) {
+	function withripple(rootScope, window, location) {
 		return {
 			restrict: 'C', // class
 			link: function(scope, element, attrs) {
 				element.bind('click', function() {
 					if (location.path() !== element.attr('data-target')) {
-						rootScope.$apply(function() {
-							location.path(element.attr('data-target'));
-						});
+						if (element.attr('data-target').indexOf('https://') !== 0) {
+							rootScope.$apply(function() {
+								location.path(element.attr('data-target'));
+							});
+						} else {
+							window.open(element.attr('data-target'));
+						}
 					}
 				});
 			}

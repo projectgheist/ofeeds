@@ -85,8 +85,12 @@
 		}
 
 		$scope.isActive = function(str) {
+			// !special case for the main page
+			if (str === '/') {
+				return $location.path() === str;
+			}
 			var s = decodeURIComponent(str),
-				b = s.substring('/subscription/feed/'.length, s.length),
+				b = s.indexOf('/subscription/feed/') === 0 ? s.substring('/subscription/feed/'.length, s.length) : str,
 				a = new RegExp(b.replace('/',''));
 			// do regex test
 			return a.test($location.path());

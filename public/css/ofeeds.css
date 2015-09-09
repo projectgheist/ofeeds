@@ -9,9 +9,21 @@
 .text-center {
 	text-align: center;
 }
+
+#menu, .table>tbody>tr>td {
+	background-color: white;
+}
+
 .table>tbody>tr>td, .table>thead>tr>th {
 	padding: 15px;
     vertical-align: middle;
+}
+
+#menu {
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
 }
 
 #menu, .no-padding {
@@ -26,6 +38,10 @@
 #menu ul li {
 	list-style: none;
 	padding: 20px 0 20px 20px;
+}
+
+#menu ul li.active {
+	background-color:#f5f5f5;
 }
 
 /* webkit solution */

@@ -1,6 +1,6 @@
 .col-xs-3#menu(ng-controller="navController")
 	ul
-		li.withripple
+		li.withripple(ng-class="isActive('/') ? 'active' : ''",data-target="/")
 			a(href="/")
 				i.fa.fa-home.fa-fw(style="width:32px;margin-right:15px")
 				| Home
@@ -10,7 +10,7 @@
 	ul(ng-Ripple="{{subs.length}}")
 		li.withripple(ng-if="subs && subs.length <= 0")
 			a(href="#") No feeds
-		li.withripple(ng-repeat="s in subs", ng-class="isActive(s.url) ? 'active' : ''", data-target="/subscription/feed/{{s.id}}") 
+		li.withripple(ng-repeat="s in subs", ng-class="{'active':isActive(s.url)}", data-target="/subscription/feed/{{s.id}}") 
 			a(href="#")
 				.pull-left(style="width:32px;height:16px;margin-right:15px")
 					img(ng-if="s.favicon", ng-src="{{s.favicon}}", style="height:100%")
@@ -18,13 +18,13 @@
 				.text-overflow {{s.title}}
 	hr
 	ul
-		li.withripple
+		li.withripple(ng-class="isActive('/manage') ? 'active' : ''",data-target="/manage")
 			a(href="/manage")
 				i.fa.fa-bar-chart.fa-fw(style="width:32px;margin-right:15px")
 				| Management
 	hr
 	ul
-		li.withripple
+		li.withripple(data-target="https://github.com/projectgheist/ofeeds")
 			a(href="https://github.com/projectgheist/ofeeds",target="_blank")
 				i.fa.fa-github.fa-fw(style="width:32px;margin-right:15px")
 				| View on Github
