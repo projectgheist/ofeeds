@@ -258,6 +258,7 @@ hbinclude .bs-callout {
 	padding: 0;
 	position: absolute;
 	right: 0;
+	background-color: rgb(238, 238, 238);
 }
 
 .panel-image {

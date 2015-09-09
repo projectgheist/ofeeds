@@ -9,7 +9,7 @@ include includes/header
 					p(ng-bind-html="alertMessage")
 	.row
 		include includes/sidebar
-		#panel.well-white(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'")
+		#panel(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'")
 			.navbar.navbar-default.navbar-static-top
 				.container-fluid
 					.navbar-header
