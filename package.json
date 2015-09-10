@@ -21,6 +21,7 @@
     "feedparser": "*",
     "image-size": "*",
     "jade": "*",
+	"mongoomise": "*",
     "mongoose": "*",
     "passport": "*",
     "passport-google-oauth": "*",

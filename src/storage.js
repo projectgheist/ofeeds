@@ -1,11 +1,19 @@
 /** Includes
  */
-require('./mongoose-promise');
 var mg = require('mongoose'),
     rs = require('rsvp'),
     pr = rs.Promise,
 	cf = require('../config'),
 	ut = require('./utils');
+
+/** Needs to be done before promisifyAll
+ * export the modules
+ */
+exports.User 	= require('./models/user');
+exports.Feed 	= require('./models/feed');
+exports.Post 	= require('./models/post');
+exports.Tag 	= require('./models/tag');
+exports.Pref 	= require('./models/pref');
 
 /** function Connect
  * creates a connection to the MongoDB
@@ -24,6 +32,8 @@ exports.setup = function() {
     mg.connect(ut.getDBConnectionURL(cf.db()), options);
     // declare connection variable
 	var db = mg.connection;
+	// Add promise support to Mongoose
+	require('mongoomise').promisifyAll(db, rs);
 	// error event
     db.on('error', function(err) {
         console.log(err);
@@ -234,10 +244,3 @@ exports.formatPosts = function(user,posts) {
         }; 
     });
 };
-
-// export the modules
-exports.User 	= require('./models/user');
-exports.Feed 	= require('./models/feed');
-exports.Post 	= require('./models/post');
-exports.Tag 	= require('./models/tag');
-exports.Pref 	= require('./models/pref');
