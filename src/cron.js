@@ -426,7 +426,7 @@ function PingFeed(feed) {
 		.on('error', function(err) {
 			//console.log('REQUEST ERROR: ' + feed.feedURL + ' | ' +err);
 			//console.log('Done - UpdateFeed: ' + feed.feedURL)
-			resolve();
+			resolve(feed.save());
 		})
 		.pipe(feedparser); // parse it through feedparser;
 	});
