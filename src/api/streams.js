@@ -121,10 +121,11 @@ app.get('/api/0/stream/contents*', function(req, res) {
 				} else {
 					//console.log('stream/contents (Y)')
 					if (req.user) {
-						var r = ut.parseTags('user/-/state/reading-list', req.user)[0];
-						return db.Tag.find(r).then(function(tags) {
-							res.json(formatPosts(req.user, feed, posts, tags, obj))
-						});
+						return db.Tag
+							.find(ut.parseTags('user/-/state/reading-list', req.user)[0])
+							.then(function(tags) {
+								res.json(formatPosts(req.user, feed, posts, tags, obj))
+							});
 					} else {
 						res.json(formatPosts({}, feed, posts, [], obj))
 					}

@@ -1,5 +1,5 @@
 .col-md-3#menu(ng-controller="navController")
-	ul#sidebar-header.well-material-blue
+	ul#sidebar-header
 		li.withripple(ng-class="isActive('/') ? 'active' : ''",data-target="/")
 			a(href="/")
 				i.fa.fa-home.fa-fw(style="width:32px;margin-right:15px")
@@ -8,7 +8,7 @@
 			a(href="/manage")
 				i.fa.fa-bar-chart.fa-fw(style="width:32px;margin-right:15px")
 				| Management
-	#sidebar-body(style="overflow:scroll;overflow-x:hidden")
+	#sidebar-body(style="overflow:scroll;overflow-x:hidden;overflow-y:auto")
 		div(ng-if="!subs")
 			include ../elements/loading
 		ul(ng-Ripple="{{subs.length}}")
@@ -20,16 +20,21 @@
 						img(ng-if="s.favicon", ng-src="{{s.favicon}}", style="height:100%")
 						i.fa.fa-fw.fa-bookmark(ng-if="!s.favicon")
 					.text-overflow {{s.title}}
-	ul#sidebar-footer.well-material-blue(style="width:100%;position:static;bottom:0;left:0;margin-top:10px")
+						span.badge.pull-right {{s.unreadcount}}
+	ul#sidebar-footer(style="width:100%;position:static;bottom:0;left:0;margin-top:10px")
 		li.withripple(data-target="https://github.com/projectgheist/ofeeds")
 			a(href="https://github.com/projectgheist/ofeeds",target="_blank")
 				i.fa.fa-github.fa-fw(style="width:32px;margin-right:15px")
 				| View on Github
 		if user
 			li.withripple
-				a(href="#") Settings
+				a(href="#")
+					i.fa.fa-cog.fa-fw(style="width:32px;margin-right:15px")
+					| Settings
 			li.withripple
-				a(href="#") Logout
+				a(href="#")
+					i.fa.fa-sign-out.fa-fw(style="width:32px;margin-right:15px")
+					| Logout
 		else
 			li.withripple
 				a(href="/auth/google", target="_self")

@@ -119,8 +119,7 @@ app.get('/api/0/posts', function(req, res) {
 		});
 });
 
-// lists all of the feeds in the database
-app.get('/api/0/feeds/list', function(req, res) {
+function AllFeeds(req, res) {
 	var s;
 	if (!req.query.r) {
 		s = {title: 1}; // alphabetical
@@ -178,63 +177,75 @@ app.get('/api/0/feeds/list', function(req, res) {
 			return res.json({'nextRunIn':(jobs.length > 0 ? jobs[0].attrs.nextRunAt : ''), 'feeds':a});
 		});
 	});
-});
+};
+
+// lists all of the feeds in the database
+app.get('/api/0/feeds/list', AllFeeds);
 
 // lists all of the feeds a user is subscribed to
 app.get('/api/0/subscription/list', function(req, res) {
     // is user logged in?
 	if (!req.isAuthenticated()) {
-		res.status(500).send('User not defined!');
+		AllFeeds(req, res);
 	} else {
 		// get tags
 		var tags = ut.parseTags(['user/-/state/reading-list','user/-/state/read'], req.user),
 			tuc = 0;
-		return db.getTags(tags[0]).then(function(readinglist) {
-			// no feeds returned
-			if (!readinglist) {
-				return [];
-			}
-			// find all feeds that contain 'reading-list' tag & sort by alphabetical title
-			return rs.all([db.Feed.find({ tags: readinglist }).sort({ 'title': 1 }),db.getTags(tags[1])]);
-		}).then(function(results) {
-			var a = results[0].map(function(f) {
-				// find posts in feed WHERE 'read'-tag 'not in' array
-				return db.Post.find({ _id: {$in: f.posts}, tags: {$nin: results[1]} }).then(function(c) {
-					// create array of users tags for this feed
-					var categories = f.tagsForUser(req.user).map(function(tag) {
-						return {
-							id: 	tag.stringID,
-							label: 	tag.name
-						};
-					});
-					// increment total unread count
-					tuc += c.length;
-					return {
-						favicon:		f.favicon,
-						id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
-						title: 			f.titleForUser(req.user),
-						unreadcount: 	c.length,
-						shortid: 		f.shortID,
-						categories: 	categories,
-						crawlTime:		f.successfulCrawlTime,
-						updated:		f.lastModified,
-						creation:		f.creationTime
-					};
-				}, function(err) {
+		return db
+			.getTags(tags[0]).then(function(readinglist) {
+				// no feeds returned
+				if (!readinglist) {
+					return [];
+				}
+				// find all feeds that contain 'reading-list' tag & sort by alphabetical title
+				return rs
+					.all([
+						db.Feed.find({ tags: readinglist }).sort({ 'title': 1 }),
+						db.getTags(tags[1])
+					]);
+			})
+			.then(function(results) {
+				var a = results[0].map(function(f) {
+					// find posts in feed WHERE 'read'-tag 'not in' array
+					return db.Post
+						.find({ _id: {$in: f.posts}, tags: {$nin: results[1]} })
+						.then(function(c) {
+							// create array of users tags for this feed
+							var categories = f.tagsForUser(req.user).map(function(tag) {
+								return {
+									id: 	tag.stringID,
+									label: 	tag.name
+								};
+							});
+							// increment total unread count
+							tuc += c.length;
+							return {
+								favicon:		f.favicon,
+								id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
+								title: 			f.titleForUser(req.user),
+								unreadcount: 	c.length,
+								shortid: 		f.shortID,
+								categories: 	categories,
+								crawlTime:		f.successfulCrawlTime,
+								updated:		f.lastModified,
+								creation:		f.creationTime
+							};
+						}, function(err) {
+						});
 				});
+				return rs.all(a);			
+			})
+			.then(function(s) {
+				// add separate reading-list element
+				s.push({
+					id:encodeURIComponent('label/reading-list'),
+					unreadcount:tuc
+				});
+				// return json value
+				return res.json({'feeds': s});
+			}, function(err) {
+				res.status(500).send(err);
 			});
-			return rs.all(a);			
-		}).then(function(s) {
-			// add separate reading-list element
-			s.push({
-				id:encodeURIComponent('label/reading-list'),
-				unreadcount:tuc
-			});
-			// return json value
-			return res.json(s);
-		}, function(err) {
-			res.status(500).send(err);
-		});
 	}
 });
 

@@ -76,7 +76,7 @@ ap.get("/manage", function(req, res) {
 
 /** subscription route */
 ap.get("/subscription/*", function(req, res) {
-	res.render(req.isAuthenticated() ? 'pages/dashboard' : 'pages/landing', { 
+	res.render('pages/landing', { 
 		'config': cf.site,
 		'user': req.user
 	});

@@ -223,12 +223,11 @@
 					// local reference to item
 					var ref = $scope.stream.items[i];
 					// format date
-					ref.formatted = moment(ref.published).fromNow();
-					/*if (moment().diff(ref.published,'days') > 1) {
+					if (moment().diff(ref.published,'days') > 1) {
 						ref.formatted = moment(ref.published).format('ddd, hh:mm');
 					} else {
 						ref.formatted = moment(ref.published).fromNow();
-					}*/
+					}
 					if (ref.author) {
 						// shorten the author name
 						var author = /(by\s)(\w*\s\w*)/i.exec(ref.author);

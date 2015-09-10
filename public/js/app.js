@@ -32,7 +32,11 @@
 		})
 		.when('/subscription/:type/:value', {
 			templateUrl: function(urlattr) {
-				return 'views/pages/posts';
+				if (urlattr.type === 'feed') {
+					return 'views/pages/posts';
+				} else {
+					return 'views/pages/dashboard';
+				}
 			}
 		})
 		.otherwise({

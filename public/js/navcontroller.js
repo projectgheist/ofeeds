@@ -15,7 +15,7 @@
 		};
 		
 		function getElements() {
-			return $resource('/api/0/feeds/list', {}, { query:{ method: 'GET', isArray: false } });
+			return $resource('/api/0/subscription/list', {}, { query:{ method: 'GET', isArray: false } });
 		}
 	};
 	
@@ -47,7 +47,7 @@
 					// create url
 					data.feeds[i].url = ['/subscription/feed/',encodeURIComponent(data.feeds[i].id),'/'].join('');
 					// make sure it has a title
-					if (data.feeds[i].title.length <= 0) {
+					if (data.feeds[i].title && data.feeds[i].title.length <= 0) {
 						// else use the feed url
 						data.feeds[i].title = data.feeds[i].feedURL;
 					}
