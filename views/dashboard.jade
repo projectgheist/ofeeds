@@ -1,9 +1,0 @@
-include includes/header
-.container-fluid#m(ng-controller="AppFeeds")
-	.row
-		.hidden-xs.hidden-sm.col-md-3(style='position:fixed;padding:0;height:100%')
-			include includes/sidebar
-		.col-xs-12.col-md-offset-3.col-md-9#map(ng-controller="AppStream",resize='')
-			div(ng-view='')
-				p Loading...
-include includes/js

@@ -4,12 +4,11 @@
 var ta = [],
 	gTemplateID = '',
 	gTemplates = {
-		'list': ['/templates/post-compact','/templates/post-expand'],
-		'tile': ['/templates/post-tile'], 
-		'mini': ['/templates/post-minimal','/templates/post-expand'],
+		'list': ['views/templates/post-compact','views/templates/post-expand'],
+		'tile': ['views/templates/post-tile'], 
+		'mini': ['views/templates/post-minimal','views/templates/post-expand'],
 	},
-	g_Layzr = {},
-	g_Slideout = {};
+	g_Layzr = {};
 /**
  * On page load ready
  */
@@ -17,10 +16,10 @@ jQuery(document).ready(function($) {
 	g_Layzr = new Layzr({ 
 		attr: 'data-layzr',
 		threshold: 50,
-		callback: function() {
+		callback: function(node) {
 			var self = $(this);
 			// wait for the image to finish loading
-			self.bind('load', function() {
+			self.bind('load', function() {	
 				// remove holderjs attributes
 				self.removeAttr('data-src');
 				self.removeAttr('data-holder-rendered');
@@ -31,18 +30,6 @@ jQuery(document).ready(function($) {
 			});
 		}
 	});
-
-	// create slideout navbar
-	/*
-	g_Slideout = new Slideout({
-		'panel': document.getElementById('panel'),
-		'menu': document.getElementById('menu'),
-		'padding': $('#menu').outerWidth()
-	});
-	*/
-	
-	// navbar is visible by default
-	//g_Slideout.open();
 	
 	// have some nice font scaling.
 	$('.alert').flowtype({
@@ -50,6 +37,17 @@ jQuery(document).ready(function($) {
 		maxFont:36,
 		fontRatio:96
 	});
+	
+	//
+	$('#menu').matchHeight({
+		target: $(window)
+	});
+	$.fn.matchHeight._afterUpdate = function(event, groups) {
+		var c = $('#menu').height(),
+			a = $('#sidebar-header').height() + 10,
+			b = $('#sidebar-footer').height() + 10;
+		$('#sidebar-body').height(c - (a + b));
+	};
 });
 
 // single keys

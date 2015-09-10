@@ -1,15 +1,9 @@
-.row(ng-click="toggle(post)",ng-class="isRead(post) ? 'read' : ''",style='padding: 10px 0')
-	div(ng-if="stream.showOrigin")
-		.visible-lg.col-lg-2
-			a(href="#/subscription/feed/{{post.origin.url}}") 
+.col-xs-12
+	.row(ng-click="toggle(post)",ng-class="{'read':isRead(post)}",style='padding: 10px 0')
+		.col-lg-2(ng-if="!stream || stream.showOrigin")
+			a(href="{{post.origin.url}}") 
 				span.label.label-primary {{post.origin.title}}
-		.col-xs-9.col-lg-7
+		.col-xs-9(ng-class="{'col-lg-7':(!stream || stream.showOrigin)}")
 			p.text-overflow {{post.title}}
-	div(ng-if="!stream.showOrigin")
-		.col-xs-9
-			p.text-overflow {{post.title}}
-	.col-xs-3(style="text-align:right")
-		p {{post.formatted}}
-.row
-	.col-xs-12
-		.line-separator
+		.col-xs-3
+			p.text-right {{post.formatted}}

@@ -1,29 +1,26 @@
-.col-xs-3#menu(ng-controller="navController")
-	ul
+.col-md-3#menu(ng-controller="navController")
+	ul#sidebar-header.well-material-blue
 		li.withripple(ng-class="isActive('/') ? 'active' : ''",data-target="/")
 			a(href="/")
 				i.fa.fa-home.fa-fw(style="width:32px;margin-right:15px")
 				| Home
-	hr
-	div(ng-if="!subs")
-		include ../templates/loading
-	ul(ng-Ripple="{{subs.length}}")
-		li.withripple(ng-if="subs && subs.length <= 0")
-			a(href="#") No feeds
-		li.withripple(ng-repeat="s in subs", ng-class="{'active':isActive(s.url)}", data-target="/subscription/feed/{{s.id}}") 
-			a(href="#")
-				.pull-left(style="width:32px;height:16px;margin-right:15px")
-					img(ng-if="s.favicon", ng-src="{{s.favicon}}", style="height:100%")
-					i.fa.fa-fw.fa-bookmark(ng-if="!s.favicon")
-				.text-overflow {{s.title}}
-	hr
-	ul
 		li.withripple(ng-class="isActive('/manage') ? 'active' : ''",data-target="/manage")
 			a(href="/manage")
 				i.fa.fa-bar-chart.fa-fw(style="width:32px;margin-right:15px")
 				| Management
-	hr
-	ul
+	#sidebar-body(style="overflow:scroll;overflow-x:hidden")
+		div(ng-if="!subs")
+			include ../elements/loading
+		ul(ng-Ripple="{{subs.length}}")
+			li.withripple(ng-if="subs && subs.length <= 0")
+				a(href="#") No feeds
+			li.withripple(ng-repeat="s in subs", ng-class="{'active':isActive(s.url)}", data-target="/subscription/feed/{{s.id}}") 
+				a(href="#")
+					.pull-left(style="width:32px;height:16px;margin-right:15px")
+						img(ng-if="s.favicon", ng-src="{{s.favicon}}", style="height:100%")
+						i.fa.fa-fw.fa-bookmark(ng-if="!s.favicon")
+					.text-overflow {{s.title}}
+	ul#sidebar-footer.well-material-blue(style="width:100%;position:static;bottom:0;left:0;margin-top:10px")
 		li.withripple(data-target="https://github.com/projectgheist/ofeeds")
 			a(href="https://github.com/projectgheist/ofeeds",target="_blank")
 				i.fa.fa-github.fa-fw(style="width:32px;margin-right:15px")

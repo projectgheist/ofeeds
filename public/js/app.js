@@ -26,18 +26,18 @@
 		$routeProvider
 		.when('/manage', {
 			templateUrl: function(urlattr) {
-				return '/templates/manage';
+				return 'views/pages/manage';
 			},
 			controller: 'overviewController'
 		})
 		.when('/subscription/:type/:value', {
 			templateUrl: function(urlattr) {
-				return '/templates/posts-list';
+				return 'views/pages/posts';
 			}
 		})
 		.otherwise({
 			templateUrl: function(urlattr) {
-				return '/templates/post-dashboard';
+				return 'views/pages/dashboard';
 			},
 			controller: 'dashboardController'
 		});
@@ -52,7 +52,7 @@
 				}, function() {
 					setTimeout(function() { // requires a 1ms delay for some reason
 						// set holderjs data
-						attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/random'].join(''));
+						attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/grey'].join(''));
 						// run holderjs
 						Holder.run({ images: $(element)[0] });
 						// image link detected?
@@ -61,6 +61,7 @@
 							element.css('width', '');
 							element.css('height', '');
 							// force image lazy loading update
+							g_Layzr.updateSelector();
 							g_Layzr.update();
 						} else if (element.attr('src')) {
 							// fit image to parent
@@ -156,7 +157,6 @@
 	};
 	
 	function ngInclude($compile) {
-		console.log('ngI')
 		return {
 			restrict: 'A',
 			link: function(scope, element, attrs) {

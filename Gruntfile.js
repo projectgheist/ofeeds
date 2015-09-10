@@ -27,8 +27,12 @@ module.exports = function(grunt) {
 					'./bower_components/moment/moment.js',
 					'./bower_components/typeahead.js/dist/bloodhound.js',
 					'./bower_components/typeahead.js/dist/typeahead.jquery.js',
-					'./public/js/fit.js',
-					'./public/js/jquery.texttailor.js'
+					'./bower_components/layzr.js/dist/layzr.js',
+					'./bower_components/matchHeight/jquery.matchHeight.js',
+					'./bower_components/ngInfiniteScroll/build/ng-infinite-scroll.js',
+					'./private/js/fit.js',
+					'./private/js/mousetrap.js',
+					'./private/js/jquery.texttailor.js'
 				],
 				dest: './public/js/<%= pkg.name %>-<%= pkg.version %>.js'
 			}
@@ -41,7 +45,7 @@ module.exports = function(grunt) {
 			},
 			dist: {
 				src: [
-					'./bower_components/fontawesome/css/font-awesome.css',
+					'./bower_components/font-awesome/css/font-awesome.css',
 					'./bower_components/bootstrap/dist/css/bootstrap.css',
 					'./bower_components/bootstrap-material-design/dist/css/roboto.css',
 					'./bower_components/bootstrap-material-design/dist/css/material.css',

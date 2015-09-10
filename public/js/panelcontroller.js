@@ -56,26 +56,16 @@
 			return $('#alert').is(':visible');
 		};
 		
-		$scope.navToggle = true;
-		
 		/** function navToggle
 		 * toggle the slideout of the nav sidebar
 		 */
 		$scope.nt = function() {
-			if (g_Slideout && Object.keys(g_Slideout).length > 0) {
-				g_Slideout.toggle();
-				$scope.navToggle = g_Slideout.isOpen();
-			} else {
-				$scope.navToggle = !$scope.navToggle;
-			}
+			$('#menu').toggle();
 		};
 		
 		// is slideout open
 		$scope.isNavVisible = function() {
-			if (g_Slideout && Object.keys(g_Slideout).length > 0) {
-				return g_Slideout.isOpen();
-			} 
-			return $scope.navToggle;
+			return $('#menu').is(':visible');
 		};
 		
 		// go to a subscription

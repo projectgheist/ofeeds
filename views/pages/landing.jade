@@ -1,5 +1,5 @@
-include includes/header
-.container-fluid(ng-controller="panelController")
+include ../includes/header
+.container(ng-controller="panelController")
 	.row
 		.col-xs-12.no-padding
 			.text-center
@@ -8,7 +8,7 @@ include includes/header
 						span(aria-hidden="true") &times;
 					p(ng-bind-html="alertMessage")
 	.row
-		include includes/sidebar
+		include ../includes/sidebar
 		#panel(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'")
 			.navbar.navbar-default.navbar-static-top
 				.container-fluid
@@ -39,9 +39,9 @@ include includes/header
 									.input-group-addon.no-padding(style="width:0.1%")
 									input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style='width:100%')
 			.container-fluid
-				.row(ng-if="stream !== undefined")
+				.row
 					.col-xs-12
-						table.table.shadow-z-1
+						table.table.shadow-z-1(ng-if="stream !== undefined")
 							thead
 								tr
 									th(style='width:30%') Title
@@ -61,7 +61,7 @@ include includes/header
 								tr
 									td Visible articles
 									td {{stream.items.length}}
-				div(ng-view="")
+						div(ng-view="")
 	.modal.fade#myModal(ng-controller="modalController", tabindex="-1", role="dialog", aria-labelledby="myModalLabel", aria-hidden="true")
 		.modal-dialog
 			.modal-content
@@ -82,4 +82,4 @@ include includes/header
 						a.right.carousel-control(href="#carousel-example-generic", role="button", data-slide="next", ng-if="images.length > 1")
 							span.glyphicon.glyphicon-chevron-right(aria-hidden="true")
 							span.sr-only Next
-include includes/js
+include ../includes/js

@@ -44,7 +44,7 @@ ap.get("/", function(req, res) {
 	if (req.isAuthenticated()) {
 		res.redirect('/subscription/user/reading-list');
 	} else {
-		res.render('landing', { 
+		res.render('pages/landing', { 
 			'config': cf.site
 		});
 	}
@@ -68,7 +68,7 @@ ap.get("/dashboard", ensureAuth, function(req, res) {
 
 /** manage route */
 ap.get("/manage", function(req, res) {
-	res.render('landing', { 
+	res.render('pages/landing', { 
 		'config': cf.site,
 		'user': req.user
 	});
@@ -76,16 +76,20 @@ ap.get("/manage", function(req, res) {
 
 /** subscription route */
 ap.get("/subscription/*", function(req, res) {
-	res.render(req.isAuthenticated() ? 'dashboard' : 'landing', { 
+	res.render(req.isAuthenticated() ? 'pages/dashboard' : 'pages/landing', { 
 		'config': cf.site,
 		'user': req.user
 	});
 });
 
 /** templates route */
-ap.get("/templates/:name", function(req, res) {
-	res.render('templates/' + req.params.name, {
-		'config': cf.site,
-		'user': req.user
-	});
+ap.get("/views/*", function(req, res) {
+	if (Object.keys(req.params).length) {
+		res.render(req.params[0], {
+			'config': cf.site,
+			'user': req.user
+		});
+	} else {
+		res.render('elements/unknown', {});
+	}
 });

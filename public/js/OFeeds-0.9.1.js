@@ -52821,7 +52821,721 @@ return /******/ (function(modules) { // webpackBootstrap
             return $el.length ? $el : null;
         }
     })();
-});;/* Copyright (C) 2014 Justin Windle, http://soulwire.co.uk */
+});;/*!
+ * Layzr.js 1.4.2 - A small, fast, modern, and dependency-free library for lazy loading.
+ * Copyright (c) 2015 Michael Cavalea - http://callmecavs.github.io/layzr.js/
+ * License: MIT
+ */
+
+(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.Layzr = factory();
+  }
+}(this, function() {
+'use strict';
+
+// CONSTRUCTOR
+
+function Layzr(options) {
+  // debounce
+  this._lastScroll = 0;
+  this._ticking    = false;
+
+  // options
+  options = options || {};
+
+  this._optionsContainer  = document.querySelector(options.container) || window;
+  this._optionsSelector   = options.selector || '[data-layzr]';
+  this._optionsAttr       = options.attr || 'data-layzr';
+  this._optionsAttrRetina = options.retinaAttr || 'data-layzr-retina';
+  this._optionsAttrBg     = options.bgAttr || 'data-layzr-bg';
+  this._optionsAttrHidden = options.hiddenAttr || 'data-layzr-hidden';
+  this._optionsThreshold  = options.threshold || 0;
+  this._optionsCallback   = options.callback || null;
+
+  // properties
+  this._retina  = window.devicePixelRatio > 1;
+  this._srcAttr = this._retina ? this._optionsAttrRetina : this._optionsAttr;
+
+  // nodelist
+  this._nodes = document.querySelectorAll(this._optionsSelector);
+
+  // scroll and resize handler
+  this._handlerBind = this._requestScroll.bind(this);
+
+  // call to create
+  this._create();
+}
+
+// DEBOUNCE HELPERS
+// adapted from: http://www.html5rocks.com/en/tutorials/speed/animations/
+
+Layzr.prototype._requestScroll = function() {
+  if(this._optionsContainer === window) {
+    this._lastScroll = window.pageYOffset;
+  }
+  else {
+    this._lastScroll = this._optionsContainer.scrollTop + this._getOffset(this._optionsContainer);
+  }
+
+  this._requestTick();
+};
+
+Layzr.prototype._requestTick = function() {
+  if(!this._ticking) {
+    requestAnimationFrame(this.update.bind(this));
+    this._ticking = true;
+  }
+};
+
+// OFFSET HELPER
+// remember, getBoundingClientRect is relative to the viewport
+
+Layzr.prototype._getOffset = function(node) {
+  return node.getBoundingClientRect().top + window.pageYOffset;
+};
+
+// HEIGHT HELPER
+
+Layzr.prototype._getContainerHeight = function() {
+  return this._optionsContainer.innerHeight
+      || this._optionsContainer.offsetHeight;
+}
+
+// LAYZR METHODS
+
+Layzr.prototype._create = function() {
+  // fire scroll event once
+  this._handlerBind();
+
+  // bind scroll and resize event
+  this._optionsContainer.addEventListener('scroll', this._handlerBind, false);
+  this._optionsContainer.addEventListener('resize', this._handlerBind, false);
+};
+
+Layzr.prototype._destroy = function() {
+  // unbind scroll and resize event
+  this._optionsContainer.removeEventListener('scroll', this._handlerBind, false);
+  this._optionsContainer.removeEventListener('resize', this._handlerBind, false);
+};
+
+Layzr.prototype._inViewport = function(node) {
+  // get viewport top and bottom offset
+  var viewportTop = this._lastScroll;
+  var viewportBottom = viewportTop + this._getContainerHeight();
+
+  // get node top and bottom offset
+  var nodeTop = this._getOffset(node);
+  var nodeBottom = nodeTop + this._getContainerHeight();
+
+  // calculate threshold, convert percentage to pixel value
+  var threshold = (this._optionsThreshold / 100) * window.innerHeight;
+
+  // return if node in viewport
+  return nodeBottom >= viewportTop - threshold
+      && nodeTop <= viewportBottom + threshold
+      && !node.hasAttribute(this._optionsAttrHidden);
+};
+
+Layzr.prototype._reveal = function(node) {
+  // get node source
+  var source = node.getAttribute(this._srcAttr) || node.getAttribute(this._optionsAttr);
+
+  // set node src or bg image
+  if(node.hasAttribute(this._optionsAttrBg)) {
+    node.style.backgroundImage = 'url(' + source + ')';
+  }
+  else {
+    node.setAttribute('src', source);
+  }
+
+  // call the callback
+  if(typeof this._optionsCallback === 'function') {
+    // "this" will be the node in the callback
+    this._optionsCallback.call(node);
+  }
+
+  // remove node data attributes
+  node.removeAttribute(this._optionsAttr);
+  node.removeAttribute(this._optionsAttrRetina);
+  node.removeAttribute(this._optionsAttrBg);
+  node.removeAttribute(this._optionsAttrHidden);
+};
+
+Layzr.prototype.updateSelector = function() {
+  // update cached list of nodes matching selector
+  this._nodes = document.querySelectorAll(this._optionsSelector);
+};
+
+Layzr.prototype.update = function() {
+  // cache nodelist length
+  var nodesLength = this._nodes.length;
+
+  // loop through nodes
+  for(var i = 0; i < nodesLength; i++) {
+    // cache node
+    var node = this._nodes[i];
+
+    // check if node has mandatory attribute
+    if(node.hasAttribute(this._optionsAttr)) {
+      // check if node in viewport
+      if(this._inViewport(node)) {
+        // reveal node
+        this._reveal(node);
+      }
+    }
+  }
+
+  // allow for more animation frames
+  this._ticking = false;
+};
+
+return Layzr;
+}));
+;/**
+* jquery.matchHeight.js master
+* http://brm.io/jquery-match-height/
+* License: MIT
+*/
+
+;(function($) {
+    /*
+    *  internal
+    */
+
+    var _previousResizeWidth = -1,
+        _updateTimeout = -1;
+
+    /*
+    *  _parse
+    *  value parse utility function
+    */
+
+    var _parse = function(value) {
+        // parse value and convert NaN to 0
+        return parseFloat(value) || 0;
+    };
+
+    /*
+    *  _rows
+    *  utility function returns array of jQuery selections representing each row
+    *  (as displayed after float wrapping applied by browser)
+    */
+
+    var _rows = function(elements) {
+        var tolerance = 1,
+            $elements = $(elements),
+            lastTop = null,
+            rows = [];
+
+        // group elements by their top position
+        $elements.each(function(){
+            var $that = $(this),
+                top = $that.offset().top - _parse($that.css('margin-top')),
+                lastRow = rows.length > 0 ? rows[rows.length - 1] : null;
+
+            if (lastRow === null) {
+                // first item on the row, so just push it
+                rows.push($that);
+            } else {
+                // if the row top is the same, add to the row group
+                if (Math.floor(Math.abs(lastTop - top)) <= tolerance) {
+                    rows[rows.length - 1] = lastRow.add($that);
+                } else {
+                    // otherwise start a new row group
+                    rows.push($that);
+                }
+            }
+
+            // keep track of the last row top
+            lastTop = top;
+        });
+
+        return rows;
+    };
+
+    /*
+    *  _parseOptions
+    *  handle plugin options
+    */
+
+    var _parseOptions = function(options) {
+        var opts = {
+            byRow: true,
+            property: 'height',
+            target: null,
+            remove: false
+        };
+
+        if (typeof options === 'object') {
+            return $.extend(opts, options);
+        }
+
+        if (typeof options === 'boolean') {
+            opts.byRow = options;
+        } else if (options === 'remove') {
+            opts.remove = true;
+        }
+
+        return opts;
+    };
+
+    /*
+    *  matchHeight
+    *  plugin definition
+    */
+
+    var matchHeight = $.fn.matchHeight = function(options) {
+        var opts = _parseOptions(options);
+
+        // handle remove
+        if (opts.remove) {
+            var that = this;
+
+            // remove fixed height from all selected elements
+            this.css(opts.property, '');
+
+            // remove selected elements from all groups
+            $.each(matchHeight._groups, function(key, group) {
+                group.elements = group.elements.not(that);
+            });
+
+            // TODO: cleanup empty groups
+
+            return this;
+        }
+
+        if (this.length <= 1 && !opts.target) {
+            return this;
+        }
+
+        // keep track of this group so we can re-apply later on load and resize events
+        matchHeight._groups.push({
+            elements: this,
+            options: opts
+        });
+
+        // match each element's height to the tallest element in the selection
+        matchHeight._apply(this, opts);
+
+        return this;
+    };
+
+    /*
+    *  plugin global options
+    */
+
+    matchHeight._groups = [];
+    matchHeight._throttle = 80;
+    matchHeight._maintainScroll = false;
+    matchHeight._beforeUpdate = null;
+    matchHeight._afterUpdate = null;
+
+    /*
+    *  matchHeight._apply
+    *  apply matchHeight to given elements
+    */
+
+    matchHeight._apply = function(elements, options) {
+        var opts = _parseOptions(options),
+            $elements = $(elements),
+            rows = [$elements];
+
+        // take note of scroll position
+        var scrollTop = $(window).scrollTop(),
+            htmlHeight = $('html').outerHeight(true);
+
+        // get hidden parents
+        var $hiddenParents = $elements.parents().filter(':hidden');
+
+        // cache the original inline style
+        $hiddenParents.each(function() {
+            var $that = $(this);
+            $that.data('style-cache', $that.attr('style'));
+        });
+
+        // temporarily must force hidden parents visible
+        $hiddenParents.css('display', 'block');
+
+        // get rows if using byRow, otherwise assume one row
+        if (opts.byRow && !opts.target) {
+
+            // must first force an arbitrary equal height so floating elements break evenly
+            $elements.each(function() {
+                var $that = $(this),
+                    display = $that.css('display') === 'inline-block' ? 'inline-block' : 'block';
+
+                // cache the original inline style
+                $that.data('style-cache', $that.attr('style'));
+
+                $that.css({
+                    'display': display,
+                    'padding-top': '0',
+                    'padding-bottom': '0',
+                    'margin-top': '0',
+                    'margin-bottom': '0',
+                    'border-top-width': '0',
+                    'border-bottom-width': '0',
+                    'height': '100px'
+                });
+            });
+
+            // get the array of rows (based on element top position)
+            rows = _rows($elements);
+
+            // revert original inline styles
+            $elements.each(function() {
+                var $that = $(this);
+                $that.attr('style', $that.data('style-cache') || '');
+            });
+        }
+
+        $.each(rows, function(key, row) {
+            var $row = $(row),
+                targetHeight = 0;
+
+            if (!opts.target) {
+                // skip apply to rows with only one item
+                if (opts.byRow && $row.length <= 1) {
+                    $row.css(opts.property, '');
+                    return;
+                }
+
+                // iterate the row and find the max height
+                $row.each(function(){
+                    var $that = $(this),
+                        display = $that.css('display') === 'inline-block' ? 'inline-block' : 'block';
+
+                    // ensure we get the correct actual height (and not a previously set height value)
+                    var css = { 'display': display };
+                    css[opts.property] = '';
+                    $that.css(css);
+
+                    // find the max height (including padding, but not margin)
+                    if ($that.outerHeight(false) > targetHeight) {
+                        targetHeight = $that.outerHeight(false);
+                    }
+
+                    // revert display block
+                    $that.css('display', '');
+                });
+            } else {
+                // if target set, use the height of the target element
+                targetHeight = opts.target.outerHeight(false);
+            }
+
+            // iterate the row and apply the height to all elements
+            $row.each(function(){
+                var $that = $(this),
+                    verticalPadding = 0;
+
+                // don't apply to a target
+                if (opts.target && $that.is(opts.target)) {
+                    return;
+                }
+
+                // handle padding and border correctly (required when not using border-box)
+                if ($that.css('box-sizing') !== 'border-box') {
+                    verticalPadding += _parse($that.css('border-top-width')) + _parse($that.css('border-bottom-width'));
+                    verticalPadding += _parse($that.css('padding-top')) + _parse($that.css('padding-bottom'));
+                }
+
+                // set the height (accounting for padding and border)
+                $that.css(opts.property, targetHeight - verticalPadding);
+            });
+        });
+
+        // revert hidden parents
+        $hiddenParents.each(function() {
+            var $that = $(this);
+            $that.attr('style', $that.data('style-cache') || null);
+        });
+
+        // restore scroll position if enabled
+        if (matchHeight._maintainScroll) {
+            $(window).scrollTop((scrollTop / htmlHeight) * $('html').outerHeight(true));
+        }
+
+        return this;
+    };
+
+    /*
+    *  matchHeight._applyDataApi
+    *  applies matchHeight to all elements with a data-match-height attribute
+    */
+
+    matchHeight._applyDataApi = function() {
+        var groups = {};
+
+        // generate groups by their groupId set by elements using data-match-height
+        $('[data-match-height], [data-mh]').each(function() {
+            var $this = $(this),
+                groupId = $this.attr('data-mh') || $this.attr('data-match-height');
+
+            if (groupId in groups) {
+                groups[groupId] = groups[groupId].add($this);
+            } else {
+                groups[groupId] = $this;
+            }
+        });
+
+        // apply matchHeight to each group
+        $.each(groups, function() {
+            this.matchHeight(true);
+        });
+    };
+
+    /*
+    *  matchHeight._update
+    *  updates matchHeight on all current groups with their correct options
+    */
+
+    var _update = function(event) {
+        if (matchHeight._beforeUpdate) {
+            matchHeight._beforeUpdate(event, matchHeight._groups);
+        }
+
+        $.each(matchHeight._groups, function() {
+            matchHeight._apply(this.elements, this.options);
+        });
+
+        if (matchHeight._afterUpdate) {
+            matchHeight._afterUpdate(event, matchHeight._groups);
+        }
+    };
+
+    matchHeight._update = function(throttle, event) {
+        // prevent update if fired from a resize event
+        // where the viewport width hasn't actually changed
+        // fixes an event looping bug in IE8
+        if (event && event.type === 'resize') {
+            var windowWidth = $(window).width();
+            if (windowWidth === _previousResizeWidth) {
+                return;
+            }
+            _previousResizeWidth = windowWidth;
+        }
+
+        // throttle updates
+        if (!throttle) {
+            _update(event);
+        } else if (_updateTimeout === -1) {
+            _updateTimeout = setTimeout(function() {
+                _update(event);
+                _updateTimeout = -1;
+            }, matchHeight._throttle);
+        }
+    };
+
+    /*
+    *  bind events
+    */
+
+    // apply on DOM ready event
+    $(matchHeight._applyDataApi);
+
+    // update heights on load and resize events
+    $(window).bind('load', function(event) {
+        matchHeight._update(false, event);
+    });
+
+    // throttled update heights on resize events
+    $(window).bind('resize orientationchange', function(event) {
+        matchHeight._update(true, event);
+    });
+
+})(jQuery);
+;/* ng-infinite-scroll - v1.2.0 - 2015-02-14 */
+var mod;
+
+mod = angular.module('infinite-scroll', []);
+
+mod.value('THROTTLE_MILLISECONDS', null);
+
+mod.directive('infiniteScroll', [
+  '$rootScope', '$window', '$interval', 'THROTTLE_MILLISECONDS', function($rootScope, $window, $interval, THROTTLE_MILLISECONDS) {
+    return {
+      scope: {
+        infiniteScroll: '&',
+        infiniteScrollContainer: '=',
+        infiniteScrollDistance: '=',
+        infiniteScrollDisabled: '=',
+        infiniteScrollUseDocumentBottom: '=',
+        infiniteScrollListenForEvent: '@'
+      },
+      link: function(scope, elem, attrs) {
+        var changeContainer, checkWhenEnabled, container, handleInfiniteScrollContainer, handleInfiniteScrollDisabled, handleInfiniteScrollDistance, handleInfiniteScrollUseDocumentBottom, handler, height, immediateCheck, offsetTop, pageYOffset, scrollDistance, scrollEnabled, throttle, unregisterEventListener, useDocumentBottom, windowElement;
+        windowElement = angular.element($window);
+        scrollDistance = null;
+        scrollEnabled = null;
+        checkWhenEnabled = null;
+        container = null;
+        immediateCheck = true;
+        useDocumentBottom = false;
+        unregisterEventListener = null;
+        height = function(elem) {
+          elem = elem[0] || elem;
+          if (isNaN(elem.offsetHeight)) {
+            return elem.document.documentElement.clientHeight;
+          } else {
+            return elem.offsetHeight;
+          }
+        };
+        offsetTop = function(elem) {
+          if (!elem[0].getBoundingClientRect || elem.css('none')) {
+            return;
+          }
+          return elem[0].getBoundingClientRect().top + pageYOffset(elem);
+        };
+        pageYOffset = function(elem) {
+          elem = elem[0] || elem;
+          if (isNaN(window.pageYOffset)) {
+            return elem.document.documentElement.scrollTop;
+          } else {
+            return elem.ownerDocument.defaultView.pageYOffset;
+          }
+        };
+        handler = function() {
+          var containerBottom, containerTopOffset, elementBottom, remaining, shouldScroll;
+          if (container === windowElement) {
+            containerBottom = height(container) + pageYOffset(container[0].document.documentElement);
+            elementBottom = offsetTop(elem) + height(elem);
+          } else {
+            containerBottom = height(container);
+            containerTopOffset = 0;
+            if (offsetTop(container) !== void 0) {
+              containerTopOffset = offsetTop(container);
+            }
+            elementBottom = offsetTop(elem) - containerTopOffset + height(elem);
+          }
+          if (useDocumentBottom) {
+            elementBottom = height((elem[0].ownerDocument || elem[0].document).documentElement);
+          }
+          remaining = elementBottom - containerBottom;
+          shouldScroll = remaining <= height(container) * scrollDistance + 1;
+          if (shouldScroll) {
+            checkWhenEnabled = true;
+            if (scrollEnabled) {
+              if (scope.$$phase || $rootScope.$$phase) {
+                return scope.infiniteScroll();
+              } else {
+                return scope.$apply(scope.infiniteScroll);
+              }
+            }
+          } else {
+            return checkWhenEnabled = false;
+          }
+        };
+        throttle = function(func, wait) {
+          var later, previous, timeout;
+          timeout = null;
+          previous = 0;
+          later = function() {
+            var context;
+            previous = new Date().getTime();
+            $interval.cancel(timeout);
+            timeout = null;
+            func.call();
+            return context = null;
+          };
+          return function() {
+            var now, remaining;
+            now = new Date().getTime();
+            remaining = wait - (now - previous);
+            if (remaining <= 0) {
+              clearTimeout(timeout);
+              $interval.cancel(timeout);
+              timeout = null;
+              previous = now;
+              return func.call();
+            } else {
+              if (!timeout) {
+                return timeout = $interval(later, remaining, 1);
+              }
+            }
+          };
+        };
+        if (THROTTLE_MILLISECONDS != null) {
+          handler = throttle(handler, THROTTLE_MILLISECONDS);
+        }
+        scope.$on('$destroy', function() {
+          container.unbind('scroll', handler);
+          if (unregisterEventListener != null) {
+            unregisterEventListener();
+            return unregisterEventListener = null;
+          }
+        });
+        handleInfiniteScrollDistance = function(v) {
+          return scrollDistance = parseFloat(v) || 0;
+        };
+        scope.$watch('infiniteScrollDistance', handleInfiniteScrollDistance);
+        handleInfiniteScrollDistance(scope.infiniteScrollDistance);
+        handleInfiniteScrollDisabled = function(v) {
+          scrollEnabled = !v;
+          if (scrollEnabled && checkWhenEnabled) {
+            checkWhenEnabled = false;
+            return handler();
+          }
+        };
+        scope.$watch('infiniteScrollDisabled', handleInfiniteScrollDisabled);
+        handleInfiniteScrollDisabled(scope.infiniteScrollDisabled);
+        handleInfiniteScrollUseDocumentBottom = function(v) {
+          return useDocumentBottom = v;
+        };
+        scope.$watch('infiniteScrollUseDocumentBottom', handleInfiniteScrollUseDocumentBottom);
+        handleInfiniteScrollUseDocumentBottom(scope.infiniteScrollUseDocumentBottom);
+        changeContainer = function(newContainer) {
+          if (container != null) {
+            container.unbind('scroll', handler);
+          }
+          container = newContainer;
+          if (newContainer != null) {
+            return container.bind('scroll', handler);
+          }
+        };
+        changeContainer(windowElement);
+        if (scope.infiniteScrollListenForEvent) {
+          unregisterEventListener = $rootScope.$on(scope.infiniteScrollListenForEvent, handler);
+        }
+        handleInfiniteScrollContainer = function(newContainer) {
+          if ((newContainer == null) || newContainer.length === 0) {
+            return;
+          }
+          if (newContainer instanceof HTMLElement) {
+            newContainer = angular.element(newContainer);
+          } else if (typeof newContainer.append === 'function') {
+            newContainer = angular.element(newContainer[newContainer.length - 1]);
+          } else if (typeof newContainer === 'string') {
+            newContainer = angular.element(document.querySelector(newContainer));
+          }
+          if (newContainer != null) {
+            return changeContainer(newContainer);
+          } else {
+            throw new Exception("invalid infinite-scroll-container attribute.");
+          }
+        };
+        scope.$watch('infiniteScrollContainer', handleInfiniteScrollContainer);
+        handleInfiniteScrollContainer(scope.infiniteScrollContainer || []);
+        if (attrs.infiniteScrollParent != null) {
+          changeContainer(angular.element(elem.parent()));
+        }
+        if (attrs.infiniteScrollImmediateCheck != null) {
+          immediateCheck = scope.$eval(attrs.infiniteScrollImmediateCheck);
+        }
+        return $interval((function() {
+          if (immediateCheck) {
+            return handler();
+          }
+        }), 0, 1);
+      }
+    };
+  }
+]);
+;/* Copyright (C) 2014 Justin Windle, http://soulwire.co.uk */
 
 var fit = (function() {
 
@@ -53279,7 +53993,1028 @@ var fit = (function() {
 
     });
 
-})();;/*!
+})();;/*global define:false */
+/**
+ * Copyright 2015 Craig Campbell
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Mousetrap is a simple keyboard shortcut library for Javascript with
+ * no external dependencies
+ *
+ * @version 1.5.3
+ * @url craig.is/killing/mice
+ */
+(function(window, document, undefined) {
+
+    /**
+     * mapping of special keycodes to their corresponding keys
+     *
+     * everything in this dictionary cannot use keypress events
+     * so it has to be here to map to the correct keycodes for
+     * keyup/keydown events
+     *
+     * @type {Object}
+     */
+    var _MAP = {
+        8: 'backspace',
+        9: 'tab',
+        13: 'enter',
+        16: 'shift',
+        17: 'ctrl',
+        18: 'alt',
+        20: 'capslock',
+        27: 'esc',
+        32: 'space',
+        33: 'pageup',
+        34: 'pagedown',
+        35: 'end',
+        36: 'home',
+        37: 'left',
+        38: 'up',
+        39: 'right',
+        40: 'down',
+        45: 'ins',
+        46: 'del',
+        91: 'meta',
+        93: 'meta',
+        224: 'meta'
+    };
+
+    /**
+     * mapping for special characters so they can support
+     *
+     * this dictionary is only used incase you want to bind a
+     * keyup or keydown event to one of these keys
+     *
+     * @type {Object}
+     */
+    var _KEYCODE_MAP = {
+        106: '*',
+        107: '+',
+        109: '-',
+        110: '.',
+        111 : '/',
+        186: ';',
+        187: '=',
+        188: ',',
+        189: '-',
+        190: '.',
+        191: '/',
+        192: '`',
+        219: '[',
+        220: '\\',
+        221: ']',
+        222: '\''
+    };
+
+    /**
+     * this is a mapping of keys that require shift on a US keypad
+     * back to the non shift equivelents
+     *
+     * this is so you can use keyup events with these keys
+     *
+     * note that this will only work reliably on US keyboards
+     *
+     * @type {Object}
+     */
+    var _SHIFT_MAP = {
+        '~': '`',
+        '!': '1',
+        '@': '2',
+        '#': '3',
+        '$': '4',
+        '%': '5',
+        '^': '6',
+        '&': '7',
+        '*': '8',
+        '(': '9',
+        ')': '0',
+        '_': '-',
+        '+': '=',
+        ':': ';',
+        '\"': '\'',
+        '<': ',',
+        '>': '.',
+        '?': '/',
+        '|': '\\'
+    };
+
+    /**
+     * this is a list of special strings you can use to map
+     * to modifier keys when you specify your keyboard shortcuts
+     *
+     * @type {Object}
+     */
+    var _SPECIAL_ALIASES = {
+        'option': 'alt',
+        'command': 'meta',
+        'return': 'enter',
+        'escape': 'esc',
+        'plus': '+',
+        'mod': /Mac|iPod|iPhone|iPad/.test(navigator.platform) ? 'meta' : 'ctrl'
+    };
+
+    /**
+     * variable to store the flipped version of _MAP from above
+     * needed to check if we should use keypress or not when no action
+     * is specified
+     *
+     * @type {Object|undefined}
+     */
+    var _REVERSE_MAP;
+
+    /**
+     * loop through the f keys, f1 to f19 and add them to the map
+     * programatically
+     */
+    for (var i = 1; i < 20; ++i) {
+        _MAP[111 + i] = 'f' + i;
+    }
+
+    /**
+     * loop through to map numbers on the numeric keypad
+     */
+    for (i = 0; i <= 9; ++i) {
+        _MAP[i + 96] = i;
+    }
+
+    /**
+     * cross browser add event method
+     *
+     * @param {Element|HTMLDocument} object
+     * @param {string} type
+     * @param {Function} callback
+     * @returns void
+     */
+    function _addEvent(object, type, callback) {
+        if (object.addEventListener) {
+            object.addEventListener(type, callback, false);
+            return;
+        }
+
+        object.attachEvent('on' + type, callback);
+    }
+
+    /**
+     * takes the event and returns the key character
+     *
+     * @param {Event} e
+     * @return {string}
+     */
+    function _characterFromEvent(e) {
+
+        // for keypress events we should return the character as is
+        if (e.type == 'keypress') {
+            var character = String.fromCharCode(e.which);
+
+            // if the shift key is not pressed then it is safe to assume
+            // that we want the character to be lowercase.  this means if
+            // you accidentally have caps lock on then your key bindings
+            // will continue to work
+            //
+            // the only side effect that might not be desired is if you
+            // bind something like 'A' cause you want to trigger an
+            // event when capital A is pressed caps lock will no longer
+            // trigger the event.  shift+a will though.
+            if (!e.shiftKey) {
+                character = character.toLowerCase();
+            }
+
+            return character;
+        }
+
+        // for non keypress events the special maps are needed
+        if (_MAP[e.which]) {
+            return _MAP[e.which];
+        }
+
+        if (_KEYCODE_MAP[e.which]) {
+            return _KEYCODE_MAP[e.which];
+        }
+
+        // if it is not in the special map
+
+        // with keydown and keyup events the character seems to always
+        // come in as an uppercase character whether you are pressing shift
+        // or not.  we should make sure it is always lowercase for comparisons
+        return String.fromCharCode(e.which).toLowerCase();
+    }
+
+    /**
+     * checks if two arrays are equal
+     *
+     * @param {Array} modifiers1
+     * @param {Array} modifiers2
+     * @returns {boolean}
+     */
+    function _modifiersMatch(modifiers1, modifiers2) {
+        return modifiers1.sort().join(',') === modifiers2.sort().join(',');
+    }
+
+    /**
+     * takes a key event and figures out what the modifiers are
+     *
+     * @param {Event} e
+     * @returns {Array}
+     */
+    function _eventModifiers(e) {
+        var modifiers = [];
+
+        if (e.shiftKey) {
+            modifiers.push('shift');
+        }
+
+        if (e.altKey) {
+            modifiers.push('alt');
+        }
+
+        if (e.ctrlKey) {
+            modifiers.push('ctrl');
+        }
+
+        if (e.metaKey) {
+            modifiers.push('meta');
+        }
+
+        return modifiers;
+    }
+
+    /**
+     * prevents default for this event
+     *
+     * @param {Event} e
+     * @returns void
+     */
+    function _preventDefault(e) {
+        if (e.preventDefault) {
+            e.preventDefault();
+            return;
+        }
+
+        e.returnValue = false;
+    }
+
+    /**
+     * stops propogation for this event
+     *
+     * @param {Event} e
+     * @returns void
+     */
+    function _stopPropagation(e) {
+        if (e.stopPropagation) {
+            e.stopPropagation();
+            return;
+        }
+
+        e.cancelBubble = true;
+    }
+
+    /**
+     * determines if the keycode specified is a modifier key or not
+     *
+     * @param {string} key
+     * @returns {boolean}
+     */
+    function _isModifier(key) {
+        return key == 'shift' || key == 'ctrl' || key == 'alt' || key == 'meta';
+    }
+
+    /**
+     * reverses the map lookup so that we can look for specific keys
+     * to see what can and can't use keypress
+     *
+     * @return {Object}
+     */
+    function _getReverseMap() {
+        if (!_REVERSE_MAP) {
+            _REVERSE_MAP = {};
+            for (var key in _MAP) {
+
+                // pull out the numeric keypad from here cause keypress should
+                // be able to detect the keys from the character
+                if (key > 95 && key < 112) {
+                    continue;
+                }
+
+                if (_MAP.hasOwnProperty(key)) {
+                    _REVERSE_MAP[_MAP[key]] = key;
+                }
+            }
+        }
+        return _REVERSE_MAP;
+    }
+
+    /**
+     * picks the best action based on the key combination
+     *
+     * @param {string} key - character for key
+     * @param {Array} modifiers
+     * @param {string=} action passed in
+     */
+    function _pickBestAction(key, modifiers, action) {
+
+        // if no action was picked in we should try to pick the one
+        // that we think would work best for this key
+        if (!action) {
+            action = _getReverseMap()[key] ? 'keydown' : 'keypress';
+        }
+
+        // modifier keys don't work as expected with keypress,
+        // switch to keydown
+        if (action == 'keypress' && modifiers.length) {
+            action = 'keydown';
+        }
+
+        return action;
+    }
+
+    /**
+     * Converts from a string key combination to an array
+     *
+     * @param  {string} combination like "command+shift+l"
+     * @return {Array}
+     */
+    function _keysFromString(combination) {
+        if (combination === '+') {
+            return ['+'];
+        }
+
+        combination = combination.replace(/\+{2}/g, '+plus');
+        return combination.split('+');
+    }
+
+    /**
+     * Gets info for a specific key combination
+     *
+     * @param  {string} combination key combination ("command+s" or "a" or "*")
+     * @param  {string=} action
+     * @returns {Object}
+     */
+    function _getKeyInfo(combination, action) {
+        var keys;
+        var key;
+        var i;
+        var modifiers = [];
+
+        // take the keys from this pattern and figure out what the actual
+        // pattern is all about
+        keys = _keysFromString(combination);
+
+        for (i = 0; i < keys.length; ++i) {
+            key = keys[i];
+
+            // normalize key names
+            if (_SPECIAL_ALIASES[key]) {
+                key = _SPECIAL_ALIASES[key];
+            }
+
+            // if this is not a keypress event then we should
+            // be smart about using shift keys
+            // this will only work for US keyboards however
+            if (action && action != 'keypress' && _SHIFT_MAP[key]) {
+                key = _SHIFT_MAP[key];
+                modifiers.push('shift');
+            }
+
+            // if this key is a modifier then add it to the list of modifiers
+            if (_isModifier(key)) {
+                modifiers.push(key);
+            }
+        }
+
+        // depending on what the key combination is
+        // we will try to pick the best event for it
+        action = _pickBestAction(key, modifiers, action);
+
+        return {
+            key: key,
+            modifiers: modifiers,
+            action: action
+        };
+    }
+
+    function _belongsTo(element, ancestor) {
+        if (element === null || element === document) {
+            return false;
+        }
+
+        if (element === ancestor) {
+            return true;
+        }
+
+        return _belongsTo(element.parentNode, ancestor);
+    }
+
+    function Mousetrap(targetElement) {
+        var self = this;
+
+        targetElement = targetElement || document;
+
+        if (!(self instanceof Mousetrap)) {
+            return new Mousetrap(targetElement);
+        }
+
+        /**
+         * element to attach key events to
+         *
+         * @type {Element}
+         */
+        self.target = targetElement;
+
+        /**
+         * a list of all the callbacks setup via Mousetrap.bind()
+         *
+         * @type {Object}
+         */
+        self._callbacks = {};
+
+        /**
+         * direct map of string combinations to callbacks used for trigger()
+         *
+         * @type {Object}
+         */
+        self._directMap = {};
+
+        /**
+         * keeps track of what level each sequence is at since multiple
+         * sequences can start out with the same sequence
+         *
+         * @type {Object}
+         */
+        var _sequenceLevels = {};
+
+        /**
+         * variable to store the setTimeout call
+         *
+         * @type {null|number}
+         */
+        var _resetTimer;
+
+        /**
+         * temporary state where we will ignore the next keyup
+         *
+         * @type {boolean|string}
+         */
+        var _ignoreNextKeyup = false;
+
+        /**
+         * temporary state where we will ignore the next keypress
+         *
+         * @type {boolean}
+         */
+        var _ignoreNextKeypress = false;
+
+        /**
+         * are we currently inside of a sequence?
+         * type of action ("keyup" or "keydown" or "keypress") or false
+         *
+         * @type {boolean|string}
+         */
+        var _nextExpectedAction = false;
+
+        /**
+         * resets all sequence counters except for the ones passed in
+         *
+         * @param {Object} doNotReset
+         * @returns void
+         */
+        function _resetSequences(doNotReset) {
+            doNotReset = doNotReset || {};
+
+            var activeSequences = false,
+                key;
+
+            for (key in _sequenceLevels) {
+                if (doNotReset[key]) {
+                    activeSequences = true;
+                    continue;
+                }
+                _sequenceLevels[key] = 0;
+            }
+
+            if (!activeSequences) {
+                _nextExpectedAction = false;
+            }
+        }
+
+        /**
+         * finds all callbacks that match based on the keycode, modifiers,
+         * and action
+         *
+         * @param {string} character
+         * @param {Array} modifiers
+         * @param {Event|Object} e
+         * @param {string=} sequenceName - name of the sequence we are looking for
+         * @param {string=} combination
+         * @param {number=} level
+         * @returns {Array}
+         */
+        function _getMatches(character, modifiers, e, sequenceName, combination, level) {
+            var i;
+            var callback;
+            var matches = [];
+            var action = e.type;
+
+            // if there are no events related to this keycode
+            if (!self._callbacks[character]) {
+                return [];
+            }
+
+            // if a modifier key is coming up on its own we should allow it
+            if (action == 'keyup' && _isModifier(character)) {
+                modifiers = [character];
+            }
+
+            // loop through all callbacks for the key that was pressed
+            // and see if any of them match
+            for (i = 0; i < self._callbacks[character].length; ++i) {
+                callback = self._callbacks[character][i];
+
+                // if a sequence name is not specified, but this is a sequence at
+                // the wrong level then move onto the next match
+                if (!sequenceName && callback.seq && _sequenceLevels[callback.seq] != callback.level) {
+                    continue;
+                }
+
+                // if the action we are looking for doesn't match the action we got
+                // then we should keep going
+                if (action != callback.action) {
+                    continue;
+                }
+
+                // if this is a keypress event and the meta key and control key
+                // are not pressed that means that we need to only look at the
+                // character, otherwise check the modifiers as well
+                //
+                // chrome will not fire a keypress if meta or control is down
+                // safari will fire a keypress if meta or meta+shift is down
+                // firefox will fire a keypress if meta or control is down
+                if ((action == 'keypress' && !e.metaKey && !e.ctrlKey) || _modifiersMatch(modifiers, callback.modifiers)) {
+
+                    // when you bind a combination or sequence a second time it
+                    // should overwrite the first one.  if a sequenceName or
+                    // combination is specified in this call it does just that
+                    //
+                    // @todo make deleting its own method?
+                    var deleteCombo = !sequenceName && callback.combo == combination;
+                    var deleteSequence = sequenceName && callback.seq == sequenceName && callback.level == level;
+                    if (deleteCombo || deleteSequence) {
+                        self._callbacks[character].splice(i, 1);
+                    }
+
+                    matches.push(callback);
+                }
+            }
+
+            return matches;
+        }
+
+        /**
+         * actually calls the callback function
+         *
+         * if your callback function returns false this will use the jquery
+         * convention - prevent default and stop propogation on the event
+         *
+         * @param {Function} callback
+         * @param {Event} e
+         * @returns void
+         */
+        function _fireCallback(callback, e, combo, sequence) {
+
+            // if this event should not happen stop here
+            if (self.stopCallback(e, e.target || e.srcElement, combo, sequence)) {
+                return;
+            }
+
+            if (callback(e, combo) === false) {
+                _preventDefault(e);
+                _stopPropagation(e);
+            }
+        }
+
+        /**
+         * handles a character key event
+         *
+         * @param {string} character
+         * @param {Array} modifiers
+         * @param {Event} e
+         * @returns void
+         */
+        self._handleKey = function(character, modifiers, e) {
+            var callbacks = _getMatches(character, modifiers, e);
+            var i;
+            var doNotReset = {};
+            var maxLevel = 0;
+            var processedSequenceCallback = false;
+
+            // Calculate the maxLevel for sequences so we can only execute the longest callback sequence
+            for (i = 0; i < callbacks.length; ++i) {
+                if (callbacks[i].seq) {
+                    maxLevel = Math.max(maxLevel, callbacks[i].level);
+                }
+            }
+
+            // loop through matching callbacks for this key event
+            for (i = 0; i < callbacks.length; ++i) {
+
+                // fire for all sequence callbacks
+                // this is because if for example you have multiple sequences
+                // bound such as "g i" and "g t" they both need to fire the
+                // callback for matching g cause otherwise you can only ever
+                // match the first one
+                if (callbacks[i].seq) {
+
+                    // only fire callbacks for the maxLevel to prevent
+                    // subsequences from also firing
+                    //
+                    // for example 'a option b' should not cause 'option b' to fire
+                    // even though 'option b' is part of the other sequence
+                    //
+                    // any sequences that do not match here will be discarded
+                    // below by the _resetSequences call
+                    if (callbacks[i].level != maxLevel) {
+                        continue;
+                    }
+
+                    processedSequenceCallback = true;
+
+                    // keep a list of which sequences were matches for later
+                    doNotReset[callbacks[i].seq] = 1;
+                    _fireCallback(callbacks[i].callback, e, callbacks[i].combo, callbacks[i].seq);
+                    continue;
+                }
+
+                // if there were no sequence matches but we are still here
+                // that means this is a regular match so we should fire that
+                if (!processedSequenceCallback) {
+                    _fireCallback(callbacks[i].callback, e, callbacks[i].combo);
+                }
+            }
+
+            // if the key you pressed matches the type of sequence without
+            // being a modifier (ie "keyup" or "keypress") then we should
+            // reset all sequences that were not matched by this event
+            //
+            // this is so, for example, if you have the sequence "h a t" and you
+            // type "h e a r t" it does not match.  in this case the "e" will
+            // cause the sequence to reset
+            //
+            // modifier keys are ignored because you can have a sequence
+            // that contains modifiers such as "enter ctrl+space" and in most
+            // cases the modifier key will be pressed before the next key
+            //
+            // also if you have a sequence such as "ctrl+b a" then pressing the
+            // "b" key will trigger a "keypress" and a "keydown"
+            //
+            // the "keydown" is expected when there is a modifier, but the
+            // "keypress" ends up matching the _nextExpectedAction since it occurs
+            // after and that causes the sequence to reset
+            //
+            // we ignore keypresses in a sequence that directly follow a keydown
+            // for the same character
+            var ignoreThisKeypress = e.type == 'keypress' && _ignoreNextKeypress;
+            if (e.type == _nextExpectedAction && !_isModifier(character) && !ignoreThisKeypress) {
+                _resetSequences(doNotReset);
+            }
+
+            _ignoreNextKeypress = processedSequenceCallback && e.type == 'keydown';
+        };
+
+        /**
+         * handles a keydown event
+         *
+         * @param {Event} e
+         * @returns void
+         */
+        function _handleKeyEvent(e) {
+
+            // normalize e.which for key events
+            // @see http://stackoverflow.com/questions/4285627/javascript-keycode-vs-charcode-utter-confusion
+            if (typeof e.which !== 'number') {
+                e.which = e.keyCode;
+            }
+
+            var character = _characterFromEvent(e);
+
+            // no character found then stop
+            if (!character) {
+                return;
+            }
+
+            // need to use === for the character check because the character can be 0
+            if (e.type == 'keyup' && _ignoreNextKeyup === character) {
+                _ignoreNextKeyup = false;
+                return;
+            }
+
+            self.handleKey(character, _eventModifiers(e), e);
+        }
+
+        /**
+         * called to set a 1 second timeout on the specified sequence
+         *
+         * this is so after each key press in the sequence you have 1 second
+         * to press the next key before you have to start over
+         *
+         * @returns void
+         */
+        function _resetSequenceTimer() {
+            clearTimeout(_resetTimer);
+            _resetTimer = setTimeout(_resetSequences, 1000);
+        }
+
+        /**
+         * binds a key sequence to an event
+         *
+         * @param {string} combo - combo specified in bind call
+         * @param {Array} keys
+         * @param {Function} callback
+         * @param {string=} action
+         * @returns void
+         */
+        function _bindSequence(combo, keys, callback, action) {
+
+            // start off by adding a sequence level record for this combination
+            // and setting the level to 0
+            _sequenceLevels[combo] = 0;
+
+            /**
+             * callback to increase the sequence level for this sequence and reset
+             * all other sequences that were active
+             *
+             * @param {string} nextAction
+             * @returns {Function}
+             */
+            function _increaseSequence(nextAction) {
+                return function() {
+                    _nextExpectedAction = nextAction;
+                    ++_sequenceLevels[combo];
+                    _resetSequenceTimer();
+                };
+            }
+
+            /**
+             * wraps the specified callback inside of another function in order
+             * to reset all sequence counters as soon as this sequence is done
+             *
+             * @param {Event} e
+             * @returns void
+             */
+            function _callbackAndReset(e) {
+                _fireCallback(callback, e, combo);
+
+                // we should ignore the next key up if the action is key down
+                // or keypress.  this is so if you finish a sequence and
+                // release the key the final key will not trigger a keyup
+                if (action !== 'keyup') {
+                    _ignoreNextKeyup = _characterFromEvent(e);
+                }
+
+                // weird race condition if a sequence ends with the key
+                // another sequence begins with
+                setTimeout(_resetSequences, 10);
+            }
+
+            // loop through keys one at a time and bind the appropriate callback
+            // function.  for any key leading up to the final one it should
+            // increase the sequence. after the final, it should reset all sequences
+            //
+            // if an action is specified in the original bind call then that will
+            // be used throughout.  otherwise we will pass the action that the
+            // next key in the sequence should match.  this allows a sequence
+            // to mix and match keypress and keydown events depending on which
+            // ones are better suited to the key provided
+            for (var i = 0; i < keys.length; ++i) {
+                var isFinal = i + 1 === keys.length;
+                var wrappedCallback = isFinal ? _callbackAndReset : _increaseSequence(action || _getKeyInfo(keys[i + 1]).action);
+                _bindSingle(keys[i], wrappedCallback, action, combo, i);
+            }
+        }
+
+        /**
+         * binds a single keyboard combination
+         *
+         * @param {string} combination
+         * @param {Function} callback
+         * @param {string=} action
+         * @param {string=} sequenceName - name of sequence if part of sequence
+         * @param {number=} level - what part of the sequence the command is
+         * @returns void
+         */
+        function _bindSingle(combination, callback, action, sequenceName, level) {
+
+            // store a direct mapped reference for use with Mousetrap.trigger
+            self._directMap[combination + ':' + action] = callback;
+
+            // make sure multiple spaces in a row become a single space
+            combination = combination.replace(/\s+/g, ' ');
+
+            var sequence = combination.split(' ');
+            var info;
+
+            // if this pattern is a sequence of keys then run through this method
+            // to reprocess each pattern one key at a time
+            if (sequence.length > 1) {
+                _bindSequence(combination, sequence, callback, action);
+                return;
+            }
+
+            info = _getKeyInfo(combination, action);
+
+            // make sure to initialize array if this is the first time
+            // a callback is added for this key
+            self._callbacks[info.key] = self._callbacks[info.key] || [];
+
+            // remove an existing match if there is one
+            _getMatches(info.key, info.modifiers, {type: info.action}, sequenceName, combination, level);
+
+            // add this call back to the array
+            // if it is a sequence put it at the beginning
+            // if not put it at the end
+            //
+            // this is important because the way these are processed expects
+            // the sequence ones to come first
+            self._callbacks[info.key][sequenceName ? 'unshift' : 'push']({
+                callback: callback,
+                modifiers: info.modifiers,
+                action: info.action,
+                seq: sequenceName,
+                level: level,
+                combo: combination
+            });
+        }
+
+        /**
+         * binds multiple combinations to the same callback
+         *
+         * @param {Array} combinations
+         * @param {Function} callback
+         * @param {string|undefined} action
+         * @returns void
+         */
+        self._bindMultiple = function(combinations, callback, action) {
+            for (var i = 0; i < combinations.length; ++i) {
+                _bindSingle(combinations[i], callback, action);
+            }
+        };
+
+        // start!
+        _addEvent(targetElement, 'keypress', _handleKeyEvent);
+        _addEvent(targetElement, 'keydown', _handleKeyEvent);
+        _addEvent(targetElement, 'keyup', _handleKeyEvent);
+    }
+
+    /**
+     * binds an event to mousetrap
+     *
+     * can be a single key, a combination of keys separated with +,
+     * an array of keys, or a sequence of keys separated by spaces
+     *
+     * be sure to list the modifier keys first to make sure that the
+     * correct key ends up getting bound (the last key in the pattern)
+     *
+     * @param {string|Array} keys
+     * @param {Function} callback
+     * @param {string=} action - 'keypress', 'keydown', or 'keyup'
+     * @returns void
+     */
+    Mousetrap.prototype.bind = function(keys, callback, action) {
+        var self = this;
+        keys = keys instanceof Array ? keys : [keys];
+        self._bindMultiple.call(self, keys, callback, action);
+        return self;
+    };
+
+    /**
+     * unbinds an event to mousetrap
+     *
+     * the unbinding sets the callback function of the specified key combo
+     * to an empty function and deletes the corresponding key in the
+     * _directMap dict.
+     *
+     * TODO: actually remove this from the _callbacks dictionary instead
+     * of binding an empty function
+     *
+     * the keycombo+action has to be exactly the same as
+     * it was defined in the bind method
+     *
+     * @param {string|Array} keys
+     * @param {string} action
+     * @returns void
+     */
+    Mousetrap.prototype.unbind = function(keys, action) {
+        var self = this;
+        return self.bind.call(self, keys, function() {}, action);
+    };
+
+    /**
+     * triggers an event that has already been bound
+     *
+     * @param {string} keys
+     * @param {string=} action
+     * @returns void
+     */
+    Mousetrap.prototype.trigger = function(keys, action) {
+        var self = this;
+        if (self._directMap[keys + ':' + action]) {
+            self._directMap[keys + ':' + action]({}, keys);
+        }
+        return self;
+    };
+
+    /**
+     * resets the library back to its initial state.  this is useful
+     * if you want to clear out the current keyboard shortcuts and bind
+     * new ones - for example if you switch to another page
+     *
+     * @returns void
+     */
+    Mousetrap.prototype.reset = function() {
+        var self = this;
+        self._callbacks = {};
+        self._directMap = {};
+        return self;
+    };
+
+    /**
+     * should we stop this event before firing off callbacks
+     *
+     * @param {Event} e
+     * @param {Element} element
+     * @return {boolean}
+     */
+    Mousetrap.prototype.stopCallback = function(e, element) {
+        var self = this;
+
+        // if the element has the class "mousetrap" then no need to stop
+        if ((' ' + element.className + ' ').indexOf(' mousetrap ') > -1) {
+            return false;
+        }
+
+        if (_belongsTo(element, self.target)) {
+            return false;
+        }
+
+        // stop for input, select, and textarea
+        return element.tagName == 'INPUT' || element.tagName == 'SELECT' || element.tagName == 'TEXTAREA' || element.isContentEditable;
+    };
+
+    /**
+     * exposes _handleKey publicly so it can be overwritten by extensions
+     */
+    Mousetrap.prototype.handleKey = function() {
+        var self = this;
+        return self._handleKey.apply(self, arguments);
+    };
+
+    /**
+     * Init the global mousetrap functions
+     *
+     * This method is needed to allow the global mousetrap functions to work
+     * now that mousetrap is a constructor function.
+     */
+    Mousetrap.init = function() {
+        var documentMousetrap = Mousetrap(document);
+        for (var method in documentMousetrap) {
+            if (method.charAt(0) !== '_') {
+                Mousetrap[method] = (function(method) {
+                    return function() {
+                        return documentMousetrap[method].apply(documentMousetrap, arguments);
+                    };
+                } (method));
+            }
+        }
+    };
+
+    Mousetrap.init();
+
+    // expose mousetrap to the global object
+    window.Mousetrap = Mousetrap;
+
+    // expose as a common js module
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = Mousetrap;
+    }
+
+    // expose mousetrap as an AMD module
+    if (typeof define === 'function' && define.amd) {
+        define(function() {
+            return Mousetrap;
+        });
+    }
+}) (window, document);
+;/*!
  * TextTailor - v0.1.0
  * https://github.com/jpntex
  *
