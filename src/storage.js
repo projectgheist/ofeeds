@@ -40,7 +40,7 @@ exports.setup = function() {
     });
 	// connection established event
     db.once('open', function() {
-        console.log('Connected to Mongo: '+cf.db().dbname+'!');
+        console.log('Connected to Mongo: ' + cf.db().dbname+'!');
 		require('./wait')
     });
 };

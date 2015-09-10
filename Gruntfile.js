@@ -34,7 +34,7 @@ module.exports = function(grunt) {
 					'./private/js/mousetrap.js',
 					'./private/js/jquery.texttailor.js'
 				],
-				dest: './public/js/<%= pkg.name %>-<%= pkg.version %>.js'
+				dest: './public/js/<%= pkg.name %>.js'
 			}
 		},
 		cssmin: {
@@ -51,7 +51,7 @@ module.exports = function(grunt) {
 					'./bower_components/bootstrap-material-design/dist/css/material.css',
 					'./bower_components/bootstrap-material-design/dist/css/ripples.css',
 				],
-				dest: './public/css/<%= pkg.name %>-<%= pkg.version %>.min.css'
+				dest: './public/css/<%= pkg.name %>.min.css'
 			}
 		},
 		uglify: {
@@ -60,8 +60,8 @@ module.exports = function(grunt) {
 				mangle: false  // Use if you want the names of your functions and variables unchanged
 			},
 			build: {
-				src: './public/js/<%= pkg.name %>-<%= pkg.version %>.js',
-				dest: './public/js/<%= pkg.name %>-<%= pkg.version %>.min.js'
+				src: './public/js/<%= pkg.name %>.js',
+				dest: './public/js/<%= pkg.name %>.min.js'
 			}
 		},
 		watch: {
