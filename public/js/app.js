@@ -4,13 +4,7 @@
 	/**
 	 * Global variables
 	 */
-	var gTemplateID = '',
-		gTemplates = {
-			'list': ['views/templates/post-compact','views/templates/post-expand'],
-			'tile': ['views/templates/post-tile'], 
-			'mini': ['views/templates/post-minimal','views/templates/post-expand'],
-		},
-		g_Layzr = {};
+	var g_Layzr = {};
 
 	/**
 	 * On page load ready
@@ -41,7 +35,7 @@
 			fontRatio:96
 		});
 		
-		//
+		// set sidebar height
 		$('#menu').matchHeight({
 			target: $(window)
 		});
@@ -63,6 +57,8 @@
 		return false;
 	});
 
+	/** function clamp
+	 */
 	function clamp(val,min,max) {
 		return Math.min(Math.max(val, min), max);
 	}

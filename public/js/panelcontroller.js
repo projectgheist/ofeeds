@@ -34,6 +34,13 @@
 	];
 
 	function panelController($rootScope, $scope, $http, $location, $route, $routeParams, $anchorScroll, $sce, $timeout, panelService) {
+		$scope.templateID = '';
+		$scope.templates = {
+			'list': ['views/templates/post-compact','views/templates/post-expand'],
+			'tile': ['views/templates/post-tile'], 
+			'mini': ['views/templates/post-minimal','views/templates/post-expand'],
+		},
+
 		/** function showAlert
 		 @param t: type of alert (eg. warning, danger)
 		 @param m: message to relay
@@ -251,10 +258,10 @@
 					// set article's template
 					if ($scope.cp && ref.uid === $scope.cp.uid) {
 						$scope.expand($scope.stream.items[i]);
-					} else if (gTemplateID !== '') {
-						ref.template = gTemplates[gTemplateID][0];
+					} else if ($scope.templateID !== '') {
+						ref.template = $scope.templates[$scope.templateID][0];
 					} else {
-						ref.template = gTemplates['tile'][0];
+						ref.template = $scope.templates['tile'][0];
 					}
 				}
 				// is message present?
@@ -270,14 +277,14 @@
 		*/
 		$scope.updateStyle = function(n) {
 			// if the same template id is set
-			if (gTemplateID === n) {
+			if ($scope.templateID === n) {
 				return;
 			}
 			// set new template id
-			gTemplateID = n;
+			$scope.templateID = n;
 			// set the template for all the items
 			for (var i in $scope.stream.items) {
-				$scope.stream.items[i].template = gTemplates[gTemplateID][0];
+				$scope.stream.items[i].template = $scope.templates[$scope.templateID][0];
 			}
 		};
 		
@@ -397,12 +404,12 @@
 		
 		$scope.expand = function(p) {
 			// if template style doesn't have an expanded version, skip
-			if (gTemplates[gTemplateID].length <= 1) {
+			if ($scope.templates[$scope.templateID].length <= 1) {
 				return;
 			}
 			$timeout(function() {
 				// change the template of the post to the expanded version
-				p.template = gTemplates[gTemplateID][1];
+				p.template = $scope.templates[$scope.templateID][1];
 				// store post as the current post
 				$scope.cp = p;
 				// reset
@@ -412,7 +419,7 @@
 		
 		$scope.toggle = function(p) {
 			// if template style doesn't have an expanded version, skip
-			if (gTemplates[gTemplateID].length <= 1) {
+			if ($scope.templates[$scope.templateID].length <= 1) {
 				return;
 			}
 			// make previous expanded post small again
@@ -420,14 +427,14 @@
 				// remove expand class from current post
 				$('#' + $scope.cp.uid).removeClass('expand');
 				// set post template to compact version
-				$scope.cp.template = gTemplates[gTemplateID][0];
+				$scope.cp.template = $scope.templates[$scope.templateID][0];
 			}
 			// store current expanded post
-			if (p.template !== gTemplates[gTemplateID][1]) {
+			if (p.template !== $scope.templates[$scope.templateID][1]) {
 				$scope.expand(p);
 			} else {
 				// set post template to compact version
-				p.template = gTemplates[gTemplateID][0];
+				p.template = $scope.templates[$scope.templateID][0];
 			}
 		};
 		
