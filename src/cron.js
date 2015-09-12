@@ -114,9 +114,9 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 				try {
 					//console.log("FindOrCreatePost (D)");
 					var ref = !ut.isArray(post) ? post : post[0];
-					ref.title 		= data.title ? ut.parseHtmlEntities(data.title).trim() : '';
-					ref.body		= data.description || '';
-					ref.summary		= CleanupSummary((data.summary !== undefined && data.summary !== data.description) ? data.summary : data.description);
+					ref.title 		= data.title ? ut.parseHtmlEntities(data.title) : '';
+					ref.body		= data.description ? CleanupDescription(data.description) : '';
+					ref.summary		= CleanupSummary((data.summary !== undefined && data.summary !== ref.body) ? data.summary : ref.body);
 					ref.images		= data.images || undefined;
 					ref.videos		= data.videos || [];
 					// prevent the publish date to be overridden
@@ -170,6 +170,20 @@ function CleanupSummary(data,debug) {
 	if (!data || data.length <= 0) {
 		resolve('');
 	}
+	//  remove all html tags and return
+	return data
+		.replace(/<br[\s\S]*?>/gi, ' ')
+		.replace(/<.*?>/gi, '')
+		.trim();
+};
+
+/** function CleanupDescription
+ */
+function CleanupDescription(data,debug) {
+	// early escape on no string
+	if (!data || data.length <= 0) {
+		resolve('');
+	}
 	
 	data = data
 		.replace(/((<img).*?(>))|<hr>|<\/*h\d>/gi, '') // remove headings OR separator OR image tags
@@ -177,19 +191,12 @@ function CleanupSummary(data,debug) {
 		.replace(/(<script)[\s\S]*?(<\/script>)/gi, '') // remove scripts
 		.replace(/(<iframe)[\s\S]*?(\/iframe>)/gi, ''); // remove iframes
 
-	// detect link tags
-	if (true) {
-		// remove all link tags
-		data = data
-			.replace(/<a.*?(>)/gi, '')
-			.replace(/<\/a>/gi, '');
-	} else {
-		// add new tab to all links
-		var p = /<a\s/gi; // needs to be a separate variable otherwise it will be an infinite loop 
-			e;
-		while (e = p.exec(data)) {
-			data = ut.stringInsert(data, 'target="_blank"', e.index + 3);
-		}
+	// add new tab to all links
+	var p = /<a\s/gi, // needs to be a separate variable otherwise it will be an infinite loop 
+		e;
+
+	while (e = p.exec(data)) {
+		data = ut.stringInsert(data, 'target="_blank"', e.index + 3);
 	}
 	
 	// return values

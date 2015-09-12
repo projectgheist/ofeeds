@@ -147,12 +147,14 @@ exports.parseParameters = function(obj,user) {
 };
 exports.parseHtmlEntities = function(str) {
 	if (!str) {
-		return "";
+		return '';
 	}
-    return str.replace(/&#([0-9]{1,3});/gi, function(match, numStr) {
-        var num = parseInt(numStr, 10); // read num as normal number
-        return String.fromCharCode(num);
-    });
+    return str
+		.replace(/&#([0-9]{1,3});/gi, function(match, numStr) {
+			var num = parseInt(numStr, 10); // read num as normal number
+			return String.fromCharCode(num);
+		})
+		.trim();
 }
 exports.parseFeeds = function(feeds) {
     if (!feeds) {
