@@ -234,10 +234,6 @@ hbinclude .bs-callout {
 /**
  * typeahead
  */
-.twitter-typeahead{
-	width: 100%;
-}
-
 .twitter-typeahead .tt-query,
 .twitter-typeahead .tt-hint {
 	margin-bottom: 0;
@@ -283,6 +279,10 @@ hbinclude .bs-callout {
 	overflow: hidden;
 }
 
+.panel-body img {
+	max-width: 100%;
+}
+
 .tt-suggestion p {
 	margin: 0;
 }
@@ -317,4 +317,58 @@ hbinclude .bs-callout {
 	top: 15px;
     right: 30px;
 	z-index: 10;
+}
+
+/** Mobile changes to bootstrap
+*/
+.navbar-header {
+	width: 100%;
+}
+
+.navbar-nav {
+	display: inline-block;
+	margin: 0;
+}
+
+.nav > li > a {
+	margin-right: 15px;
+	padding: 20px 15px;
+	color: rgba(255,255,255,.84);
+}
+
+.nav>li>a:focus, .nav>li>a:hover ,
+.nav .open>a, .nav .open>a:focus, .nav .open>a:hover {
+	color: white;
+	background-color: transparent;
+}
+
+@media (max-width: 767px) {
+	.nav > li > a {
+		margin-right: 0;
+	}
+}
+
+.navbar-header > form.navbar-form {
+	display: block;
+	width: 95%;
+	padding: 0 60px;
+	position: absolute;
+	top: 0;
+	left: 15px;
+}
+
+.navbar-header > .navbar-right {
+	float: right;
+}
+
+.navbar-form {
+	box-shadow: none;
+	-webkit-box-shadow: none;
+	border: none;
+}
+
+.navbar-form > .form-group,
+.twitter-typeahead,
+.twitter-typeahead > .typeahead {
+	width: 100%;
 }

@@ -236,6 +236,7 @@ exports.formatPosts = function(user,posts) {
                 favicon: post.feed.favicon,
                 url: post.feed.feedURL
             },
+			crawlSuccesful: post.feed.lastFailureWasParseFailure,
             crawlTimeMsec: post.feed.successfulCrawlTime ? post.feed.successfulCrawlTime.getTime() : post.published,
             timestampUsec: post.published ? post.published.getTime() : post.feed.successfulCrawlTime.getTime(),
             likingUsers: [],

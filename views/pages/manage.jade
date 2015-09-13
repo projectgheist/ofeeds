@@ -1,40 +1,42 @@
-.col-lg-12
-	.page-header
-		h1 Information&nbsp;
-			small Next update time: {{diff}}
-	table.table.shadow-z-1
-		thead
-			tr
-				th Icon
-				th Name
-				th Posts
-				th Crawl time
-				th Update time
-				th.text-center Action
-		tbody
-			tr(ng-repeat='f in subs',ng:class="{true:'', false:'danger'}[f.crawlSuccesful]")
-				td
-					img(ng-src="{{f.favicon}}", ng-if="f.favicon", style="height:16px")
-					i.fa.fa-fw.fa-bookmark(ng-if="!f.favicon")
-				td.col-xs-4
-					input.form-control(type="text",value="{{f.title}}",style='background-color:transparent')
-					//--br
-					//--input.form-control(type="text",value="{{f.feedURL}}",style='background-color:transparent')
-				td.text-center {{f.postCount}}
-				td
-					i.fa.fa-fw(ng:class="{true:'fa-check', false:'fa-times'}[f.crawlSuccesful]")
-					| {{f.crawlFormatTime}}
-				td(ng-if="f.time === undefined")
-					| {{f.updated}}
-				td(ng-if="f.time !== undefined")
-					| {{f.date}}
-					br
-					| {{f.time}}
-				td.col-xs-4.text-center
-					a.btn.btn-primary(href="{{f.url}}",title="View")
-						i.fa.fa-external-link
-					button.btn.btn-primary(type="button",title="Refresh",ng-click="rfrsh(f.id)")
-						i.fa.fa-refresh
-					if user !== undefined && user.isAdmin
-						button.btn.btn-primary(type="button",title="Remove")
-							i.fa.fa-times
+.container-fluid
+	.row
+		.col-xs-12
+			.page-header
+				h1 
+					i.fa.fa-info.fa-fw
+					| &nbsp;Information&nbsp;
+					small Next update time: {{diff}}
+			table.table.shadow-z-1
+				thead
+					tr
+						th Icon
+						th Name
+						th Posts
+						th Crawl time
+						th.text-center Action
+				tbody
+					tr(ng-if="!subs")
+						td(colspan="5")
+							include ../elements/loading
+					tr(ng-repeat='f in subs',ng:class="{'danger':!f.crawlSuccesful}")
+						td
+							img(ng-src="{{f.favicon}}", ng-if="f.favicon", style="height:16px")
+							i.fa.fa-fw.fa-bookmark(ng-if="!f.favicon")
+						td.col-xs-4
+							input.form-control(type="text",value="{{f.title}}",style='background-color:transparent')
+							//--br
+							//--input.form-control(type="text",value="{{f.feedURL}}",style='background-color:transparent')
+						td.text-center {{f.postCount}}
+						td
+							p
+								i.fa.fa-fw(ng:class="{true:'fa-check', false:'fa-times'}[f.crawlSuccesful]")
+								| &nbsp;{{f.crawlTime}}
+							p(ng-if="!f.crawlSuccesful") {{f.updated}}
+						td.col-xs-4.text-center
+							a.btn.btn-primary(href="{{f.url}}",title="View")
+								i.fa.fa-external-link
+							button.btn.btn-primary(type="button",title="Refresh",ng-click="rfrsh(f.id)")
+								i.fa.fa-refresh
+							if user !== undefined && user.isAdmin
+								button.btn.btn-primary(type="button",title="Remove")
+									i.fa.fa-times

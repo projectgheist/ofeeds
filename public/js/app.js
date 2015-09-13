@@ -22,8 +22,17 @@
 					self.removeAttr('data-holder-rendered');
 					// remove layzr attributes
 					self.removeAttr('data-layzr');
-					// fit image to parent
-					fit(self[0], self.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
+					var obj = { hasContent: true };
+					if (self.attr('holderjs').length) {
+						obj = JSON.parse(self.attr('holderjs'));
+						if (obj.hasContent) {
+							self.parent().css('height', obj.height);
+						}
+					}
+					if (obj.hasContent) {
+						// fit image to parent
+						fit(self[0], self.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
+					}
 				});
 			}
 		});
@@ -130,8 +139,14 @@
 							g_Layzr.updateSelector();
 							g_Layzr.update();
 						} else if (element.attr('src')) {
-							// fit image to parent
-							fit(element[0], element.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
+							var obj = scope.$eval(attrs.holderjs);
+							if (obj && obj.hasContent) {
+								element.parent().css('height', obj.height);
+							}
+							if (obj === undefined || obj.hasContent) {
+								// fit image to parent
+								fit(element[0], element.parent()[0], { cover: true, apply: true }, fit.cssTransform);
+							}
 						}
 					}, 1);
 				});
@@ -201,9 +216,12 @@
 					return scope.isNavVisible();
 				}, function() {
 					setTimeout(function() { // requires a 1ms delay for some reason
+						var b = ((attrs.ngTextfit.length === 0) || (attrs.ngTextfit === 'true'));
 						element.textTailor({
-							minFont: 12,
-							justify: true
+							fit: b,
+							ellipsis: true,
+							minFont: 14,
+							justify: b
 						});
 					}, 1);
 				});

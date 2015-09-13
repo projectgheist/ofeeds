@@ -10,58 +10,8 @@ include ../includes/header
 	.row
 		include ../includes/sidebar
 		#panel(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'")
-			.navbar.navbar-default.navbar-static-top
-				.container-fluid
-					.navbar-header
-						ul.nav.navbar-nav
-							li
-								a(href="#", ng-click='nt()')
-									i.fa.fa-align-justify.fa-fw
-						button.navbar-toggle(type="button", data-toggle="collapse", data-target=".navbar-collapse")
-					.collapse.navbar-collapse
-						ul.nav.navbar-nav.navbar-right
-							li.dropdown
-								a.dropdown-toggle(href="#",data-toggle="dropdown")
-									i.fa.fa-ellipsis-v.fa-fw
-								ul.dropdown-menu
-									li(ng-click="updateStyle('list')")
-										a(href="#")
-											| List
-									li(ng-click="updateStyle('mini')")
-										a(href="#")
-											| Long
-									li(ng-click="updateStyle('tile')")
-										a(href="#")
-											| Tiled
-						form.navbar-form
-							.form-group(style="display:inline")
-								.input-group(style="display:table")
-									.input-group-addon.no-padding(style="width:0.1%")
-									input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed",style='width:100%')
-			.container-fluid
-				.row
-					.col-xs-12
-						table.table.shadow-z-1(ng-if="stream !== undefined")
-							thead
-								tr
-									th(style='width:30%') Title
-									th(style='width:70%') Values
-							tbody
-								tr
-									td URL
-									td
-										a(href="{{stream.feedURL}}", target="_blank")
-											ng-Textoverflow {{stream.feedURL}}
-								tr
-									td Creation
-									td {{stream.creation}}
-								tr
-									td Updated
-									td {{stream.updated}}
-								tr
-									td Visible articles
-									td {{stream.items.length}}
-						div(ng-view="")
+			include ../includes/nav
+			div(ng-view="")
 	.modal.fade#myModal(ng-controller="modalController", tabindex="-1", role="dialog", aria-labelledby="myModalLabel", aria-hidden="true")
 		.modal-dialog
 			.modal-content

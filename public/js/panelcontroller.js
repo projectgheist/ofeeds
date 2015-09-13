@@ -30,10 +30,11 @@
 		'$anchorScroll', 
 		'$sce', 
 		'$timeout', 
+		'$window', 
 		'panelService'
 	];
 
-	function panelController($rootScope, $scope, $http, $location, $route, $routeParams, $anchorScroll, $sce, $timeout, panelService) {
+	function panelController($rootScope, $scope, $http, $location, $route, $routeParams, $anchorScroll, $sce, $timeout, $window, panelService) {
 		$scope.templateID = '';
 		$scope.templates = {
 			'list': ['views/templates/post-compact','views/templates/post-expand'],
@@ -246,6 +247,7 @@
 					var str = ref.content.content;
 					// check if string
 					if (typeof str == 'string' || str instanceof String) {
+						ref.content.hasContent = (str.length > 0);
 						// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
 						ref.content.content = $sce.trustAsHtml(str);
 					}
@@ -282,9 +284,12 @@
 			}
 			// set new template id
 			$scope.templateID = n;
-			// set the template for all the items
-			for (var i in $scope.stream.items) {
-				$scope.stream.items[i].template = $scope.templates[$scope.templateID][0];
+			// null pointer check
+			if ($scope.stream) {
+				// set the template for all the items
+				for (var i in $scope.stream.items) {
+					$scope.stream.items[i].template = $scope.templates[$scope.templateID][0];
+				}
 			}
 		};
 		

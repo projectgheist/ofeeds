@@ -38,9 +38,8 @@
 				for (var i in $scope.subs) {
 					var ref = $scope.subs[i];
 					ref.url = ['/subscription/feed/',encodeURIComponent(ref.id)].join('');
-					ref.crawlFormatTime = moment(ref.crawlTime).format();
-					ref.date = moment(ref.updated).format('DD MMM YYYY');
-					ref.time = moment(ref.updated).format('HH:mm Z');
+					ref.crawlTime = moment(ref.crawlTime).fromNow();
+					ref.updated = moment(ref.updated).format();
 				}
 			});
 		};

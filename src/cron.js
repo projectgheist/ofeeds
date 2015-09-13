@@ -115,8 +115,8 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 					//console.log("FindOrCreatePost (D)");
 					var ref = !ut.isArray(post) ? post : post[0];
 					ref.title 		= data.title ? ut.parseHtmlEntities(data.title) : '';
-					ref.body		= data.description ? CleanupDescription(data.description) : '';
-					ref.summary		= CleanupSummary((data.summary !== undefined && data.summary !== ref.body) ? data.summary : ref.body);
+					ref.body		= data.description ? CleanupDescription(data.description, data.images) : '';
+					ref.summary		= CleanupSummary(ref.body);
 					ref.images		= data.images || undefined;
 					ref.videos		= data.videos || [];
 					// prevent the publish date to be overridden
@@ -137,6 +137,7 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 					//console.log('POST STORE ERROR: ' + e)
 				}
 			}, function(err) {
+				feed.lastFailureWasParseFailure = true;
 				resolve();
 			});
 	});
@@ -168,7 +169,7 @@ function SelectPublishedDate(prev,data,debug) {
 function CleanupSummary(data,debug) {
 	// early escape on no string
 	if (!data || data.length <= 0) {
-		resolve('');
+		return '';
 	}
 	//  remove all html tags and return
 	return data
@@ -179,22 +180,42 @@ function CleanupSummary(data,debug) {
 
 /** function CleanupDescription
  */
-function CleanupDescription(data,debug) {
+function CleanupDescription(data,images,debug) {
 	// early escape on no string
 	if (!data || data.length <= 0) {
-		resolve('');
+		return '';
 	}
 	
 	data = data
-		.replace(/((<img).*?(>))|<hr>|<\/*h\d>/gi, '') // remove headings OR separator OR image tags
+		.replace(/<\/img>|<hr>|<\/*h\d>/gi, '') // remove headings OR separator
 		.replace(/<br[\s\S]*?>/gi, ' ') // remove new lines
 		.replace(/(<script)[\s\S]*?(<\/script>)/gi, '') // remove scripts
 		.replace(/(<iframe)[\s\S]*?(\/iframe>)/gi, ''); // remove iframes
-
+	
+	var p, // needs to be a separate variable otherwise it will be an infinite loop
+		e,
+		i = []; // array of image urls to remove
+	
+	// remove thumbnails
+	if (images.small.length) i = i.concat(images.small);
+	if (images.other.length) i.push(images.other[0].url);
+	if (i.length) {
+		p = /<img\s.*?src="(.*?)"\s*\/?>/gi;
+		while (e = p.exec(data)) {
+			for (var j in i) { // loop all urls
+				if (e[1] === i[j]) { // compare image src urls
+					data = data.replace(e[0], ''); // do string replace
+				}
+			}
+		}
+	}
+	
+	data = data
+		.replace(/(<img\s)(.*?)((height|width)="1"\s*)+(.*?>)/gi, '') // remove ad images
+		.replace(/<a\s?.*?>[\s\n]*<\/a>/gi, ''); // remove empty links
+	
 	// add new tab to all links
-	var p = /<a\s/gi, // needs to be a separate variable otherwise it will be an infinite loop 
-		e;
-
+	p = /<a\s/gi;
 	while (e = p.exec(data)) {
 		data = ut.stringInsert(data, 'target="_blank"', e.index + 3);
 	}
@@ -275,8 +296,7 @@ function StorePosts(stream, feed, posts, guids) {
 		ignoreImages = false;
 	while (data = stream.read()) {
 		var images = new ContainerImages(),
-			videos = [],
-			paragraph;
+			videos = [];
 
 		//console.log("StorePosts (B)");
 		// Store original thumbnail url
@@ -300,10 +320,10 @@ function StorePosts(stream, feed, posts, guids) {
 		}
 		
 		//console.log("StorePosts (D)");
-		// Can't remember why I'm doing this
+		// Used by DeviantArt
 		if (data['media:content'] !== undefined && data['media:content']['@'] !== undefined && data['media:content']['@'].medium !== undefined && data['media:content']['@'].medium !== 'document') {
 			images.other.push(data['media:content']['@']);
-			ignoreImages=true;
+			ignoreImages = true;
 		}
 		
 		//console.log("StorePosts (E)");
@@ -358,8 +378,6 @@ function StorePosts(stream, feed, posts, guids) {
 		data.images = images;
 		// store videos in object
 		data.videos = videos;
-		// store first paragraph
-		data.summary = paragraph;
 		// get the GUID of the post
 		var guid = (data.guid || data.link);
 		// does GUID already exist?
@@ -378,6 +396,7 @@ function StorePosts(stream, feed, posts, guids) {
  @param feed: the database feed object
 */
 function PingFeed(feed) {
+	//console.log("PingFeed - " + feed.title);
 	return new rs.Promise(function(resolve, reject) {
 		// pre-define variables
 		var postGUIDs = [],
@@ -414,7 +433,7 @@ function PingFeed(feed) {
 					resolve(feed.save());
 				}
 			} else {
-				//console.log("FetchFeed (Y)");
+				//console.log("FetchFeed (Y) - " + feed.title);
 				exports.UpdateFeed(feed, posts, resolve);
 			}
 		});
@@ -427,12 +446,13 @@ function PingFeed(feed) {
 		}, function (err, res, user) {
 			// is it an invalid url?
 			if ((err && err.code === 'ETIMEDOUT') || (res && res.statusCode !== 200)) {
-				console.log('REMOVE FEED: ' + feed.feedURL + ' | ' + err + ' | ' + (res ? res.statusCode : 'N/A'))
+				//console.log('Request Error: ' + feed.title + ' | ' + err + ' | ' + (res ? res.statusCode : 'N/A'))
 			}
 		})
 		.on('error', function(err) {
-			//console.log('REQUEST ERROR: ' + feed.feedURL + ' | ' +err);
-			//console.log('Done - UpdateFeed: ' + feed.feedURL)
+			//console.log('Done - Error UpdateFeed: ' + feed.feedURL)
+			feed.lastModified = feed.failedCrawlTime = new Date();
+			feed.lastFailureWasParseFailure = true;
 			resolve(feed.save());
 		})
 		.pipe(feedparser); // parse it through feedparser;
@@ -484,7 +504,7 @@ exports.UpdateAllFeeds = function(done) {
 			}
 			// if jobs present
 			if (a.length > 0) {
-				//console.log('LENGTH OF JOBS: ' + a.length)
+				//console.log('Update feed count: ' + a.length)
 				// run all jobs
 				rs
 					.all(a) // execute FetchFeed promises

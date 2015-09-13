@@ -17,7 +17,7 @@
 						| &nbsp;·
 					| &nbsp;{{post.formatted}}
 		.panel-body
-			.col-xs-4(style="height:360px;overflow:hidden")
-				img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
-			.col-xs-8
-				div(ng-bind-html="post.content.summary")
+			div(ng-class="{'col-xs-4':post.content.content,'col-xs-12 text-center':!post.content.content}",style="overflow:hidden")
+				img(data-layzr="{{post.content.images.other[0].url}}",holderjs='{"hasContent":{{post.content.hasContent}},"height":"360px"}',ng-click="showModal(post.uid)")
+			.col-xs-8(ng-if="post.content.content")
+				div(ng-bind-html="post.content.content")
