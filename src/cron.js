@@ -115,7 +115,7 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 					//console.log("FindOrCreatePost (D)");
 					var ref = !ut.isArray(post) ? post : post[0];
 					ref.title 		= data.title ? ut.parseHtmlEntities(data.title) : '';
-					ref.body		= data.description ? CleanupDescription(data.description, data.images) : '';
+					ref.body		= data.description ? CleanupDescription(data.description) : '';
 					ref.summary		= CleanupSummary(ref.body);
 					ref.images		= data.images || undefined;
 					ref.videos		= data.videos || [];
@@ -200,10 +200,16 @@ function CleanupDescription(data,images,debug) {
 	if (images.small.length) i = i.concat(images.small);
 	if (images.other.length) i.push(images.other[0].url);
 	if (i.length) {
-		p = /<img\s.*?src="(.*?)"\s*\/?>/gi;
+		p = /<img\s.*?src="(.*?)"\s*(.*?)\s*\/?>/gi;
 		while (e = p.exec(data)) {
+			if (debug) {
+				console.log(e);
+				console.log('found' + e[1]);
+			}
 			for (var j in i) { // loop all urls
+				if (debug) console.log('comp: ' + i[j]);
 				if (e[1] === i[j]) { // compare image src urls
+					if (debug) console.log('removed!');
 					data = data.replace(e[0], ''); // do string replace
 				}
 			}
