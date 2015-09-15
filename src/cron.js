@@ -115,7 +115,7 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 					//console.log("FindOrCreatePost (D)");
 					var ref = !ut.isArray(post) ? post : post[0];
 					ref.title 		= data.title ? ut.parseHtmlEntities(data.title) : '';
-					ref.body		= data.description ? CleanupDescription(data.description) : '';
+					ref.body		= data.description ? CleanupDescription(data.description, data.images) : '';
 					ref.summary		= CleanupSummary(ref.body);
 					ref.images		= data.images || undefined;
 					ref.videos		= data.videos || [];
@@ -191,26 +191,22 @@ function CleanupDescription(data,images,debug) {
 		.replace(/<br[\s\S]*?>/gi, ' ') // remove new lines
 		.replace(/(<script)[\s\S]*?(<\/script>)/gi, '') // remove scripts
 		.replace(/(<iframe)[\s\S]*?(\/iframe>)/gi, ''); // remove iframes
-	
+		
 	var p, // needs to be a separate variable otherwise it will be an infinite loop
 		e,
 		i = []; // array of image urls to remove
 	
 	// remove thumbnails
-	if (images.small.length) i = i.concat(images.small);
-	if (images.other.length) i.push(images.other[0].url);
-	if (i.length) {
-		p = /<img\s.*?src="(.*?)"\s*(.*?)\s*\/?>/gi;
-		while (e = p.exec(data)) {
-			if (debug) {
-				console.log(e);
-				console.log('found' + e[1]);
-			}
-			for (var j in i) { // loop all urls
-				if (debug) console.log('comp: ' + i[j]);
-				if (e[1] === i[j]) { // compare image src urls
-					if (debug) console.log('removed!');
-					data = data.replace(e[0], ''); // do string replace
+	if (images) {
+		if (images.small.length) i = i.concat(images.small);
+		if (images.other.length) i.push(images.other[0].url);
+		if (i.length) {
+			p = /<img\s.*?src="(.*?)"[\s\S][^>]*>/gi;
+			while ((e = p.exec(data)) !== null) {
+				for (var j in i) { // loop all urls
+					if (e[1] === i[j]) { // compare image src urls
+						data = data.replace(e[0], ''); // do string replace
+					}
 				}
 			}
 		}
@@ -222,7 +218,7 @@ function CleanupDescription(data,images,debug) {
 	
 	// add new tab to all links
 	p = /<a\s/gi;
-	while (e = p.exec(data)) {
+	while ((e = p.exec(data)) !== null) {
 		data = ut.stringInsert(data, 'target="_blank"', e.index + 3);
 	}
 	
