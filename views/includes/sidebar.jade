@@ -4,10 +4,6 @@
 			a(href="/")
 				i.fa.fa-home.fa-fw(style="width:32px;margin-right:15px")
 				| Home
-		li.withripple(ng-class="isActive('/manage') ? 'active' : ''",data-target="/manage")
-			a(href="/manage")
-				i.fa.fa-bar-chart.fa-fw(style="width:32px;margin-right:15px")
-				| Management
 	#sidebar-body(style="overflow:scroll;overflow-x:hidden;overflow-y:auto")
 		div(ng-if="!subs")
 			include ../elements/loading

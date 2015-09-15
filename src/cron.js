@@ -114,7 +114,7 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 				try {
 					//console.log("FindOrCreatePost (D)");
 					var ref = !ut.isArray(post) ? post : post[0];
-					ref.title 		= data.title ? ut.parseHtmlEntities(data.title) : '';
+					ref.title 		= data.title ? ut.parseHtmlEntities(data.title) : 'No title';
 					ref.body		= data.description ? CleanupDescription(data.description, data.images) : '';
 					ref.summary		= CleanupSummary(ref.body);
 					ref.images		= data.images || undefined;
