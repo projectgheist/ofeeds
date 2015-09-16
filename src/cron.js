@@ -114,8 +114,10 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 				try {
 					//console.log("FindOrCreatePost (D)");
 					var ref = !ut.isArray(post) ? post : post[0];
+					var m = data['media:group'];
 					ref.title 		= data.title ? ut.parseHtmlEntities(data.title) : 'No title';
-					ref.body		= data.description ? CleanupDescription(data.description, data.images) : '';
+					ref.body		= data.description ? data.description : (m && m['media:description'] && m['media:description']['#'] ? m['media:description']['#'] : '');
+					ref.body		= CleanupDescription(ref.body || '', data.images);
 					ref.summary		= CleanupSummary(ref.body);
 					ref.images		= data.images || undefined;
 					ref.videos		= data.videos || [];
@@ -199,12 +201,12 @@ function CleanupDescription(data,images,debug) {
 	// remove thumbnails
 	if (images) {
 		if (images.small.length) i = i.concat(images.small);
-		if (images.other.length) i.push(images.other[0].url);
+		if (images.other.length) i.push(images.other[0]);
 		if (i.length) {
 			p = /<img\s.*?src="(.*?)"[\s\S][^>]*>/gi;
 			while ((e = p.exec(data)) !== null) {
 				for (var j in i) { // loop all urls
-					if (e[1] === i[j]) { // compare image src urls
+					if (e[1] === i[j].url) { // compare image src urls
 						data = data.replace(e[0], ''); // do string replace
 					}
 				}
@@ -310,22 +312,28 @@ function StorePosts(stream, feed, posts, guids) {
 
 		//console.log("StorePosts (C)");
 		// Used by DeviantArt
-		var thumbnails = data['media:thumbnail'];
-		if (!Array.isArray(thumbnails)) {
-			thumbnails = [thumbnails];
-		}
-		for (var i in thumbnails) {
-			// store thumbnail image
-			if (thumbnails[i] !== undefined && thumbnails[i]['@'] !== undefined && thumbnails[i]['@'].medium !== undefined && thumbnails[i]['@'].medium !== 'document') {
-				images.small.push(data['media:thumbnail']['@']);
+		var thumbnails = data['media:thumbnail'] || (data['media:group'] ? data['media:group']['media:thumbnail'] : undefined);
+		if (thumbnails) {
+			if (!Array.isArray(thumbnails)) { // make array
+				thumbnails = [thumbnails];
+			}
+			for (var i in thumbnails) { // loop all found thumbnails
+				if (thumbnails[i] && thumbnails[i]['@'] && (thumbnails[i]['@'].medium === undefined || thumbnails[i]['@'].medium !== 'document')) {
+					images.small.push(thumbnails[i]['@']); // store thumbnail image
+				}
 			}
 		}
 		
 		//console.log("StorePosts (D)");
-		// Used by DeviantArt
-		if (data['media:content'] !== undefined && data['media:content']['@'] !== undefined && data['media:content']['@'].medium !== undefined && data['media:content']['@'].medium !== 'document') {
-			images.other.push(data['media:content']['@']);
-			ignoreImages = true;
+		// Used by DeviantArt, Youtube, Imgur
+		var m = data['media:content'] || (data['media:group'] ? data['media:group']['media:content'] : undefined);
+		if (m && m['@']) {
+			if (m['@'].medium && m['@'].medium === 'image') {
+				images.other.push(m['@']);
+				ignoreImages = true;
+			} else if (m['@'].type && m['@'].type === 'application/x-shockwave-flash') {
+				videos.push(m['@'].url);
+			}
 		}
 		
 		//console.log("StorePosts (E)");
