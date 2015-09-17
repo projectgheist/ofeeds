@@ -18,7 +18,7 @@
 					| ·&nbsp;
 				| {{post.formatted}}
 			hr
-			h3(style="height:52px",ng-textfit='')
+			h3(style="max-height:52px",ng-textfit='')
 				a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
 .col-lg-8(ng-if="post.content.videos.length")
 	.panel.panel-default
@@ -29,14 +29,13 @@
 				span.label.label-primary(ng-if="!post.read") New
 			| &nbsp;
 			span.label.label-primary(ng-if="post.content.videos.length") Video
-		.panel-image
-			img(holderjs='')
-		.panel-text
-			p
-				span(ng-if="post.author")
-					a(href="#") by {{post.author}} 
-					| ·&nbsp;
-				| {{post.formatted}}
-			hr
-			h3(style="height:52px",ng-textfit='')
-				a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+		.panel-video
+			img(holderjs='',data-layzr="{{post.content.images.other[0].url}}")
+			.panel-text
+				h3(style="max-height:52px",ng-textfit='')
+					a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+				p
+					span(ng-if="post.author")
+						a(href="#") by {{post.author}} 
+						| ·&nbsp;
+					| {{post.formatted}}
