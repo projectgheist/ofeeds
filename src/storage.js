@@ -221,7 +221,7 @@ exports.formatPosts = function(user,posts) {
             },
             content: {
                 direction: 'ltr',
-				summary: post.summary || '',
+				summary: post.summary,
                 content: post.body,
 				images: post.images,
 				videos: post.videos

@@ -1,5 +1,15 @@
+mixin PanelText()
+	.panel-text
+		h3(style="max-height:52px",ng-textfit='')
+			a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+		p
+			span(ng-if="post.author")
+				a(href="#") by {{post.author}} 
+				| ·&nbsp;
+			| {{post.formatted}}
+
 .col-lg-4(ng-if="!post.content.videos.length")
-	.panel.panel-default
+	.panel.panel-post.panel-default
 		.panel-label
 			if user
 				span.label.label-primary(ng-if="!post.read") Unread
@@ -11,17 +21,9 @@
 			img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
 		.panel-image(ng-if="!post.content.images.other.length")
 			img(holderjs='')
-		.panel-text
-			p
-				span(ng-if="post.author")
-					a(href="#") by {{post.author}} 
-					| ·&nbsp;
-				| {{post.formatted}}
-			hr
-			h3(style="max-height:52px",ng-textfit='')
-				a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+		mixin PanelText()
 .col-lg-8(ng-if="post.content.videos.length")
-	.panel.panel-default
+	.panel.panel-post.panel-default
 		.panel-label
 			if user
 				span.label.label-primary(ng-if="!post.read") Unread
@@ -31,11 +33,5 @@
 			span.label.label-primary(ng-if="post.content.videos.length") Video
 		.panel-video
 			img(holderjs='',data-layzr="{{post.content.images.other[0].url}}")
-			.panel-text
-				h3(style="max-height:52px",ng-textfit='')
-					a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
-				p
-					span(ng-if="post.author")
-						a(href="#") by {{post.author}} 
-						| ·&nbsp;
-					| {{post.formatted}}
+			i.fa.fa-youtube-play.fa-fw.fa-5x(style="position:absolute;top:30%;left:0;right:0;margin-left:auto;margin-right:auto")
+		mixin PanelText()

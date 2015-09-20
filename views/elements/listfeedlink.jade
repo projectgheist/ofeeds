@@ -1,0 +1,6 @@
+li(style="height:24px",ng-textfit='')
+	a(href="{{feed.url}}")
+		.pull-left(style="width:32px;height:16px;margin-right:15px")
+			img(ng-src="{{feed.favicon}}", ng-if="feed.favicon", style="height:100%")
+			i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon")
+		| {{feed.title}}

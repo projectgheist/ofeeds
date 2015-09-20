@@ -226,23 +226,40 @@
 					// copy retrieved articles to stream
 					$scope.stream = data;
 				}
+
 				// loop all articles/items
 				for (var i in $scope.stream.items) {
 					// local reference to item
 					var ref = $scope.stream.items[i];
+					
 					// format date
 					if (moment().diff(ref.published,'days') > 1) {
 						ref.formatted = moment(ref.published).format('ddd, hh:mm');
 					} else {
 						ref.formatted = moment(ref.published).fromNow();
 					}
+					
+					// shorten the author name
 					if (ref.author) {
-						// shorten the author name
 						var author = /(by\s)(\w*\s\w*)/i.exec(ref.author);
 						if (author) {
 							ref.author = author[2];
 						}
 					}
+					
+					// retrieve video image
+					if (ref.content.videos.length) {
+						var e; // declare variable
+						for (var j in ref.content.videos) { // loop videos
+							if ((e = /youtube.com\/[\s\S]+\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
+								// add video as thumbnail
+								ref.content.images.other.splice(0, 0, {
+									url: ['http://img.youtube.com/vi/',e[1],'/0.jpg'].join('')
+								});
+							}
+						}
+					}
+					
 					// local reference to variable
 					var str = ref.content.content;
 					// check if string
@@ -251,19 +268,15 @@
 						// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
 						ref.content.content = $sce.trustAsHtml(str);
 					}
-					str = ref.content.summary;
-					// check if string
-					if (typeof str == 'string' || str instanceof String) {
-						// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
-						ref.content.summary = $sce.trustAsHtml(str);
-					}
+					
 					// set article's template
 					if ($scope.cp && ref.uid === $scope.cp.uid) {
 						$scope.expand($scope.stream.items[i]);
 					} else if ($scope.templateID !== '') {
 						ref.template = $scope.templates[$scope.templateID][0];
 					} else {
-						ref.template = $scope.templates['tile'][0];
+						$scope.templateID = 'tile';
+						ref.template = $scope.templates[$scope.templateID][0];
 					}
 				}
 				// is message present?
@@ -424,7 +437,7 @@
 		
 		$scope.toggle = function(p) {
 			// if template style doesn't have an expanded version, skip
-			if ($scope.templates[$scope.templateID].length <= 1) {
+			if (!$scope.templates || $scope.templates[$scope.templateID].length <= 1) {
 				return;
 			}
 			// make previous expanded post small again

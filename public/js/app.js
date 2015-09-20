@@ -86,10 +86,10 @@
 		.directive('withripple', ['$rootScope','$window','$location',withripple])
 		.directive('ngRipple', ngRipple)
 		.directive('ngTextfit', ngTextfit)
-		.directive('ngTextoverflow', ngTextoverflow);
+		//.directive('ngTextoverflow', ngTextoverflow);
 		//.directive('onLastRepeat', onLastRepeat)
 		//.directive('onResize', onResize)
-		//.directive('ngInclude', ngInclude)
+		.directive('ngInclude', ['$compile',ngInclude]);
 		//.directive('ngImgLoaded', ngImgLoaded)
 
 	function appConfig($routeProvider, $locationProvider) {
@@ -242,9 +242,9 @@
 	
 	function ngInclude($compile) {
 		return {
-			restrict: 'A',
+			restrict: 'A', // attribute
 			link: function(scope, element, attrs) {
-				var s = scope.$parent.$parent, // scope
+				/*var s = scope.$parent.$parent, // scope
 					p = scope.$parent.post; // post info
 				// Trigger when number of children changes, including by directives like ng-repeat
 				scope.$watch(function() {
@@ -267,8 +267,6 @@
 							}
 							// make all links open in a new tab
 							element.find('.article-content').find('a').each(function(e) {
-								// open in new tab
-								$(this).attr("target","_blank");
 								// if tumblr site
 								var u = $(this).attr("href"),
 									r = new RegExp("(?:http:\/\/)?(?:www\.+)?([A-Za-z0-9\-]*)(\.tumblr\.com\/)"),
@@ -294,7 +292,7 @@
 							});
 						}
 					});
-				});
+				});*/
 			}
 		}
 	};

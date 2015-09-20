@@ -1,5 +1,5 @@
 .col-xs-12
-	.panel.panel-default
+	.panel.panel-default(ng-repeat='post in stream.items',ng-class="{'read':isRead(post)}")
 		.panel-heading
 			.row
 				.col-xs-4
