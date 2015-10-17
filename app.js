@@ -39,6 +39,7 @@ ap.use(require('./src/routes'));
 /** Include routes
  */
 ap.use(require('./src/api/subscriptions'));
+ap.use(require('./src/api/posts'));
 ap.use(require('./src/api/streams'));
 ap.use(require('./src/api/tag'));
 /*

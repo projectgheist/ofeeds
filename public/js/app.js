@@ -92,6 +92,9 @@
 		.directive('ngInclude', ['$compile',ngInclude]);
 		//.directive('ngImgLoaded', ngImgLoaded)
 
+	/*
+	 *
+	 */
 	function appConfig($routeProvider, $locationProvider) {
 		$locationProvider.html5Mode(true);
 		$routeProvider
@@ -100,6 +103,11 @@
 				return 'views/pages/manage';
 			},
 			controller: 'overviewController'
+		})
+		.when('/post/:value', {
+			templateUrl: function(urlattr) {
+				return 'views/pages/single';
+			}
 		})
 		.when('/subscription/:type/:value', {
 			templateUrl: function(urlattr) {

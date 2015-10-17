@@ -58,13 +58,15 @@ exports.all = function(model, options) {
 	return q;
 }
 
-/**
-	use an empty callback function as a fourth parameter
+/** function findOrCreate
+ * use an empty callback function as a fourth parameter
  */
 exports.findOrCreate = function(model, item, debug) {
     return exports.updateOrCreate(model, item, item, debug); 
 };
 
+/** function updateOrCreate
+ */
 exports.updateOrCreate = function(model, item, update, debug) {
 	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
 	var q = model.findOneAndUpdate(item, update, {upsert: true, 'new': true});
@@ -110,6 +112,8 @@ exports.editTags = function(record, addTags, removeTags) {
 	});
 };
 
+/** function getTags
+ */
 exports.getTags = function(tags) {
 	if (tags) {
 		if (!Array.isArray(tags)) {
@@ -162,7 +166,8 @@ exports.getPosts = function(streams, options) {
                 { tags: { $in: includeTags, $nin: excludeTags }}
             ]
         });
-    }).then(function(rfeeds) {
+    })
+	.then(function(rfeeds) {
 		// find posts by feed and tags, and filter by date
         var query = exports.Post.find({
             $or: [

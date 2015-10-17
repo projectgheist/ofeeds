@@ -1,0 +1,6 @@
+include post-compact
+.col-xs-4(style='overflow:hidden')
+	img(ng-if='post.content.images.other.length',holderjs='',data-layzr="{{post.content.images.other[0].url}}")
+	img(ng-if="!post.content.images.other.length",holderjs='')
+.col-xs-8
+	p(ng-bind-html="post.content.content")
