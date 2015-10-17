@@ -45,6 +45,8 @@ exports.setup = function() {
     });
 };
 
+/** function all
+ */
 exports.all = function(model, options) {
 	// use parameter or create empty object
     options || (options = {});
@@ -155,53 +157,59 @@ exports.getPosts = function(streams, options) {
     var includeTags, excludeTags;
     //
 	return rs
-	.all([exports.getTags(tags), exports.getTags(options.excludeTags)])
-	.then(function(results) {
-		includeTags = results[0];
-        excludeTags = results[1];
-        // find feeds given directly and by tag
-        return exports.Feed.find({
-            $or: [
-                { feedURL: { $in: feeds }},
-                { tags: { $in: includeTags, $nin: excludeTags }}
-            ]
-        });
-    })
-	.then(function(rfeeds) {
-		// find posts by feed and tags, and filter by date
-        var query = exports.Post.find({
-            $or: [
-                { feed: { $in: rfeeds }},
-                { tags: { $in: includeTags }}
-            ],
-            tags: { $nin: excludeTags },
-            updated: {
-				$gte: new Date(parseInt(options.minTime) || 0),
-				$lt: (options.maxTime ? new Date(parseInt(options.maxTime)) : undefined)
+		.all([exports.getTags(tags), exports.getTags(options.excludeTags)])
+		.then(function(multipleTags) {
+			// store for later use
+			includeTags = multipleTags[0];
+			excludeTags = multipleTags[1];
+			// find feeds given directly and by tag
+			return exports.Feed.find({
+				$or: [
+					{ feedURL: { $in: feeds }},
+					{ tags: { $in: includeTags, $nin: excludeTags }}
+				]
+			});
+		})
+		.then(function(rfeeds) {
+			// find posts by feed and tags, and filter by date
+			var query = exports.Post.find({
+				$or: [
+					{ feed: { $in: rfeeds }},
+					{ tags: { $in: includeTags }}
+				],
+				tags: { $nin: excludeTags },
+				updated: {
+					$gte: new Date(parseInt(options.minTime)),
+					$lt: new Date(parseInt(options.maxTime))
+				}
+			});
+			
+			// limit return query amount
+			if (options.limit) {
+				query.limit(options.limit);
 			}
-        });
-		
-        if (options.limit) {
-            query.limit(options.limit);
-		}
-        if (options.sort) {
-			query.sort(options.sort);
-		}
-        /*if (options.count) {
-            query.count();
-		}*/
-        if (options.populate) {
-			// check if already an array, else make it an array
-			if (!Array.isArray(options.populate)) {
-				options.populate = [options.populate];
+			
+			// sort return query
+			if (options.sort) {
+				query.sort(options.sort);
 			}
-			// loop items to populate in the query
-			for (var i in options.populate) {
-            	query.populate(options.populate[i]);
+			/*if (options.count) {
+				query.count();
+			}*/
+			
+			// populate the referenced model variables of the return model
+			if (options.populate) {
+				// check if already an array, else make it an array
+				if (!Array.isArray(options.populate)) {
+					options.populate = [options.populate];
+				}
+				// loop items to populate in the query
+				for (var i in options.populate) {
+					query.populate(options.populate[i]);
+				}
 			}
-		}
-        return {'query':query,'feeds':rfeeds};
-    });
+			return {'query':query,'feeds':rfeeds};
+		});
 };
 
 //

@@ -197,6 +197,7 @@
 				$scope.params.xt = 'user/-/state/read';
 			}
 			panelService.getElements().query($scope.params,function(data) {
+				console.log(data)
 				// turn off refresh
 				$scope.rf = false;
 				// make sure variables exist
@@ -416,6 +417,8 @@
 			return (p.read > 0) ? true : false;
 		};
 		
+		/** Flagged if something is loading
+		*/
 		$scope.isSpinning = function() {
 			return $scope.rf;
 		};
