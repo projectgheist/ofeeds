@@ -9,8 +9,10 @@ var mg = require('mongoose'),
 var Post = mg.Schema({
 	// reference to the feed this post belongs to
     feed: ut.refAndIndex('Feed'),
-	// unique post identifier for this feed
-    guid: { type: String, index: 1 },
+	// unique post identifier for this post (usually the post url or similar)
+    guid: { type: String, unique: true, index: 1 },
+	// unique short id
+	shortid: { type: String, unique: true, 'default': sh.generate },
 	// post title
     title: String,
 	// post html markup
@@ -36,9 +38,7 @@ var Post = mg.Schema({
 	tags: [ut.ref('Tag')]
 });
 
-Post.virtual('shortID').get(sh.generate);
-
-Post.virtual('longID').get(function() {
+Post.virtual('longid').get(function() {
     return 'tag:reader/item/' + this.id;
 });
 

@@ -10,7 +10,7 @@
 		ul(ng-Ripple="{{subs.length}}")
 			li.withripple(ng-if="subs && subs.length <= 0")
 				a(href="#") No feeds
-			li.withripple(ng-repeat="feed in subs", ng-class="{'active':isActive(feed.url)}", data-target="/subscription/feed/{{feed.id}}") 
+			li.withripple(ng-repeat="feed in subs", ng-class="{'active':isActive(feed.url)}", data-target="/feed/{{feed.id}}") 
 				a(href="#")
 					.pull-left(style="width:32px;height:16px;margin-right:15px")
 						img(ng-if="feed.favicon", ng-src="{{feed.favicon}}", style="height:100%")

@@ -1,6 +1,16 @@
-include post-compact
-.col-xs-4(style='overflow:hidden')
-	img(ng-if='post.content.images.other.length',holderjs='',data-layzr="{{post.content.images.other[0].url}}")
-	img(ng-if="!post.content.images.other.length",holderjs='')
-.col-xs-8
-	p(ng-bind-html="post.content.content")
+.container-fluid
+	.row
+		.col-xs-12
+			ol.breadcrumb
+				li
+					a(href="#") {{post.origin.title}}
+				li.active
+					a(href="#") {{post.title}}
+	.row
+		include ../templates/post-compact
+	.row
+		.col-xs-4(style='overflow:hidden')
+			img(ng-if='post.content.images.other.length',holderjs='',data-layzr="{{post.content.images.other[0].url}}")
+			img(ng-if="!post.content.images.other.length",holderjs='')
+		.col-xs-8
+			p(ng-bind-html="post.content.content")

@@ -1,7 +1,7 @@
 mixin PanelText()
 	.panel-text
 		h3(style="max-height:52px",ng-textfit='')
-			a(href='{{post.alternate.href}}',target='_blank') {{post.title}}
+			a(href='/post/{{post.uid}}') {{post.title}}
 		p
 			span(ng-if="post.author")
 				a(href="#") by {{post.author}} 

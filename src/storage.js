@@ -224,8 +224,8 @@ exports.formatPosts = function(user,posts) {
 				return r;
         	}) : [];
         return {
-            uid: post.shortID.toString(),
-			lid: post.longID.toString(),
+            uid: post.shortid.toString(),
+			lid: post.longid.toString(),
             title: post.title,
 			read: isRead,
             alternate: {

@@ -145,6 +145,9 @@ exports.parseParameters = function(obj,user) {
     }
     return obj;
 };
+
+/**
+*/
 exports.parseHtmlEntities = function(str) {
 	if (!str) {
 		return '';
@@ -156,6 +159,9 @@ exports.parseHtmlEntities = function(str) {
 		})
 		.trim();
 }
+
+/**
+*/
 exports.parseFeeds = function(feeds) {
     if (!feeds) {
         return null;

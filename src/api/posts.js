@@ -24,21 +24,22 @@ app.get('/api/0/posts', function(req, res) {
 		});
 });
 
-/**
+/** retrieve a single post
  */
-app.get('/api/0/post/*', function(req, res) {
+app.get('/api/0/post*', function(req, res) {
 	// has parameters?
 	var q = req.params.length ? req.params : req.query;
 	if (q) {
-		console.log(q);
 		// create query
         db.Post
-		.find({
-			//guid: 
-        })
-		.then(function(post) {
-			return res.json(post);
-        });
+			.find({
+				shortid: q.value 
+			})
+			.populate('feed') // replacing the specified paths in the document with document(s) from other collection(s)
+			.then(function(post) {
+				var fp = db.formatPosts({}, post); // formatted posts
+				return res.json(fp.length && ut.isArray(fp) ? fp[0] : {});
+			});
 	} else {
         return res.status(400).send('InvalidParams');
 	}

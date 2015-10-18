@@ -104,15 +104,12 @@
 			},
 			controller: 'overviewController'
 		})
-		.when('/post/:value', {
-			templateUrl: function(urlattr) {
-				return 'views/pages/single';
-			}
-		})
-		.when('/subscription/:type/:value', {
+		.when('/:type/:value', {
 			templateUrl: function(urlattr) {
 				if (urlattr.type === 'feed') {
 					return 'views/pages/posts';
+				} else if (urlattr.type === 'post') {
+					return 'views/pages/single';
 				} else {
 					return 'views/pages/dashboard';
 				}

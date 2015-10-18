@@ -75,7 +75,15 @@ ap.get("/manage", function(req, res) {
 });
 
 /** subscription route */
-ap.get("/subscription/*", function(req, res) {
+ap.get("/feed/*", function(req, res) {
+	res.render('pages/landing', { 
+		'config': cf.site,
+		'user': req.user
+	});
+});
+
+/** single post route */
+ap.get("/post/*", function(req, res) {
 	res.render('pages/landing', { 
 		'config': cf.site,
 		'user': req.user

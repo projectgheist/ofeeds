@@ -111,7 +111,7 @@ app.get('/api/0/stream/contents*', function(req, res) {
 						} : {};
 					if (hasPosts === undefined) {
 						//console.log('stream/contents (N)')
-						var feedURL = ut.isArray(streams) && streams.length > 0 ? streams[0].value : undefined;
+						var feedURL = ut.isArray(streams) && (streams.length > 0) ? streams[0].value : undefined;
 						// Google Reader returns 404 response, we need a valid json response for infinite scrolling
 						res.json({
 							feedURL: feedURL,

@@ -13,10 +13,15 @@
 	function panelService($resource) {
 		return {
 			getElements: getElements,
+			getSingle: getSingle,
 		};
 		
 		function getElements() {
 			return $resource('/api/0/stream/contents/', {type:'@type', params:'@params'}, { query:{ method: 'GET', isArray: false } });
+		}
+		
+		function getSingle() {
+			return $resource('/api/0/post/', {params:'@params'}, { query:{ method: 'GET', isArray: false } });
 		}
 	};
 
@@ -78,7 +83,7 @@
 		
 		// go to a subscription
 		$scope.gotostream = function(obj) {
-			var url = ['/subscription/feed/',obj.value].join('');
+			var url = ['/feed/',obj.value].join('');
 			if ($location.path() !== url) {
 				// go to subscription local url
 				$rootScope.$apply(function() {
@@ -179,7 +184,51 @@
 				$scope.showAlert('danger',['An <strong>error</strong> occured when trying to subscribe to',$scope.stream.title].join(' '));
 			});
 		};
+
+		/** retrieve multiple posts
+		*/
+		$scope.getpost = function(m) {
+			// make sure that it has a param value
+			if ($scope.params === undefined) {
+				$scope.rf = false;
+				return;
+			}
+			// is still loading?
+			if ($scope.rf) {
+				return;
+			}
+			// set refresh page to TRUE
+			$scope.rf = true;
+			// execute external calls
+			panelService.getSingle().query($scope.params,function(data) {
+				// turn off refresh
+				$scope.rf = false;
+				// no data retrieved
+				if (!data) {
+					return;
+				}
+				// local reference to item
+				var ref = data;
+				// format date
+				if (moment().diff(ref.published,'days') > 1) {
+					ref.formatted = moment(ref.published).format('ddd, hh:mm');
+				} else {
+					ref.formatted = moment(ref.published).fromNow();
+				}
+				// shorten the author name
+				if (ref.author) {
+					var author = /(by\s)(\w*\s\w*)/i.exec(ref.author);
+					if (author) {
+						ref.author = author[2];
+					}
+				}
+				// store post
+				$scope.post = ref;
+			});
+		};
 		
+		/** retrieve multiple posts
+		*/
 		$scope.gtposts = function(m) {
 			// make sure that it has a param value
 			if ($scope.params === undefined) {
@@ -197,7 +246,6 @@
 				$scope.params.xt = 'user/-/state/read';
 			}
 			panelService.getElements().query($scope.params,function(data) {
-				console.log(data)
 				// turn off refresh
 				$scope.rf = false;
 				// make sure variables exist
@@ -423,6 +471,8 @@
 			return $scope.rf;
 		};
 		
+		/** Expand the current selected post
+		*/
 		$scope.expand = function(p) {
 			// if template style doesn't have an expanded version, skip
 			if ($scope.templates[$scope.templateID].length <= 1) {
@@ -438,6 +488,8 @@
 			});
 		};
 		
+		/** Toggle between expanding the current post and minimizing it
+		*/
 		$scope.toggle = function(p) {
 			// if template style doesn't have an expanded version, skip
 			if (!$scope.templates || $scope.templates[$scope.templateID].length <= 1) {
@@ -568,7 +620,11 @@
 						value: (/\*(\/)*$/.test(v) ? v.substring(0, v.length - 1) : v)
 					};
 					// retrieve posts
-					$scope.gtposts();
+					if ($scope.params.type === 'feed') {
+						$scope.gtposts();
+					} else {
+						$scope.getpost();
+					}
 				}
 			}
 		});
