@@ -37,7 +37,7 @@
 				$scope.subs = data.feeds;
 				for (var i in $scope.subs) {
 					var ref = $scope.subs[i];
-					ref.url = ['/subscription/feed/',encodeURIComponent(ref.id)].join('');
+					ref.url = ['/feed/',encodeURIComponent(ref.id)].join('');
 					ref.crawlTime = moment(ref.crawlTime).fromNow();
 					ref.updated = moment(ref.updated).format();
 				}

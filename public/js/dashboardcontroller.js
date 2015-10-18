@@ -42,7 +42,7 @@
 			if (data && data.feeds && data.feeds.length > 0) {
 				$scope.rf = data.feeds;
 				for (var i in $scope.rf) {
-					$scope.rf[i].url = ['/subscription/feed/',encodeURIComponent($scope.rf[i].id),'/'].join('');
+					$scope.rf[i].url = ['/feed/',encodeURIComponent($scope.rf[i].id),'/'].join('');
 				}
 			}
 		});
@@ -51,7 +51,7 @@
 			if (data && data.feeds && data.feeds.length > 0) {
 				$scope.pf = data.feeds;
 				for (var i in $scope.pf) {
-					$scope.pf[i].url = ['/subscription/feed/',encodeURIComponent($scope.pf[i].id),'/'].join('');
+					$scope.pf[i].url = ['/feed/',encodeURIComponent($scope.pf[i].id),'/'].join('');
 				}
 			}
 		});
@@ -75,7 +75,7 @@
 						ref.formatted = moment(ref.published).fromNow();
 						// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
 						ref.content.summary = $sce.trustAsHtml(ref.content.summary);
-						ref.origin.url = ['/subscription/feed/',encodeURIComponent(ref.origin.url),'/'].join('');
+						ref.origin.url = ['/feed/',encodeURIComponent(ref.origin.url),'/'].join('');
 					}
 				}
 			});
