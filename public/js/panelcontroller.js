@@ -222,6 +222,14 @@
 						ref.author = author[2];
 					}
 				}
+				// local reference to variable
+				var str = ref.content.content;
+				// check if string
+				if (typeof str == 'string' || str instanceof String) {
+					ref.content.hasContent = (str.length > 0);
+					// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
+					ref.content.content = $sce.trustAsHtml(str);
+				}
 				// store post
 				$scope.post = ref;
 			});

@@ -9,8 +9,10 @@
 	.row
 		include ../templates/post-compact
 	.row
-		.col-xs-4(style='overflow:hidden')
-			img(ng-if='post.content.images.other.length',holderjs='',data-layzr="{{post.content.images.other[0].url}}")
-			img(ng-if="!post.content.images.other.length",holderjs='')
-		.col-xs-8
+		.col-xs-12
+			.text-center(style='overflow:hidden')
+				img(ng-if='post.content.images.other.length',holderjs='{"height":"100%"}',data-layzr="{{post.content.images.other[0].url}}")
+				img(ng-if="!post.content.images.other.length",holderjs='')
+	.row
+		.col-xs-12
 			p(ng-bind-html="post.content.content")
