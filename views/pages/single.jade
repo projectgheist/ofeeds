@@ -3,16 +3,25 @@
 		.col-xs-12
 			ol.breadcrumb
 				li
-					a(href="#") {{post.origin.title}}
+					a(href="{{post.origin.url}}")
+						i.fa.fa-angle-double-left.fa-fw
+						| &nbsp;{{post.origin.title}}
 				li.active
 					a(href="#") {{post.title}}
-	.row
-		include ../templates/post-compact
-	.row
-		.col-xs-12
-			.text-center(style='overflow:hidden')
-				img(ng-if='post.content.images.other.length',holderjs='{"height":"100%"}',data-layzr="{{post.content.images.other[0].url}}")
-				img(ng-if="!post.content.images.other.length",holderjs='')
-	.row
-		.col-xs-12
-			p(ng-bind-html="post.content.content")
+	.well
+		.row
+			.col-xs-12
+				h2 {{post.title}}
+				hr
+		.row
+			.col-xs-9
+				p {{post.author}}
+			.col-xs-3
+				p.text-right {{post.formatted}}
+		.row
+			.col-xs-12
+				.text-center(style='overflow:hidden')
+					img(ng-if='post.content.images.other.length',holderjs='{"height":"320px"}',data-layzr="{{post.content.images.other[0].url}}")
+					img(ng-if="!post.content.images.other.length",holderjs='')
+				hr
+				p(ng-bind-html="post.content.content")

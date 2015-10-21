@@ -222,6 +222,8 @@
 						ref.author = author[2];
 					}
 				}
+				// encode origin url
+				ref.origin.url = ['/feed/',encodeURIComponent(ref.origin.url)].join('');
 				// local reference to variable
 				var str = ref.content.content;
 				// check if string
