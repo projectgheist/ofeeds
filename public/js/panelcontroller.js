@@ -154,7 +154,7 @@
 					// reset expanded post
 					$scope.cp = undefined;
 					// get new latest items
-					$scope.gtposts({
+					$scope.getPosts({
 						t:'success',
 						m:['<strong>Successfully</strong> refreshed feed (',$scope.stream.title,')'].join(' ')
 					});
@@ -239,7 +239,7 @@
 		
 		/** retrieve multiple posts
 		*/
-		$scope.gtposts = function(m) {
+		$scope.getPosts = function(m) {
 			// make sure that it has a param value
 			if ($scope.params === undefined) {
 				$scope.rf = false;
@@ -255,6 +255,7 @@
 			if ($scope.ignoreReadArticles) {
 				$scope.params.xt = 'user/-/state/read';
 			}
+			// retrieve from database
 			panelService.getElements().query($scope.params,function(data) {
 				// turn off refresh
 				$scope.rf = false;
@@ -338,6 +339,7 @@
 						ref.template = $scope.templates[$scope.templateID][0];
 					}
 				}
+				
 				// is message present?
 				if (m) {
 					$scope.showAlert(m.t, m.m); // show message
@@ -379,7 +381,7 @@
 				// set new fetch time
 				$scope.params.nt = t;
 				// retrieve posts
-				$scope.gtposts();
+				$scope.getPosts();
 			}
 		};
 		
@@ -631,7 +633,7 @@
 					};
 					// retrieve posts
 					if ($scope.params.type === 'feed') {
-						$scope.gtposts();
+						$scope.getPosts();
 					} else {
 						$scope.getpost();
 					}

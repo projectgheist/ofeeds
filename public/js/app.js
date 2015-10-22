@@ -22,17 +22,17 @@
 					self.removeAttr('data-holder-rendered');
 					// remove layzr attributes
 					self.removeAttr('data-layzr');
-					var obj = { hasContent: true };
+					var obj = {};
+					// has holderjs attribute?
 					if (self.attr('holderjs').length) {
+						// convert json to js-object
 						obj = JSON.parse(self.attr('holderjs'));
-						if (obj.hasContent) {
+						if (obj.height) {
 							self.parent().css('height', obj.height);
 						}
 					}
-					if (obj.hasContent) {
-						// fit image to parent
-						fit(self[0], self.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
-					}
+					// fit image to parent
+					fit(self[0], self.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
 				});
 			}
 		});
@@ -145,10 +145,10 @@
 							g_Layzr.update();
 						} else if (element.attr('src')) {
 							var obj = scope.$eval(attrs.holderjs);
-							if (obj && obj.hasContent) {
+							if (obj && obj.height) {
 								element.parent().css('height', obj.height);
 							}
-							if (obj === undefined || obj.hasContent) {
+							if (obj === undefined) {
 								// fit image to parent
 								fit(element[0], element.parent()[0], { cover: true, apply: true }, fit.cssTransform);
 							}

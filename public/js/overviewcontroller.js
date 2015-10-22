@@ -46,7 +46,10 @@
 		
 		$scope.rfrsh = function(v) {
 		};
-		
+	
+		// defocus search box and set value
+		$('.typeahead').blur().val('');
+	
 		$scope.fetch();
 		
 		$interval(function() {

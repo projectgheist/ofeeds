@@ -11,13 +11,13 @@
 	.well
 		.row
 			.col-xs-12
-				h2 {{post.title}}
+				h3 
+					a(href="{{post.alternate.href}}",target="_blank") {{post.title}}
+				p 
+					img(ng-if="post.origin.favicon",src="{{post.origin.favicon}}",height="24px",width="24px")
+					| {{post.author}}
+					| {{post.formatted}}
 				hr
-		.row
-			.col-xs-9
-				p {{post.author}}
-			.col-xs-3
-				p.text-right {{post.formatted}}
 		.row
 			.col-xs-12
 				.text-center(style='overflow:hidden')
