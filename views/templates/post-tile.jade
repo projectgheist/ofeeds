@@ -16,8 +16,6 @@ mixin PanelText()
 				span.label.label-primary(ng-if="!post.read") Unread
 			else
 				span.label.label-primary(ng-if="!post.read") New
-			| &nbsp;
-			span.label.label-primary(ng-if="post.content.videos.length") Video
 		.panel-image(ng-if='post.content.images.other.length',ng-click="showModal(post.uid)")
 			img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
 		.panel-image(ng-if="!post.content.images.other.length")
@@ -31,7 +29,7 @@ mixin PanelText()
 			else
 				span.label.label-primary(ng-if="!post.read") New
 			| &nbsp;
-			span.label.label-primary(ng-if="post.content.videos.length") Video
+			span.label.label-primary Video
 		.panel-video
 			img(holderjs='',data-layzr="{{post.content.images.other[0].url}}")
 			i.fa.fa-youtube-play.fa-fw.fa-5x(style="position:absolute;top:30%;left:0;right:0;margin-left:auto;margin-right:auto")
