@@ -43,9 +43,9 @@ Note: Both require you to add a MongoDB to the application during setup
 
 * ~~Fix cron jobs not running at periodic intervals~~
 * ~~OAuth login and user accounts~~
-* Tag support
+* ~~Tag support~~
 * ~~Layout redesign~~
-* Feed management
+* ~~Feed management~~
 * OPML importing/exporting
 * Mobile support
 
