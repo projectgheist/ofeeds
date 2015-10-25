@@ -5,7 +5,8 @@ mixin PanelText()
 			a(href='/post/{{post.uid}}') {{post.title}}
 		p
 			span(ng-if="post.author")
-				a(href="#") by {{post.author}} 
+				| by&nbsp;
+				a(href="#") {{post.author}} 
 				| ·&nbsp;
 			| {{post.formatted}}
 

@@ -7,7 +7,7 @@
 	var g_Layzr = {};
 
 	/**
-	 * On page load ready
+	 * On page load ready, only load images that are currently visible in the view area
 	 */
 	jQuery(document).ready(function($) {
 		g_Layzr = new Layzr({ 
@@ -123,6 +123,8 @@
 		});
 	};
 	
+	/**
+	*/
 	function holderjs() {
 		return {
 			restrict: 'A', // attribute
@@ -169,6 +171,8 @@
 		};
 	};
 	
+	/**
+	*/
 	function withripple(rootScope, window, location) {
 		return {
 			restrict: 'C', // class
@@ -188,6 +192,8 @@
 		};
 	};
 
+	/**
+	*/
 	function onLastRepeat() {
 		return function(scope, element, attrs) {
 			if (scope.$last) {
@@ -198,6 +204,8 @@
 		}
 	};
 
+	/**
+	*/
 	function ngRipple() {
 		return {
 			restrict: 'A', // attribute
@@ -213,6 +221,8 @@
 		};
 	}
 	
+	/**
+	*/
 	function ngTextfit() {
 		return {
 			restrict: 'A', // attribute

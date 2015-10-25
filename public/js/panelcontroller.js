@@ -199,6 +199,8 @@
 			}
 			// set refresh page to TRUE
 			$scope.rf = true;
+			// reset post data
+			$scope.post = undefined;
 			// execute external calls
 			panelService.getSingle().query($scope.params,function(data) {
 				// turn off refresh
@@ -208,7 +210,7 @@
 					return;
 				}
 				// local reference to item
-				var ref = data;
+				var ref = $scope.post = data;
 				// format date
 				if (moment().diff(ref.published,'days') > 1) {
 					ref.formatted = moment(ref.published).format('ddd, hh:mm');
@@ -224,6 +226,16 @@
 				}
 				// encode origin url
 				ref.origin.url = ['/feed/',encodeURIComponent(ref.origin.url)].join('');
+				// retrieve video image
+				if (ref.content.videos.length) {
+					var e; // declare variable
+					for (var j in ref.content.videos) { // loop videos
+						if ((e = /youtube.com\/[\s\S]+\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
+							// replace url for embeded
+							ref.content.videos[j] = $sce.trustAsResourceUrl(['https://www.youtube.com/embed/',e[1]].join(''));
+						}
+					}
+				}
 				// local reference to variable
 				var str = ref.content.content;
 				// check if string
@@ -232,8 +244,6 @@
 					// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
 					ref.content.content = $sce.trustAsHtml(str);
 				}
-				// store post
-				$scope.post = ref;
 			});
 		};
 		
@@ -312,6 +322,8 @@
 						var e; // declare variable
 						for (var j in ref.content.videos) { // loop videos
 							if ((e = /youtube.com\/[\s\S]+\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
+								// replace url for embeded
+								ref.content.videos[j] = ['https://www.youtube.com/embed/',e[1]].join('');
 								// add video as thumbnail
 								ref.content.images.other.splice(0, 0, {
 									url: ['http://img.youtube.com/vi/',e[1],'/0.jpg'].join('')
