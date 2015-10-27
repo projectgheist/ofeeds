@@ -1,8 +1,9 @@
 //- Renders the panel text
 mixin PanelText()
-	.panel-text
-		h3(style="max-height:52px",ng-textfit='')
-			a(href='/post/{{post.uid}}') {{post.title}}
+	.panel-text.bottom
+		h3
+			.textfit(ng-textfit='false',style="max-height:48px")
+				a(href='/post/{{post.uid}}') {{post.title}}
 		p
 			span(ng-if="post.author")
 				| by&nbsp;
@@ -10,17 +11,15 @@ mixin PanelText()
 				| ·&nbsp;
 			| {{post.formatted}}
 
-.col-lg-4(ng-if="!post.content.videos.length")
-	.panel.panel-post.panel-default
+.col-lg-4.panel-post(ng-if="!post.content.videos.length")
+	.panel.panel-default
 		.panel-label
 			if user
 				span.label.label-primary(ng-if="!post.read") Unread
 			else
 				span.label.label-primary(ng-if="!post.read") New
-		.panel-image(ng-if='post.content.images.other.length',ng-click="showModal(post.uid)")
+		.panel-image
 			img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
-		.panel-image(ng-if="!post.content.images.other.length")
-			img(holderjs='')
 		mixin PanelText()
 .col-lg-8(ng-if="post.content.videos.length")
 	.panel.panel-post.panel-default

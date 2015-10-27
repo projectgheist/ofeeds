@@ -37,7 +37,7 @@
 
 #menu ul li {
 	list-style: none;
-	padding: 20px 15px 20px 20px;
+	padding: 15px 15px 15px 20px;
 }
 
 #menu ul li.active {
@@ -69,6 +69,10 @@
 
 .panel-text {
 	padding:15px;
+	width: 100%;
+}
+
+.panel-text.bottom {
 }
 
 .container-full {
@@ -168,6 +172,30 @@ ng-Textoverflow {
 .max-lines {
 	word-wrap: break-word;
 	margin-bottom: 15px;
+}
+
+/* CSS for TextFit.js */
+.textfit {
+	width: 100%;
+	height: 100%;
+	font-size: 16px;
+}
+
+.label.textfit {
+	display: inline-block;
+}
+
+.textfit img, .textfit i {
+	width: 16px;
+	margin-right: 15px;
+}
+
+/* set image to favicon size */
+.textfit img {
+	height: auto;
+}
+
+.textfit i {
 }
 
 /* Side notes for calling out things
@@ -273,12 +301,6 @@ hbinclude .bs-callout {
 	background-color: rgb(238, 238, 238);
 }
 
-.panel-image {
-	overflow: hidden;
-	min-height: 66%;
-	max-height: 344px;
-}
-
 .panel-image .panel-text, .panel-video .panel-text {
 	background-color: rgba(255, 255, 255, 0.84);
 }
@@ -290,6 +312,12 @@ hbinclude .bs-callout {
 .panel-video {
 	height: 344px;
 	overflow: hidden;
+}
+
+/* Panel images need a wrapper or else they overflow their bounds */
+.panel-image {
+	overflow: hidden;
+	height: 100%;
 }
 
 .panel-post {

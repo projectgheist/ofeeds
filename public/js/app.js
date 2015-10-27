@@ -30,6 +30,12 @@
 						if (obj.height) {
 							self.parent().css('height', obj.height);
 						}
+					} else {
+						self.height('0'); // ignore current image height
+						var img = self.parent(),
+							panel = img.parent();
+						img.css('height',panel.parent().height() - (panel.height() + self.height()));
+						self.height('100%'); // fill parent container
 					}
 					// fit image to parent
 					fit(self[0], self.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
@@ -137,7 +143,7 @@
 						attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/grey'].join(''));
 						// run holderjs
 						Holder.run({ images: $(element)[0] });
-						// image link detected?
+						// image link detected that needs loading?
 						if (element.attr('data-layzr')) {
 							// remove holderjs attributes
 							element.css('width', '');
@@ -233,10 +239,10 @@
 					setTimeout(function() { // requires a 1ms delay for some reason
 						var b = ((attrs.ngTextfit.length === 0) || (attrs.ngTextfit === 'true'));
 						element.textTailor({
-							fit: b,
+							fit: b, // fit the text to the parent's height and width
 							ellipsis: true,
-							minFont: 14,
-							justify: b
+							minFont: 16,
+							justify: b 	// adds css -> text-align: justify
 						});
 					}, 1);
 				});

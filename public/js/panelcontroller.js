@@ -516,7 +516,7 @@
 		*/
 		$scope.toggle = function(p) {
 			// if template style doesn't have an expanded version, skip
-			if (!$scope.templates || $scope.templates[$scope.templateID].length <= 1) {
+			if (!$scope.templates || !$scope.templates[$scope.templateID] || $scope.templates[$scope.templateID].length <= 1) {
 				return;
 			}
 			// make previous expanded post small again
