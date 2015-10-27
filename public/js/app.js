@@ -148,13 +148,15 @@
 						// run holderjs
 						Holder.run({ images: $(element)[0] });
 						// image link detected that needs loading?
-						if (element.attr('data-layzr')) {
+						if (element.attr('data-layzr').length) {
 							// remove holderjs attributes
 							element.css('width', '');
 							element.css('height', '');
 							// force image lazy loading update
 							g_Layzr.updateSelector();
 							g_Layzr.update();
+						} else {
+							element.removeAttr('data-layzr');
 						}
 					}, 1);
 				});
