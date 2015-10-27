@@ -34,7 +34,7 @@
 						self.height('0'); // ignore current image height
 						var img = self.parent(),
 							panel = img.parent();
-						img.css('height',panel.parent().height() - (panel.height() + self.height()));
+						img.css('height',panel.parent().height() - panel.height());
 						self.height('100%'); // fill parent container
 					}
 					// fit image to parent
@@ -140,10 +140,10 @@
 				}, function() {
 					setTimeout(function() { // requires a 1ms delay for some reason
 						element.height('0'); // ignore current image height
-						var img = element.parent(),
+						var img = element.parent(), //eg. panel-image
 							panel = img.parent();
 						// set holderjs data
-						attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',panel.parent().height() - (panel.height() + element.height()),'/grey'].join(''));
+						attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',panel.parent().height() - panel.height(),'/grey'].join(''));
 						element.height('100%'); // fill parent container
 						// run holderjs
 						Holder.run({ images: $(element)[0] });

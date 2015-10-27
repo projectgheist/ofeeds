@@ -21,8 +21,8 @@ mixin PanelText()
 		.panel-image
 			img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
 		mixin PanelText()
-.col-lg-8(ng-if="post.content.videos.length")
-	.panel.panel-post.panel-default
+.col-lg-8.panel-post(ng-if="post.content.videos.length")
+	.panel.panel-default
 		.panel-label
 			if user
 				span.label.label-primary(ng-if="!post.read") Unread
@@ -30,7 +30,7 @@ mixin PanelText()
 				span.label.label-primary(ng-if="!post.read") New
 			| &nbsp;
 			span.label.label-primary Video
-		.panel-video
-			img(holderjs='',data-layzr="{{post.content.images.other[0].url}}")
+		.panel-image
+			img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
 			i.fa.fa-youtube-play.fa-fw.fa-5x(style="position:absolute;top:30%;left:0;right:0;margin-left:auto;margin-right:auto")
 		mixin PanelText()

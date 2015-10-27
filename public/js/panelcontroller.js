@@ -326,7 +326,7 @@
 								ref.content.videos[j] = ['https://www.youtube.com/embed/',e[1]].join('');
 								// add video as thumbnail
 								ref.content.images.other.splice(0, 0, {
-									url: ['http://img.youtube.com/vi/',e[1],'/0.jpg'].join('')
+									url: ['http://img.youtube.com/vi/',e[1],'/maxresdefault.jpg'].join('')
 								});
 							}
 						}

@@ -301,17 +301,12 @@ hbinclude .bs-callout {
 	background-color: rgb(238, 238, 238);
 }
 
-.panel-image .panel-text, .panel-video .panel-text {
+.panel-image .panel-text {
 	background-color: rgba(255, 255, 255, 0.84);
 }
 
 .panel-text h3 {
 	margin: 0;
-}
-
-.panel-video {
-	height: 344px;
-	overflow: hidden;
 }
 
 /* Panel images need a wrapper or else they overflow their bounds */

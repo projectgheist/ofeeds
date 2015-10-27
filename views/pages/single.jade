@@ -20,8 +20,11 @@
 				hr
 		.row
 			.col-xs-12
-				.text-center(style='overflow:hidden')
-					img(ng-if='post.content.images.other.length',holderjs='',data-layzr="{{post.content.images.other[0].url}}")
-					iframe(src="{{post.content.videos[0]}}",frameborder="0",allowfullscreen,width="560",height="315")
+				.panel-post(ng-if='post.content.images.other.length')
+					.wrapper
+						.panel-image
+							img(holderjs='',data-layzr="{{post.content.images.other[0].url}}")
+				.embed-responsive.embed-responsive-16by9(ng-if='post.content.videos.length')
+					iframe.embed-responsive-item(src="{{post.content.videos[0]}}",allowfullscreen)
 				hr
 				p(ng-bind-html="post.content.content")
