@@ -139,8 +139,12 @@
 					return scope.isNavVisible();
 				}, function() {
 					setTimeout(function() { // requires a 1ms delay for some reason
+						element.height('0'); // ignore current image height
+						var img = element.parent(),
+							panel = img.parent();
 						// set holderjs data
-						attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',Math.max(element.parent().height(),175),'/grey'].join(''));
+						attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',panel.parent().height() - (panel.height() + element.height()),'/grey'].join(''));
+						element.height('100%'); // fill parent container
 						// run holderjs
 						Holder.run({ images: $(element)[0] });
 						// image link detected that needs loading?
@@ -151,15 +155,6 @@
 							// force image lazy loading update
 							g_Layzr.updateSelector();
 							g_Layzr.update();
-						} else if (element.attr('src')) {
-							var obj = scope.$eval(attrs.holderjs);
-							if (obj && obj.height) {
-								element.parent().css('height', obj.height);
-							}
-							if (obj === undefined) {
-								// fit image to parent
-								fit(element[0], element.parent()[0], { cover: true, apply: true }, fit.cssTransform);
-							}
 						}
 					}, 1);
 				});
