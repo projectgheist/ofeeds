@@ -148,7 +148,7 @@
 						// run holderjs
 						Holder.run({ images: $(element)[0] });
 						// image link detected that needs loading?
-						if (element.attr('data-layzr').length) {
+						if (element.attr('data-layzr') && element.attr('data-layzr').length) {
 							// remove holderjs attributes
 							element.css('width', '');
 							element.css('height', '');

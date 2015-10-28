@@ -11,7 +11,7 @@ mixin PanelText()
 				| ·&nbsp;
 			| {{post.formatted}}
 
-.col-lg-4.panel-post(ng-if="!post.content.videos.length")
+.panel-post(ng-if="!post.content.videos.length",ng-class="post.colsize")
 	.panel.panel-default
 		.panel-label
 			if user
@@ -21,7 +21,7 @@ mixin PanelText()
 		.panel-image
 			img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
 		mixin PanelText()
-.col-lg-8.panel-post(ng-if="post.content.videos.length")
+.panel-post(ng-if="post.content.videos.length",ng-class="post.colsize")
 	.panel.panel-default
 		.panel-label
 			if user

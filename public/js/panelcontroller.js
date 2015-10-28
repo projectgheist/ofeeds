@@ -296,12 +296,20 @@
 					// copy retrieved articles to stream
 					$scope.stream = data;
 				}
+				
+				// information about previous post's
+				var prev = {
+					colsize: '',
+					colnum: 0,
+					type: 'none',
+					iter: 0
+				};
 
 				// loop all articles/items
 				for (var i in $scope.stream.items) {
 					// local reference to item
 					var ref = $scope.stream.items[i];
-					
+										
 					// format date
 					if (moment().diff(ref.published,'days') > 1) {
 						ref.formatted = moment(ref.published).format('ddd, hh:mm');
@@ -330,23 +338,89 @@
 								});
 							}
 						}
+						// check previous info
+						if ((prev.type === 'none' || prev.type === 'video') && (!prev.colsize || prev.colsize === 'col-xs-6')) {
+							// set column size
+							ref.colsize = 'col-xs-6';
+							// increment
+							prev.colnum += 6;
+							// end of row reached?
+							if (prev.colnum === 12) {
+								// reset number
+								prev.colnum = 0;
+								prev.type = 'none';
+							} else {
+								// set type
+								prev.type = 'video';
+							}
+						}
+					} else if (ref.content.images.other.length) {
+						var c = 4;
+						if (prev.type === 'none' || prev.type === 'image') {
+							var i = prev.iter % 3;
+							switch (i) {
+							case 0:
+								c = 12;
+								break;
+							case 1:
+								c = 6;
+								break;
+							default:
+								c = 4;
+							}
+						} else {
+							c = (prev.colnum === 6) ? 6 : 4;
+						}
+						ref.colsize = 'col-xs-' + c;
+						prev.colnum += c; // increment
+						// end of row reached?
+						if (prev.colnum === 12) {
+							// reset number
+							prev.colnum = 0;
+							prev.type = 'none';
+							// increment
+							++prev.iter;
+						} else {
+							// set type
+							prev.type = 'image';
+						}
+					} else { // text only article
+						if ((prev.colnum > 0 || prev.iter !== 0) && (prev.colnum % 6) === 0) {
+							ref.colsize = 'col-xs-6';
+							prev.colnum += 6; // increment
+						} else {
+							ref.colsize = 'col-xs-4';
+							prev.colnum += 4; // increment
+						}
+						// end of row reached?
+						if (prev.colnum === 12) {
+							// reset number
+							prev.colnum = 0;
+							prev.type = 'none';
+							// increment
+							++prev.iter;
+						} else {
+							// set type
+							prev.type = 'text';
+						}
 					}
 					
 					// local reference to variable
 					var str = ref.content.content;
 					// check if string
 					if (typeof str == 'string' || str instanceof String) {
+						// Flag if text body is present
 						ref.content.hasContent = (str.length > 0);
 						// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
 						ref.content.content = $sce.trustAsHtml(str);
 					}
 					
 					// set article's template
-					if ($scope.cp && ref.uid === $scope.cp.uid) {
+					if ($scope.cp && ref.uid === $scope.cp.uid) { // has currentpost and id's are the same
 						$scope.expand($scope.stream.items[i]);
-					} else if ($scope.templateID !== '') {
+					} else if ($scope.templateID !== '') { // template id specified
 						ref.template = $scope.templates[$scope.templateID][0];
-					} else {
+					} else { // no template id specified, default to tile template
 						$scope.templateID = 'tile';
 						ref.template = $scope.templates[$scope.templateID][0];
 					}
