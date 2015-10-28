@@ -30,6 +30,8 @@ module.exports = function(grunt) {
 					'./bower_components/layzr.js/dist/layzr.js',
 					'./bower_components/matchHeight/jquery.matchHeight.js',
 					'./bower_components/ngInfiniteScroll/build/ng-infinite-scroll.js',
+					'./bower_components/Flowtype.js/flowtype.js',
+					'./bower_components/angular-flowtype/angular-flowtype.js',
 					'./private/js/fit.js',
 					'./private/js/mousetrap.js',
 					'./private/js/jquery.texttailor.js'

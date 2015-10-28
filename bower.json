@@ -28,6 +28,8 @@
     "matchHeight": "~0.6.0",
     "moment": "~2.10.2",
     "ngInfiniteScroll": "~1.2.1",
-    "typeahead.js": "~0.11.1"
+    "typeahead.js": "~0.11.1",
+    "Flowtype.js": "flowtype#~1.1.0",
+    "angular-flowtype": "*"
   }
 }

@@ -230,9 +230,11 @@
 				if (ref.content.videos.length) {
 					var e; // declare variable
 					for (var j in ref.content.videos) { // loop videos
-						if ((e = /youtube.com\/[\s\S]+\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
+							console.log(ref.content.videos[j])
+						if ((e = /(?:youtube.com\/[\s\S]+|youtu.be)\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
 							// replace url for embeded
 							ref.content.videos[j] = $sce.trustAsResourceUrl(['https://www.youtube.com/embed/',e[1]].join(''));
+							console.log(ref.content.videos[j])
 						}
 					}
 				}
@@ -329,7 +331,7 @@
 					if (ref.content.videos.length) {
 						var e; // declare variable
 						for (var j in ref.content.videos) { // loop videos
-							if ((e = /youtube.com\/[\s\S]+\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
+							if ((e = /(?:youtube.com\/[\s\S]+|youtu.be)\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
 								// replace url for embeded
 								ref.content.videos[j] = ['https://www.youtube.com/embed/',e[1]].join('');
 								// add video as thumbnail
@@ -339,20 +341,19 @@
 							}
 						}
 						// check previous info
-						if ((prev.type === 'none' || prev.type === 'video') && (!prev.colsize || prev.colsize === 'col-xs-6')) {
-							// set column size
-							ref.colsize = 'col-xs-6';
-							// increment
-							prev.colnum += 6;
-							// end of row reached?
-							if (prev.colnum === 12) {
-								// reset number
-								prev.colnum = 0;
-								prev.type = 'none';
-							} else {
-								// set type
-								prev.type = 'video';
-							}
+						var c = ref.content.images.other.length ? ((prev.colnum % 6) === 0) ? 6 : (12 - prev.colnum) : 4;
+						// set column size
+						ref.colsize = 'col-xs-' + c;
+						// increment
+						prev.colnum += c;
+						// end of row reached?
+						if (prev.colnum === 12) {
+							// reset number
+							prev.colnum = 0;
+							prev.type = 'none';
+						} else {
+							// set type
+							prev.type = 'video';
 						}
 					} else if (ref.content.images.other.length) {
 						var c = 4;
@@ -360,13 +361,15 @@
 							var i = prev.iter % 3;
 							switch (i) {
 							case 0:
-								c = 12;
-								break;
+								if (prev.colnum === 0) {
+									c = 12;
+									break;
+								}
 							case 1:
-								c = 6;
-								break;
-							default:
-								c = 4;
+								if ((prev.colnum % 6) === 0) {
+									c = 6;
+									break;
+								}
 							}
 						} else {
 							c = (prev.colnum === 6) ? 6 : 4;

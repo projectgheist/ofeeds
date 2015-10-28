@@ -53554,6 +53554,27 @@ mod.directive('infiniteScroll', [
     };
   }
 ]);
+;'use strict';
+
+/* Directives */
+
+angular.module('ngFlowtype', []).
+    directive('flowtype',function($compile)
+              {
+                  return {
+                      restrict: 'A',
+                      link: function(scope , element , attrs) {
+			  var options = {};                        
+			  options.maximum = attrs.maximum || 9999;
+			  options.minimum = attrs.minimum || 1;
+                          options.minFont = attrs.minfont || attrs.minFont || 1;
+                          options.maxFont = attrs.maxfont || attrs.maxFont || 9999;
+                          options.fontRatio = attrs.fontratio || attrs.fontRatio || 35;
+                          options.lineRatio = attrs.lineratio || attrs.lineRatio || 1.45;
+			  element.flowtype(options);
+                      }
+                  };
+              });
 ;/* Copyright (C) 2014 Justin Windle, http://soulwire.co.uk */
 
 var fit = (function() {

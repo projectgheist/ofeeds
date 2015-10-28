@@ -26,5 +26,5 @@
 							img(holderjs='',data-layzr="{{post.content.images.other[0].url}}")
 				.embed-responsive.embed-responsive-16by9(ng-if='post.content.videos.length')
 					iframe.embed-responsive-item(src="{{post.content.videos[0]}}",allowfullscreen)
-				hr
-				p(ng-bind-html="post.content.content")
+				hr(ng-if='post.content.images.other.length || post.content.videos.length')
+				p(ng-bind-html="post.content.content",flowtype='',minFont='16',maxFont='28')

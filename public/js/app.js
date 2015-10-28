@@ -84,6 +84,7 @@
 			'ngSanitize',
 			'ngResource',
 			'infinite-scroll',
+			'ngFlowtype',
 			'AppService'
 		])
 		.config(appConfig)
