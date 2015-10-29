@@ -229,12 +229,15 @@
 				// retrieve video image
 				if (ref.content.videos.length) {
 					var e; // declare variable
-					for (var j in ref.content.videos) { // loop videos
-							console.log(ref.content.videos[j])
+					// copy array into temp variable
+					var a = ref.content.videos;
+					// reset array (angularjs needs to approve it first)
+					ref.content.videos = [];
+					// loop videos
+					for (var j in a) {
 						if ((e = /(?:youtube.com\/[\s\S]+|youtu.be)\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
 							// replace url for embeded
 							ref.content.videos[j] = $sce.trustAsResourceUrl(['https://www.youtube.com/embed/',e[1]].join(''));
-							console.log(ref.content.videos[j])
 						}
 					}
 				}
@@ -280,14 +283,21 @@
 					// defocus search box and set value
 					$('.typeahead').blur().val(data.title);
 				}
+				
 				// reset end of file reached
 				$scope.eof = false;
+				
+				// old last index (don't want to re-iterate over old values)
+				var idx = 0;
+				
 				// what to do with the retrieved data
 				if ($scope.stream && 
 					($scope.stream.title && $scope.stream.title === data.title) &&
 					(($scope.stream.items && $scope.stream.items.length === 0) || (data.items.length <= 0) || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))
 					) {
 					if (data.items.length > 0) {
+						// new start index
+						idx = $scope.stream.items.length;
 						// append to the articles that were already in the array
 						$scope.stream.items = $scope.stream.items.concat(data.items);
 					} else {
@@ -297,18 +307,32 @@
 				} else {
 					// copy retrieved articles to stream
 					$scope.stream = data;
+					// array of groups to display
+					$scope.groups = [];
 				}
-				
+
+					// how often a list should appear
+				var listfreq = 5;
+
 				// information about previous post's
 				var prev = {
-					colsize: '',
+					// how much space we have used on the row
 					colnum: 0,
+					// kind of article to render
 					type: 'none',
-					iter: 0
+					// row counter
+					iter: 0,
+					// template that the group is going to use
+					template: '',
+					// group that shares the same template
+					group: {'col':0,'array':[]}
 				};
 
+				// default template
+				$scope.templateID = 'tile';
+				
 				// loop all articles/items
-				for (var i in $scope.stream.items) {
+				for (var i = idx; i < $scope.stream.items.length; ++i) {
 					// local reference to item
 					var ref = $scope.stream.items[i];
 										
@@ -326,88 +350,7 @@
 							ref.author = author[2];
 						}
 					}
-					
-					// retrieve video image
-					if (ref.content.videos.length) {
-						var e; // declare variable
-						for (var j in ref.content.videos) { // loop videos
-							if ((e = /(?:youtube.com\/[\s\S]+|youtu.be)\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
-								// replace url for embeded
-								ref.content.videos[j] = ['https://www.youtube.com/embed/',e[1]].join('');
-								// add video as thumbnail
-								ref.content.images.other.splice(0, 0, {
-									url: ['http://img.youtube.com/vi/',e[1],'/maxresdefault.jpg'].join('')
-								});
-							}
-						}
-						// check previous info
-						var c = ref.content.images.other.length ? ((prev.colnum % 6) === 0) ? 6 : (12 - prev.colnum) : 4;
-						// set column size
-						ref.colsize = 'col-xs-' + c;
-						// increment
-						prev.colnum += c;
-						// end of row reached?
-						if (prev.colnum === 12) {
-							// reset number
-							prev.colnum = 0;
-							prev.type = 'none';
-						} else {
-							// set type
-							prev.type = 'video';
-						}
-					} else if (ref.content.images.other.length) {
-						var c = 4;
-						if (prev.type === 'none' || prev.type === 'image') {
-							var i = prev.iter % 3;
-							switch (i) {
-							case 0:
-								if (prev.colnum === 0) {
-									c = 12;
-									break;
-								}
-							case 1:
-								if ((prev.colnum % 6) === 0) {
-									c = 6;
-									break;
-								}
-							}
-						} else {
-							c = (prev.colnum === 6) ? 6 : 4;
-						}
-						ref.colsize = 'col-xs-' + c;
-						prev.colnum += c; // increment
-						// end of row reached?
-						if (prev.colnum === 12) {
-							// reset number
-							prev.colnum = 0;
-							prev.type = 'none';
-							// increment
-							++prev.iter;
-						} else {
-							// set type
-							prev.type = 'image';
-						}
-					} else { // text only article
-						if ((prev.colnum > 0 || prev.iter !== 0) && (prev.colnum % 6) === 0) {
-							ref.colsize = 'col-xs-6';
-							prev.colnum += 6; // increment
-						} else {
-							ref.colsize = 'col-xs-4';
-							prev.colnum += 4; // increment
-						}
-						// end of row reached?
-						if (prev.colnum === 12) {
-							// reset number
-							prev.colnum = 0;
-							prev.type = 'none';
-							// increment
-							++prev.iter;
-						} else {
-							// set type
-							prev.type = 'text';
-						}
-					}
-					
+
 					// local reference to variable
 					var str = ref.content.content;
 					// check if string
@@ -418,6 +361,157 @@
 						ref.content.content = $sce.trustAsHtml(str);
 					}
 					
+					// when not a list, do other stuff
+					if (prev.type !== 'list') {
+						// retrieve video image
+						if (ref.content.videos.length) {
+							// declare variable
+							var e;
+							// loop videos
+							for (var j in ref.content.videos) {
+								// contains youtube video?
+								if ((e = /(?:youtube.com\/[\s\S]+|youtu.be)\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) {
+									// replace url for embeded
+									ref.content.videos[j] = ['https://www.youtube.com/embed/',e[1]].join('');
+									// add video as thumbnail
+									ref.content.images.other.splice(0, 0, {
+										url: ['http://img.youtube.com/vi/',e[1],'/maxresdefault.jpg'].join('')
+									});
+								}
+							}
+							// check previous info
+							var c = (ref.content.images.other.length ? (((prev.colnum % 6) === 0) ? 6 : (12 - prev.colnum)) : 4);
+							// set column size
+							ref.colsize = 'col-xs-' + c;
+							// increment
+							prev.colnum += c;
+							// end of row reached?
+							if (prev.colnum === 12) {
+								// reset number
+								prev.colnum = 0;
+								// increment
+								++prev.iter;
+								// decide if the next time we get a list or decide on the item when we see it
+								prev.type = ((prev.iter % listfreq) === 0) ? 'list' : 'none';
+								// increment group column size
+								prev.group.col += c;
+								// add to group
+								prev.group.array.push(ref);
+								// add to groups
+								$scope.groups.push({'template':$scope.templates['tile'][0], 'items':prev.group.array, col:'col-xs-12'});
+								// clear the current group
+								prev.group = {'col':0,'array':[]};
+							} else {
+								// set type
+								prev.type = ((prev.colnum % 6 === 0) && (prev.iter % listfreq === 0)) ? 'list' : 'video';
+								// add to group
+								prev.group.array.push(ref);
+							}
+						} else if (ref.content.images.other.length) {
+							var c = 4;
+							if (prev.type === 'none' || prev.type === 'image') {
+								var j = (prev.iter % 3);
+								if (prev.colnum === 0 && j === 0) {
+									c = 12;
+								} else {
+									c = (j === 1) ? 6 : 4;
+								}
+							} 
+							if (prev.colnum) {
+								c = ((prev.colnum % 6) === 0) ? 6 : 4;
+							}
+							ref.colsize = 'col-xs-' + c;
+							prev.colnum += c;
+							// end of row reached?
+							if (prev.colnum === 12) {
+								// reset number
+								prev.colnum = 0;
+								// increment
+								++prev.iter;
+								// decide if the next time we get a list or decide on the item when we see it
+								prev.type = ((prev.iter % listfreq) === 0) ? 'list' : 'none';
+								// increment group column size
+								prev.group.col += c;
+								// add to group
+								prev.group.array.push(ref);
+								// add to groups
+								$scope.groups.push({'template':$scope.templates['tile'][0], 'items':prev.group.array, col:'col-xs-12'});
+								// clear the current group
+								prev.group = {'col':0,'array':[]};
+							} else {
+								// set type
+								prev.type = ((prev.colnum % 6 === 0) && (prev.iter % listfreq === 0)) ? 'list' : 'image';
+								// add to group
+								prev.group.array.push(ref);
+							}
+						} else { // text only article
+							if ((prev.colnum > 0 || prev.iter !== 0) && (prev.colnum % 6) === 0) {
+								ref.colsize = 'col-xs-6';
+								// increment
+								prev.colnum += 6;
+							} else {
+								ref.colsize = 'col-xs-4';
+								// increment
+								prev.colnum += 4;
+							}
+							// end of row reached?
+							if (prev.colnum === 12) {
+								// reset number
+								prev.colnum = 0;
+								// increment
+								++prev.iter;
+								// decide if the next time we get a list or decide on the item when we see it
+								prev.type = ((prev.iter % listfreq) === 0) ? 'list' : 'none';
+								// increment group column size
+								prev.group.col += c;
+								// add to group
+								prev.group.array.push(ref);
+								// add to groups
+								$scope.groups.push({'template':$scope.templates['tile'][0], 'items':prev.group.array, col:'col-xs-12'});
+								// clear the current group
+								prev.group = {'col':0,'array':[]};
+							} else { 
+								// set type
+								prev.type = ((prev.colnum % 6 === 0) && (prev.iter % listfreq === 0)) ? 'list' : 'text';
+								// add to group
+								prev.group.array.push(ref);
+							}
+						}
+					} else {
+						var c = (prev.colnum === 0) ? 6 : (12 - prev.colnum);
+						ref.colsize = 'col-xs-' + c;
+						// increment
+						++prev.list;
+						// reached max size of list?
+						if ($scope.templateID !== 'list' && prev.group.array.length === (6 - 1)) {
+							// reset type
+							prev.type = 'none';
+							// increment
+							++prev.iter;
+							// increment
+							prev.colnum += c;
+							// increment group column size
+							prev.group.col += c;
+							// add to group
+							prev.group.array.push(ref);
+							// add to groups
+							$scope.groups.push({'template':$scope.templates['list'][0], 'items':prev.group.array, col:'col-xs-'+prev.group.col});
+							// clear the current group
+							prev.group = {'col':0,'array':[]};
+							// end of row reached?
+							if (prev.colnum === 12) {
+								// reset number
+								prev.colnum = 0;
+							}
+						} else {
+							// keep the type
+							prev.type = 'list';
+							// add to group
+							prev.group.array.push(ref);
+						}
+					}
+
+					/*
 					// set article's template
 					if ($scope.cp && ref.uid === $scope.cp.uid) { // has currentpost and id's are the same
 						$scope.expand($scope.stream.items[i]);
@@ -427,7 +521,11 @@
 						$scope.templateID = 'tile';
 						ref.template = $scope.templates[$scope.templateID][0];
 					}
+					*/
 				}
+				
+				// add to groups
+				$scope.groups.push({'template': (prev.type === 'list' ? $scope.templates['list'][0] : $scope.templates['tile'][0]), 'items':prev.group, col:$scope.stream.items.length ? $scope.stream.items[$scope.stream.items.length-1].colsize : 'col-xs-12'});
 				
 				// is message present?
 				if (m) {

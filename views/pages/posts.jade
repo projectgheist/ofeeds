@@ -21,8 +21,18 @@
 					tr
 						td Visible articles
 						td {{stream.items.length}}
-	.row(infinite-scroll='loadMore()',infinite-scroll-distance='2')
-		div(ng-repeat='post in stream.items',ng-include='post.template')
+	div(infinite-scroll='loadMore()',infinite-scroll-distance='2')
+		//- Subdivided the stream into groups
+		.row(ng-if='groups.length',ng-repeat='group in groups')
+			//- List into a panel
+			.panel-post(ng-if="group.template === 'views/templates/post-compact'",ng-class='group.col')
+				.panel.panel-default
+					.panel-body
+						div(ng-repeat='post in group.items',ng-include='group.template')
+			//- All other tile based templates
+			div(ng-if="group.template !== 'views/templates/post-compact'",ng-repeat='post in group.items',ng-include='group.template',ng-class='post.colsize')
+		//- Only when there is a stream
+		.row(ng-if='!groups.length',ng-repeat='post in stream.items',ng-include='post.template')
 	.row(ng-if="stream.items.length <= 0")
 		.col-xs-12
 			.well
