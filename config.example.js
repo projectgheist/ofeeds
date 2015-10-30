@@ -63,7 +63,7 @@ module.exports.site = {
  */
 module.exports.db = function() {
 	// default database name
-	var defaultDbName = 'storageDB';
+	var defaultDbName = 'db_ofeeds';
     // Appfog
 	if (process.env.VCAP_SERVICES) {
 		var env = JSON.parse(process.env.VCAP_SERVICES);
