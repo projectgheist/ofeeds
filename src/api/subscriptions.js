@@ -1,13 +1,10 @@
-var ex = require('express'),
+var ap = require('../app'),
 	rs = require('rsvp'),
 	db = require('../storage'),
 	cr = require('../cron'),
 	mm = require('moment'),
-	cf = require('../../config'),
 	ut = require('../utils'),
 	ag = require('../wait');
-
-var app = module.exports = ex();
 
 // @todo: functions need to be merged
 var actions = {
@@ -104,6 +101,8 @@ var actions = {
     }
 };
 
+/**
+ */
 function AllFeeds(req, res) {
 	var s;
 	if (!req.query.r) {
@@ -138,37 +137,47 @@ function AllFeeds(req, res) {
 	};
 	
 	db
-	.all(db.Feed, opts) // retrieve all feeds
-	.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
-	.then(function(feeds) {
-		var a = feeds.map(function(f) {
-			var b = f.failedCrawlTime === undefined,
-				s = f.successfulCrawlTime === undefined,
-				r = (b && s) ? false : (!b && !s ? mm(f.successfulCrawlTime) > mm(f.failedCrawlTime) : (b && !s));
-			return {
-				favicon:		f.favicon || '',
-				id: 			f.feedURL, // its already encoded
-				postCount:		f.posts ? f.posts.length : 0,
-				title: 			f.title || decodeURIComponent(f.feedURL),
-				shortid: 		f.shortID,
-				crawlTime:		f.successfulCrawlTime || undefined,
-				updated:		f.lastModified || undefined,
-				crawlSuccesful:	r,
-				creation:		f.creationTime
-			};
+		.all(db.Feed, opts) // retrieve all feeds
+		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
+		.then(function(feeds) {
+			var a = feeds.map(function(f) {
+				var b = f.failedCrawlTime === undefined,
+					s = f.successfulCrawlTime === undefined,
+					r = (b && s) ? false : (!b && !s ? mm(f.successfulCrawlTime) > mm(f.failedCrawlTime) : (b && !s));
+				return {
+					favicon:		f.favicon || '',
+					id: 			f.feedURL, // its already encoded
+					postCount:		f.posts ? f.posts.length : 0,
+					title: 			f.title || decodeURIComponent(f.feedURL),
+					shortid: 		f.shortID,
+					crawlTime:		f.successfulCrawlTime || undefined,
+					updated:		f.lastModified || undefined,
+					crawlSuccesful:	r,
+					creation:		f.creationTime
+				};
+			});
+
+			// retrieve the time till the next job needs to run
+			if (ag && ag.isReady()) {
+				ag.jobs({ 
+					name: 'UpdateAllFeeds' 
+				}, function(err, jobs) {
+					return res.json({
+						'nextRunIn': ((jobs.length > 0) ? jobs[0].attrs.nextRunAt : ''), 
+						'feeds': a
+					});
+				});
+			} else {
+				return res.json({ 'feeds': a });
+			}
 		});
-		// retrieve the time till the next job needs to run
-		ag.jobs({name: 'UpdateAllFeeds'}, function(err, jobs) {
-			return res.json({'nextRunIn':(jobs.length > 0 ? jobs[0].attrs.nextRunAt : ''), 'feeds':a});
-		});
-	});
 };
 
 // lists all of the feeds in the database
-app.get('/api/0/feeds/list', AllFeeds);
+ap.get('/api/0/feeds/list', AllFeeds);
 
 // lists all of the feeds a user is subscribed to
-app.get('/api/0/subscription/list', function(req, res) {
+ap.get('/api/0/subscription/list', function(req, res) {
     // is user logged in?
 	if (!req.isAuthenticated()) {
 		AllFeeds(req, res);
@@ -235,7 +244,7 @@ app.get('/api/0/subscription/list', function(req, res) {
 });
 
 // search for feeds and preview them before adding them to their account
-app.get('/api/0/subscription/search', function(req, res) {
+ap.get('/api/0/subscription/search', function(req, res) {
 	// create or find URL in db
     actions
 		.search(req, req.query.q)
@@ -264,7 +273,7 @@ app.get('/api/0/subscription/search', function(req, res) {
 });
 
 // fetch a feed
-app.get('/api/0/subscription/refresh', function(req, res) {
+ap.get('/api/0/subscription/refresh', function(req, res) {
 	var u = decodeURIComponent(req.query.q);
 	// Check if URL
     if (!ut.isUrl(u)) {
@@ -288,7 +297,7 @@ app.get('/api/0/subscription/refresh', function(req, res) {
 });
 
 // subscribe to feed
-app.post('/api/0/subscription/quickadd', function(req, res) {
+ap.post('/api/0/subscription/quickadd', function(req, res) {
    	// is user logged in?
 	if (!req.isAuthenticated()) {
         return;

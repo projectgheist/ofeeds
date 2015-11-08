@@ -30,11 +30,10 @@ if (!mg.connection || !mg.connection.db) {
 	require('mongoomise').promisifyAll(db, rs);
 	// error event
 	db.on('error', function(err) {
-		console.log(err);
 	});
 	// connection established event
 	db.once('open', function() {
-		require('./wait')
+		require('./wait');
 	});
 }
 
@@ -65,9 +64,7 @@ exports.findOrCreate = function(model, item, debug) {
 exports.updateOrCreate = function(model, item, update, debug) {
 	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
 	var q = model.findOneAndUpdate(item, update, {upsert: true, 'new': true});
-	if (debug) {
-		console.log(q);
-	}
+	if (debug) console.log(q);
     return q;
 };
 

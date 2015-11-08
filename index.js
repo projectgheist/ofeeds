@@ -13,10 +13,10 @@ require('./src/routes');
 
 /** Include routes
  */
-ap.use(require('./src/api/subscriptions'));
-ap.use(require('./src/api/posts'));
-ap.use(require('./src/api/streams'));
-ap.use(require('./src/api/tag'));
+require('./src/api/subscriptions');
+require('./src/api/posts');
+require('./src/api/streams');
+require('./src/api/tag');
 /*
 app.use(require('./src/api/preference'));
 */

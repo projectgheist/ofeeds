@@ -41,3 +41,38 @@ describe('Routing', function() {
 		done();
 	});
 });
+
+/** Make sure that the routing code compiles
+ */
+describe('Feeds API', function() {
+	it('Check compile', function (done) {
+		require('../src/api/subscriptions');
+		done();
+	});
+
+	it('Retrieve all feeds', function (done) {
+		rq([url,'/api/0/feeds/list'].join(''), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
+});
+
+
+/** Make sure that the routing code compiles
+ */
+describe('Posts API', function() {
+	it('Check compile', function (done) {
+		require('../src/api/posts');
+		done();
+	});
+
+	it('Retrieve most recent posts', function (done) {
+		rq([url,'/api/0/posts'].join(''), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
+});

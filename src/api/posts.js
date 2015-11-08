@@ -1,14 +1,12 @@
-var ex = require('express'),
+var ap = require('../app'),
 	rs = require('rsvp'),
 	db = require('../storage'),
 	cf = require('../../config'),
 	ut = require('../utils');
-	
-var app = module.exports = ex();
 
 /**
  */
-app.get('/api/0/posts', function(req, res) {
+ap.get('/api/0/posts', function(req, res) {
 	// make options variable
 	var opts = {
 		sort: { published:(!req.query.r || req.query.r !== 'o') ? -1 : 1 }, // newest first
@@ -26,7 +24,7 @@ app.get('/api/0/posts', function(req, res) {
 
 /** retrieve a single post
  */
-app.get('/api/0/post*', function(req, res) {
+ap.get('/api/0/post*', function(req, res) {
 	// has parameters?
 	var q = req.params.length ? req.params : req.query;
 	if (q) {

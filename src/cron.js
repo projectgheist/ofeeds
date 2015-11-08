@@ -485,7 +485,6 @@ exports.FetchFeed = function(feed) {
 /** function UpdateAllFeeds
  */
 exports.UpdateAllFeeds = function(done) {
-	//console.log('UpdateAllFeeds');
 	// declare options object
 	var opts	= {};
 	// get oldest updated feeds
@@ -510,7 +509,6 @@ exports.UpdateAllFeeds = function(done) {
 			}
 			// if jobs present
 			if (a.length > 0) {
-				//console.log('Update feed count: ' + a.length)
 				// run all jobs
 				rs
 					.all(a) // execute FetchFeed promises
@@ -527,7 +525,6 @@ exports.UpdateAllFeeds = function(done) {
 					})
 					*/
 					.then(function(err) {
-						//console.log('Done - UpdateAllFeeds!');
 						done();
 					});
 			} else {

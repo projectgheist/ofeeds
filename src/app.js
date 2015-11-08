@@ -18,8 +18,7 @@ if (false) {
 
 /** GET / POST Pages
  */
-ap.listen(cf.Port(), cf.IpAddr(), function(){
-});
+ap.listen(cf.Port(), cf.IpAddr(), function(){});
 
 /** Export reference
  */
