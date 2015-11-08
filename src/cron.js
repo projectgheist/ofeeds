@@ -3,13 +3,9 @@
 var fp = require('feedparser'),
 	rq = require('request'),
 	rs = require('rsvp'),
-	sx = require("../node_modules/feedparser/node_modules/sax/lib/sax.js"),
-	pr = sx.parser(false),
-	cf = require('../config'),
+	pr = require("../node_modules/feedparser/node_modules/sax/lib/sax.js").parser(false),
 	st = require('./storage'),
 	ut = require('./utils'),
-	mm = require('moment'),
-	mg = require('mongoose'),
 	is = require('image-size');
 	
 /**
@@ -106,10 +102,10 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 			.then(function() {
 				//console.log("FindOrCreatePost (C)");
 				// find or create post in database
-				return st.findOrCreate(st.Post, {'feed':feed, 'guid':guid});
+				return db.findOrCreate(db.Post, {'feed':feed, 'guid':guid});
 			})*/
 		st
-			.findOrCreate(st.Post, {'feed':feed, 'guid':guid})
+			.findOrCreate(db.Post, {'feed':feed, 'guid':guid})
 			.then(function(post) {
 				try {
 					//console.log("FindOrCreatePost (D)");
@@ -150,13 +146,13 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 function SelectPublishedDate(prev,data,debug) {
 	if (data['rss:pubdate'] && data['rss:pubdate']['#']) {
 		if (debug) console.log('rss:pubdate: ' + data['rss:pubdate']['#']);
-		return mm(new Date(data['rss:pubdate']['#']));
+		return mm(new Date(data['rss:pubdate']['#']).toISOString());
 	} else if (data.pubdate) {
 		if (debug) console.log('pubdate: ' + data.pubdate);
-		return mm(new Date(data.pubdate));
+		return mm(new Date(data.pubdate).toISOString());
 	} else if (!prev.published && data.meta && data.meta.pubdate) {
 		if (debug) console.log('meta.pubdate: ' + data.meta.pubdate);
-		return mm(new Date(data.meta.pubdate));
+		return mm(new Date(data.meta.pubdate).toISOString());
 	} else if (!prev.published) {
 		if (debug) console.log('now');
 		return mm();
@@ -500,7 +496,7 @@ exports.UpdateAllFeeds = function(done) {
 	opts.limit 	= 15;
 	// do database related things
 	st
-		.all(st.Feed, opts) // retrieve all feeds
+		.all(db.Feed, opts) // retrieve all feeds
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function(feeds) {
 			var a = [];
@@ -521,7 +517,7 @@ exports.UpdateAllFeeds = function(done) {
 					/*
 					.then(function() {
 						// retrieve any feeds that can be removed from being cron'd
-						return st.all(st.Feed,{query:{ posts: null, numSubscribers: null, lastFailureWasParseFailure: true }}).then(function(r) {
+						return db.all(db.Feed,{query:{ posts: null, numSubscribers: null, lastFailureWasParseFailure: true }}).then(function(r) {
 							var b = []; // declare new array
 							for (var i in r) { // loop results
 								b.push(r[i].remove()); // create a RemoveFeed promise

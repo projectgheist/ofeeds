@@ -1,9 +1,7 @@
 /** Module dependencies
  */
-var ex = require('express'),
-	cf = require('../config'),
-	ut = require('./utils'),
-	ap = module.exports = ex();
+var cf = require('../config'),
+	ap = require('./app');
 
 /** Parameter function */
 function param(fn, req, next, id) {

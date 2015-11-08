@@ -45,12 +45,12 @@ Temporary Items
 # ignore nodejs library modules
 /node_modules
 /bower_components
+/coverage
 
 # ignore custom application launcher in Windows
 *.bat
 
 # ignore specific config file
-config.js
 
 # ignore specific other file
 manifest.yml

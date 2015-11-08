@@ -7,7 +7,7 @@ var mg = require('mongoose'),
 	ut = require('./utils');
 
 /** Needs to be done before promisifyAll
- * export the modules
+ * export the models
  */
 exports.User 	= require('./models/user');
 exports.Feed 	= require('./models/feed');
@@ -15,35 +15,28 @@ exports.Post 	= require('./models/post');
 exports.Tag 	= require('./models/tag');
 exports.Pref 	= require('./models/pref');
 
-/** function Connect
- * creates a connection to the MongoDB
- */
-exports.setup = function() {
-	// if database is already connected return
-    if (mg.connection.db) {
-		return;
-	}
+// if database is already connected return
+if (!mg.connection || !mg.connection.db) {
 	// declare connection options
 	var options = { 
 		server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }, 
 		replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } } 
 	};
 	// try to connect to db
-    mg.connect(ut.getDBConnectionURL(cf.db()), options);
-    // declare connection variable
+	mg.connect(ut.getDBConnectionURL(cf.db()), options);
+	// declare connection variable
 	var db = mg.connection;
 	// Add promise support to Mongoose
 	require('mongoomise').promisifyAll(db, rs);
 	// error event
-    db.on('error', function(err) {
-        console.log(err);
-    });
+	db.on('error', function(err) {
+		console.log(err);
+	});
 	// connection established event
-    db.once('open', function() {
-        console.log('Connected to Mongo: ' + cf.db().dbname+'!');
+	db.once('open', function() {
 		require('./wait')
-    });
-};
+	});
+}
 
 /** function all
  */

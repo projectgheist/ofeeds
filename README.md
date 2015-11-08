@@ -1,5 +1,10 @@
 # [OFeeds](https://github.com/projectgheist/ofeeds)
 
+[![Dependency Status](https://david-dm.org/projectgheist/ofeeds.svg)](https://david-dm.org/projectgheist/ofeeds)
+[![Build Status](https://travis-ci.org/projectgheist/ofeeds.svg?branch=master)](https://travis-ci.org/projectgheist/ofeeds)
+[![codecov.io](https://codecov.io/github/projectgheist/ofeeds/coverage.svg?branch=master)](https://codecov.io/github/projectgheist/ofeeds?branch=master)
+[![Coverage Status](https://coveralls.io/repos/projectgheist/ofeeds/badge.svg?branch=master&service=github)](https://coveralls.io/github/projectgheist/ofeeds?branch=master)
+
 Warning: This is work in progress and not usable/stable yet!
 
 OFeeds is a minimal RSS reader in Node.js with a front end interface with as little external dependencies as possible.

@@ -5,6 +5,7 @@
 /public/*     	# static files
 /private/*     	# static files
 /views/*     	# static files
+/test/*     	# test files
 ./README.md   	# a specific file
 *.css         	# ignore any CSS files
 *.ini         	# ignore any INI files

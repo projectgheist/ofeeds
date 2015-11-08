@@ -1,23 +1,28 @@
 /** Module dependencies
  */
-var ex = require('express'),
-	cf = require('../config'),
+var cf = require('../config'),
 	pp = require('passport'),
 	gs = require('passport-google-oauth').OAuth2Strategy,
 	mg = require('mongoose'),
 	db = require('./storage');
 
-var app = module.exports = ex();
+var ap = require('./app');
 	
+/** Load configurations
+ */
+ap.use(require('express-session')({secret: 'ofeeds_secret_key'}));
+ap.use(pp.initialize());
+ap.use(pp.session());
+
 // Redirect the user to Google for authentication.  When complete, Google
-// will redirect the user back to the application at '/auth/google/callback'
-app.get('/auth/google', 
+// will redirect the user back to the aplication at '/auth/google/callback'
+ap.get('/auth/google', 
 		pp.authenticate('google', { scope: 'https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email' }));
 
 // Google will redirect the user to this URL after authentication.  Finish
 // the process by verifying the assertion.  If valid, the user will be
 // logged in.  Otherwise, authentication has failed.
-app.get('/auth/google/callback', 
+ap.get('/auth/google/callback', 
 		pp.authenticate('google', { successRedirect: '/subscription/user/reading-list',
 									failureRedirect: '/' }));
 
