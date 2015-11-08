@@ -12,7 +12,7 @@ var Post = mg.Schema({
 	// unique post identifier for this post (usually the post url or similar)
     guid: { type: String, unique: true, index: 1 },
 	// unique short id
-	shortid: { type: String, unique: true, 'default': sh.generate },
+	shortid: { type: String, unique: true, default: sh.generate },
 	// post title
     title: String,
 	// post html markup
