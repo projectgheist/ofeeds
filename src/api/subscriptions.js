@@ -133,7 +133,7 @@ function AllFeeds(req, res) {
 	// declare feed options
 	var opts = {
 		sort: s,
-		limit: !req.query.n ? false : req.query.n // limit the amount of output feeds
+		limit: (!req.query.n ? false : req.query.n) // limit the amount of output feeds
 	};
 	
 	db

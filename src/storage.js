@@ -68,17 +68,6 @@ exports.updateOrCreate = function(model, item, update, debug) {
     return q;
 };
 
-/** function dropDatabase
- * Deletes the currently connected database and removes all records
- * !Should not be used for release version, used by the tests
- */
-exports.dropDatabase = function(callback) {
-    if (!mg.connection) {
-		return callback(new Error('Not connected'));
-    }  
-    mg.connection.db.dropDatabase(callback);
-};
-
 /** function editTags
  * Adds and removes tags from a subscription or post
  */

@@ -26,8 +26,8 @@ ap.get('/api/0/posts', function(req, res) {
  */
 ap.get('/api/0/post*', function(req, res) {
 	// has parameters?
-	var q = req.params.length ? req.params : req.query;
-	if (q) {
+	var q = req.params.length ? req.params[0] : req.query;
+	if (q && q.value) {
 		// create query
         db.Post
 			.find({

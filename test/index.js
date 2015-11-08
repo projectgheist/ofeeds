@@ -75,4 +75,12 @@ describe('Posts API', function() {
 			}
 		});
 	});
+
+	it('Retrieve post BY id', function (done) {
+		rq([url,'/api/0/post'].join(''), {}, function (error, response, body) {
+			if (!error && response.statusCode == 400) {
+				done();
+			}
+		});
+	});
 });
