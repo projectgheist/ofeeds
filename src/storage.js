@@ -33,7 +33,6 @@ if (!mg.connection || !mg.connection.db) {
 	});
 	// connection established event
 	db.once('open', function() {
-		console.log('DB connection established!')
 		require('./wait');
 	});
 }

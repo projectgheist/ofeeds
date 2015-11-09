@@ -1,5 +1,6 @@
 var ut = require('./utils'),
 	cf = require('../config'),
+	rs = require('rsvp'),
 	mg = require('mongoose'),
 	Agenda = require('agenda'),
 	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db(),true), collection: 'crons' }, 
@@ -35,13 +36,32 @@ ag.on('ready', function(){
 
 	// start cron jobs
 	ag.start();
-	console.log('Agenda established!')
 	
 	// Indicates that Agenda started correctly
 	ag.isReady = function() {
 		return true;
 	};
 });
+
+/**
+ */
+ag.getAllJobs = function() {
+	return new rs.Promise(function(resolve, reject) {
+		if (ag && ag.isReady()){
+			ag.jobs({ 
+				name: 'UpdateAllFeeds' 
+			}, function(err, jobs) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(jobs);
+				}
+			})
+		} else {
+			reject();
+		}
+	});
+};
 
 /** Export
  */

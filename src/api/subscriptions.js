@@ -146,27 +146,16 @@ function AllFeeds(req, res) {
 				};
 			});
 			// retrieve the time till the next job needs to run
-			/*if (ag && ag.isReady()) {
-				new rs.Promise(function(resolve, reject) {
-					ag.jobs({ 
-						name: 'UpdateAllFeeds' 
-					}, function(err, jobs) {
-						if (err) {
-							reject(err);
-						} else {
-							resolve(jobs);
-						}
-					})
-				})
+			ag
+				.getAllJobs()
 				.then(function(jobs) {
 					return res.json({
 						'nextRunIn': ((jobs.length > 0) ? jobs[0].attrs.nextRunAt : ''), 
 						'feeds': a
 					});
+				}, function() {
+					return res.json({ 'feeds': a });
 				});
-			} else {*/
-				return res.json({ 'feeds': a });
-			//}
 		});
 };
 
@@ -183,7 +172,8 @@ ap.get('/api/0/subscription/list', function(req, res) {
 		var tags = ut.parseTags(['user/-/state/reading-list','user/-/state/read'], req.user),
 			tuc = 0; // total post unread count
 		return db
-			.getTags(tags[0]).then(function(readinglist) {
+			.getTags(tags[0])
+			.then(function(readinglist) {
 				// no feeds returned
 				if (!readinglist) {
 					return [];
@@ -289,8 +279,6 @@ ap.get('/api/0/subscription/refresh', function(req, res) {
 				numResults: 1,
 				streamId: 'feed/' + u
 			});
-		}, function(err) {
-			res.status(500).send(err);
 		});
 });
 
@@ -313,14 +301,12 @@ ap.post('/api/0/subscription/quickadd', function(req, res) {
     }
 	// creat or find URL in db
     actions
-	.subscribe(req, req.query.q)
-	.then(function(feed) {
-        res.json({
-            query: u,
-            numResults: 1,
-            streamId: 'feed/' + u
-        });
-    }, function(err) {
-        res.status(500).send(err);
-    });
+		.subscribe(req, req.query.q)
+		.then(function(feed) {
+			res.json({
+				query: u,
+				numResults: 1,
+				streamId: 'feed/' + u
+			});
+		});
 });

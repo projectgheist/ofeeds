@@ -1,11 +1,6 @@
-var ex = require('express'),
-	rs = require('rsvp'),
+var ap = require('../app'),
 	db = require('../storage'),
-	cr = require('../cron'),
-	mm = require('moment'),
 	ut = require('../utils');
-
-var app = module.exports = ex();
 
 /**
  * @param posts: Array of posts to format
@@ -38,7 +33,9 @@ function formatPosts(user, feed, posts, tags, obj) {
 	return obj;
 };
 
-app.get('/api/0/stream/contents*', function(req, res) {
+/**
+ */
+ap.get('/api/0/stream/contents*', function(req, res) {
 	var streams = [];
 	// validate input
 	if (req.params[0]) {
@@ -90,7 +87,6 @@ app.get('/api/0/stream/contents*', function(req, res) {
 			item.query
 				.then(function(posts) {
 					//console.log('stream/contents (B)')
-					//console.log(posts.length)
 					var isFeed 	= (streams[0].type === 'feed'), // boolean: TRUE if feed
 						value 	= streams[0].value,				// string: site URL
 						hasPosts = (posts.length > 0 && posts[0]), // boolean: TRUE if feed object

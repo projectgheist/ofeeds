@@ -52,16 +52,17 @@ pp.use(new gs({
 	function(token, tokenSecret, profile, done) {
 		// asynchronous verification, for effect...
 		process.nextTick(function () {
-			return db.findOrCreate(db.User, {openID: profile.id}).then(function(user) {
+			return db.findOrCreate(db.User, {openID: profile.id})
+			.then(function(user) {
 				// store retrieved info
 				user.provider 	= profile.provider;
 				user.email		= profile.emails[0].value;
 				user.name		= profile.displayName;
 				// store in db
-				user.save();
+				return user.save();
+			})
+			.then(function(user) {
 				return done(null, user);
-			}, function(err) {
-				return done(err);
 			});
 		});
 	}
