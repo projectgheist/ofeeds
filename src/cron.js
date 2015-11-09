@@ -263,7 +263,7 @@ exports.DeleteFeed = function(feed, err, resolve) {
 	 if feed is valid AND if it was updated more then 2 minutes ago
  */
 exports.AllowFetch = function(feed, debug) {
-	return (feed && (!feed.successfulCrawlTime || (feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') > 2)));
+	return feed && (!feed.successfulCrawlTime || (feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') > 2));
 };
 
 /** function StoreMetaData
@@ -336,10 +336,6 @@ function StorePosts(stream, feed, posts, guids) {
 		// Retrieve all the images from the post description
 		if (data.description !== null) {
 			pr.onopentag = function(tag) {
-				// early out
-				if (!tag.attributes) {
-					return;
-				}
 				// NOTE: tag names and attributes are all in CAPS
 				switch (tag.name) {
 				case 'IMG':
@@ -465,11 +461,6 @@ function PingFeed(feed) {
 	});
 }
 
-/** function ParseFeed
- */
-exports.ParseFeed = function() {
-};
-
 /** function FetchFeed
  */
 exports.FetchFeed = function(feed) {
@@ -498,37 +489,10 @@ exports.UpdateAllFeeds = function(done) {
 		.all(db.Feed, opts) // retrieve all feeds
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function(feeds) {
-			var a = [];
-			// loop all found feeds
-			for (var i in feeds) {
-				// make sure that the feed has a valid url
-				if (feeds[i].feedURL !== undefined && feeds[i].feedURL.length > 0) {
-					// add fetch feed job to array
-					a.push(exports.FetchFeed(feeds[i]));
-				}
-			}
-			// if jobs present
-			if (a.length > 0) {
-				// run all jobs
-				rs
-					.all(a) // execute FetchFeed promises
-					/*
-					.then(function() {
-						// retrieve any feeds that can be removed from being cron'd
-						return db.all(db.Feed,{query:{ posts: null, numSubscribers: null, lastFailureWasParseFailure: true }}).then(function(r) {
-							var b = []; // declare new array
-							for (var i in r) { // loop results
-								b.push(r[i].remove()); // create a RemoveFeed promise
-							}
-							return rs.all(b); // execute RemoveFeed promises
-						});
-					})
-					*/
-					.then(function(err) {
-						done();
-					});
-			} else {
-				done();
-			}
+			// execute FetchFeed promises
+			return rs.all(exports.FetchFeed(feeds[i]))
+		})
+		.then(function() {
+			done();
 		});
 };

@@ -59,11 +59,6 @@ ap.get("/logout", ensureAuth, function(req, res) {
 	res.redirect('/'); 
 });
 
-/** dashboard route */
-ap.get("/dashboard", ensureAuth, function(req, res) {
-	res.redirect('/subscription/user/reading-list');
-});
-
 /** manage route */
 ap.get("/manage", function(req, res) {
 	res.render('pages/landing', { 
