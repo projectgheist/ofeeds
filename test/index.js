@@ -53,7 +53,7 @@ describe('Routing', function() {
 			}
 		});
 	});
-
+/*
 	it('Route - Login', function (done) {
 		rq([url,'/login'].join(''), function (error, response, body) {
 			if (!error && response.statusCode == 200) {
@@ -69,6 +69,7 @@ describe('Routing', function() {
 			}
 		});
 	});
+*/
 });
 
 /** Make sure that the routing code compiles
