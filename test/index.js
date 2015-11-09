@@ -31,6 +31,11 @@ describe('Startup', function() {
 		require('../src/storage');
 		done();
 	});
+
+	it('Enable authentication', function (done) {
+		require('../src/auth');
+		done();
+	});
 });
 
 /** Make sure that the routing code compiles
@@ -51,14 +56,21 @@ describe('Feeds API', function() {
 	});
 
 	it('Retrieve all feeds', function (done) {
-		rq([url,'/api/0/feeds/list'].join(''), function (error, response, body) {
+		rq([url,'/api/0/subscription/list'].join(''), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
+	
+	it('Search for feed', function (done) {
+		rq.get({url: [url,'/api/0/subscription/search'].join(''), qs: {q:'feed'}}, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
 				done();
 			}
 		});
 	});
 });
-
 
 /** Make sure that the routing code compiles
  */

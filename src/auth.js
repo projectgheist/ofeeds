@@ -4,13 +4,16 @@ var cf = require('../config'),
 	pp = require('passport'),
 	gs = require('passport-google-oauth').OAuth2Strategy,
 	mg = require('mongoose'),
-	db = require('./storage');
-
-var ap = require('./app');
+	db = require('./storage'),
+	ap = require('./app');
 	
 /** Load configurations
  */
-ap.use(require('express-session')({secret: 'ofeeds_secret_key'}));
+ap.use(require('express-session')({
+	secret: 'ofeeds_secret_key',
+	resave: false,
+    saveUninitialized: false
+}));
 ap.use(pp.initialize());
 ap.use(pp.session());
 

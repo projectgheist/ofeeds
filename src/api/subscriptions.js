@@ -136,14 +136,14 @@ function AllFeeds(req, res) {
 		limit: (!req.query.n ? false : req.query.n) // limit the amount of output feeds
 	};
 	
-	db
+	return db
 		.all(db.Feed, opts) // retrieve all feeds
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function(feeds) {
 			var a = feeds.map(function(f) {
 				var b = f.failedCrawlTime === undefined,
 					s = f.successfulCrawlTime === undefined,
-					r = (b && s) ? false : (!b && !s ? mm(f.successfulCrawlTime) > mm(f.failedCrawlTime) : (b && !s));
+					r = (b && s) ? false : ((!b && !s) ? (mm(f.successfulCrawlTime) > mm(f.failedCrawlTime)) : (b && !s));
 				return {
 					favicon:		f.favicon || '',
 					id: 			f.feedURL, // its already encoded
@@ -178,13 +178,13 @@ ap.get('/api/0/feeds/list', AllFeeds);
 
 // lists all of the feeds a user is subscribed to
 ap.get('/api/0/subscription/list', function(req, res) {
-    // is user logged in?
+	// is user logged in?
 	if (!req.isAuthenticated()) {
-		AllFeeds(req, res);
+		return AllFeeds(req, res);
 	} else {
 		// get tags
 		var tags = ut.parseTags(['user/-/state/reading-list','user/-/state/read'], req.user),
-			tuc = 0;
+			tuc = 0; // total post unread count
 		return db
 			.getTags(tags[0]).then(function(readinglist) {
 				// no feeds returned
@@ -199,6 +199,7 @@ ap.get('/api/0/subscription/list', function(req, res) {
 					]);
 			})
 			.then(function(results) {
+				// create array
 				var a = results[0].map(function(f) {
 					// find posts in feed WHERE 'read'-tag 'not in' array
 					return db.Post
@@ -224,7 +225,6 @@ ap.get('/api/0/subscription/list', function(req, res) {
 								updated:		f.lastModified,
 								creation:		f.creationTime
 							};
-						}, function(err) {
 						});
 				});
 				return rs.all(a);			
@@ -251,6 +251,7 @@ ap.get('/api/0/subscription/search', function(req, res) {
 		.then(function(feeds) {
 			var vs = [],
 				at = false; // alert type?
+			// not an array?
 			if (!ut.isArray(feeds)) {
 				at = feeds.type;
 				feeds = feeds.data;
@@ -264,7 +265,7 @@ ap.get('/api/0/subscription/search', function(req, res) {
 						title:feeds[i].title,
 						description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : ''),
 						alert: at
-						});
+					});
 				};
 			}
 			// always return something, don't make it return errors
