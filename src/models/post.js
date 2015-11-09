@@ -10,9 +10,9 @@ var Post = mg.Schema({
 	// reference to the feed this post belongs to
     feed: ut.ref('Feed'),
 	// unique post identifier for this post (usually the post url or similar)
-    guid: { type: String, unique: true },
+    guid: String,
 	// unique short id
-	shortid: { type: String, unique: true, default: sh.generate },
+	shortid: { type: String, default: sh.generate },
 	// post title
     title: String,
 	// post html markup
@@ -38,4 +38,10 @@ var Post = mg.Schema({
 	tags: [ut.ref('Tag')]
 });
 
+/**
+ */
+Post.index({guid: 1, shortid: 1}, {unique: true});
+
+/**
+ */
 module.exports = mg.model('Post', Post);
