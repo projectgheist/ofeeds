@@ -81,6 +81,7 @@ describe('Feeds API', function() {
 	});
 
 	it('Retrieve all feeds', function (done) {
+		this.timeout(5000);
 		rq([url,'/api/0/subscription/list'].join(''), function (error, response, body) {
 			if (!error && response.statusCode == 200) {
 				done();
@@ -89,6 +90,7 @@ describe('Feeds API', function() {
 	});
 	
 	it('Search for feed (noFeedUrl)', function (done) {
+		this.timeout(5000);
 		rq.get({url: [url,'/api/0/subscription/search'].join(''), qs: {q:'noFeedUrl'}}, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
 				done();
@@ -97,6 +99,7 @@ describe('Feeds API', function() {
 	});
 
 	it('Refresh feed (noFeedUrl)', function (done) {
+		this.timeout(5000);
 		rq.get({url: [url,'/api/0/subscription/refresh'].join(''), qs: {q:'noFeedUrl'}}, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
 				done();

@@ -3,19 +3,6 @@
 var cf = require('../config'),
 	ap = require('./app');
 
-/** Parameter function */
-function param(fn, req, next, id) {
-	if (fn instanceof RegExp) { // make sure it is a regular expression
-		var captures;
-		if (captures = fn.exec(String(req.originalUrl))) {
-			req.params[id] = captures;
-			next();
-		} else {
-			next('route');
-		}
-	}
-};
-
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
 //   the request is authenticated (typically via a persistent login session),
@@ -25,17 +12,8 @@ function ensureAuth(req, res, next) {
 	if (req.isAuthenticated()) { 
 		return next(); 
 	}
-	res.redirect('/login')
+	res.redirect('/');
 }
-
-/** Parameter declarations */
-ap.param('uid', function(req, res, next, id) {
-	param(/^[0-9]+$/, req, next, id);
-});
-
-ap.param('name', function(req, res, next, id) {
-	param(/^.*$/, req, next, id);
-});
 
 /** home route */
 ap.get("/", function(req, res) {
