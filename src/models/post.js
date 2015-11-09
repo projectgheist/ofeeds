@@ -38,8 +38,4 @@ var Post = mg.Schema({
 	tags: [ut.ref('Tag')]
 });
 
-Post.virtual('longid').get(function() {
-    return 'tag:reader/item/' + this.id;
-});
-
 module.exports = mg.model('Post', Post);

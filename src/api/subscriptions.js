@@ -32,9 +32,7 @@ var actions = {
 					return db
 						.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)})
 						.then(function(feed) {
-							if (feed) {
-								return cr.FetchFeed(!ut.isArray(feed) ? feed: feed[0]);
-							}
+							return cr.FetchFeed(feed);
 						})
 						.then(function(f) {
 							// return feed
@@ -173,17 +171,18 @@ ap.get('/api/0/subscription/list', function(req, res) {
 			tuc = 0; // total post unread count
 		return db
 			.getTags(tags[0])
-			.then(function(readinglist) {
+			.then(function(rl) {
 				// no feeds returned
-				if (!readinglist) {
+				if (!rl) {
 					return [];
+				} else {
+					// find all feeds that contain 'reading-list' tag & sort by alphabetical title
+					return rs
+						.all([
+							db.Feed.find({ tags: rl }).sort({ 'title': 1 }),
+							db.getTags(tags[1])
+						]);
 				}
-				// find all feeds that contain 'reading-list' tag & sort by alphabetical title
-				return rs
-					.all([
-						db.Feed.find({ tags: readinglist }).sort({ 'title': 1 }),
-						db.getTags(tags[1])
-					]);
 			})
 			.then(function(results) {
 				// create array
@@ -201,6 +200,7 @@ ap.get('/api/0/subscription/list', function(req, res) {
 							});
 							// increment total unread count
 							tuc += c.length;
+							// create object
 							return {
 								favicon:		f.favicon,
 								id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
@@ -224,8 +224,6 @@ ap.get('/api/0/subscription/list', function(req, res) {
 				});
 				// return json value
 				return res.json({'feeds': s});
-			}, function(err) {
-				res.status(500).send(err);
 			});
 	}
 });
