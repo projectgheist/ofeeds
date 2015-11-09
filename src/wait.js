@@ -11,12 +11,7 @@ var ut = require('./utils'),
 ag.define('UpdateAllFeeds', { 
 	lockLifeTime: 1000 
 }, function(job, done) {
-	// needs to have a database connection
-	if (mg.connection && mg.connection.db) {
-		require('./cron').UpdateAllFeeds(done);
-	} else {
-		done();
-	}
+	require('./cron').UpdateAllFeeds(done);
 });
 
 // Indicates that Agenda still needs to be started

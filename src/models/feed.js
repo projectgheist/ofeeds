@@ -14,7 +14,7 @@ var Feed = mg.Schema({
     language: String,
     copyright: String,
     categories: [String],
-    feedURL: { type: String, index: { unique: true }},
+    feedURL: { type: String, unique: true },
     siteURL: String,
     posts: [ut.ref('Post')],
     

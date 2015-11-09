@@ -8,9 +8,9 @@ var mg = require('mongoose'),
 // User specific tags stored here to avoid having separate post records for each user
 var Post = mg.Schema({
 	// reference to the feed this post belongs to
-    feed: ut.refAndIndex('Feed'),
+    feed: ut.ref('Feed'),
 	// unique post identifier for this post (usually the post url or similar)
-    guid: { type: String, unique: true, index: 1 },
+    guid: { type: String, unique: true },
 	// unique short id
 	shortid: { type: String, unique: true, default: sh.generate },
 	// post title
