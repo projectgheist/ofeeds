@@ -63,8 +63,34 @@ describe('Feeds API', function() {
 		});
 	});
 	
-	it('Search for feed', function (done) {
-		rq.get({url: [url,'/api/0/subscription/search'].join(''), qs: {q:'feed'}}, function (error, response, body) {
+	it('Search for feed (noFeedUrl)', function (done) {
+		rq.get({url: [url,'/api/0/subscription/search'].join(''), qs: {q:'noFeedUrl'}}, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
+
+	it('Refresh feed (noFeedUrl)', function (done) {
+		rq.get({url: [url,'/api/0/subscription/refresh'].join(''), qs: {q:'noFeedUrl'}}, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
+
+	it('Search for feed (InvalidFeedUrl)', function (done) {
+		this.timeout(5000);
+		rq.get({url: [url,'/api/0/subscription/search'].join(''), qs: {q:'https://www.google.com/'}}, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
+
+	it('Refresh feed (InvalidFeedUrl)', function (done) {
+		this.timeout(5000);
+		rq.get({url: [url,'/api/0/subscription/refresh'].join(''), qs: {q:'https://www.google.com/'}}, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
 				done();
 			}

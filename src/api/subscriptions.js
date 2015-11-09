@@ -18,7 +18,6 @@ var actions = {
 			.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: url}}] })
 			.limit(6)
 			.then(function(results) {
-				//console.log("Search (B):" + url);
 				// feeds found that match the search expression
 				if (results.length > 0) { 
 					return results;
@@ -33,23 +32,15 @@ var actions = {
 					return db
 						.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)})
 						.then(function(feed) {
-							//console.log("Search (C)");
 							if (feed) {
 								return cr.FetchFeed(!ut.isArray(feed) ? feed: feed[0]);
-							} else {
-								//console.log("Search (NO FEED)");
 							}
-						}, function(err) {
-							//console.log("Search (D)");
-							//console.log(err)
 						})
 						.then(function(f) {
-							//console.log("Search (D):" + url);
 							// return feed
-							return { 'data':[f], 'type': f.posts.length ? 'success' : 'danger' };
+							return { 'data':[f], 'type': (f.posts.length ? 'success' : 'danger') };
 						});
 				}
-				//console.log("Search (E):" + url);
 				return false;
 			});
 	},
@@ -291,16 +282,16 @@ ap.get('/api/0/subscription/refresh', function(req, res) {
     }
 	// creat or find URL in db
     actions
-	.refresh(req, req.query.q)
-	.then(function(feed) {
-        res.json({
-            query: u,
-            numResults: 1,
-            streamId: 'feed/' + u
-        });
-    }, function(err) {
-        res.status(500).send(err);
-    });
+		.refresh(req, req.query.q)
+		.then(function(feed) {
+			res.json({
+				query: u,
+				numResults: 1,
+				streamId: 'feed/' + u
+			});
+		}, function(err) {
+			res.status(500).send(err);
+		});
 });
 
 // subscribe to feed
