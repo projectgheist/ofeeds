@@ -35,6 +35,7 @@ ag.on('ready', function(){
 
 	// start cron jobs
 	ag.start();
+	console.log('Agenda established!')
 	
 	// Indicates that Agenda started correctly
 	ag.isReady = function() {
