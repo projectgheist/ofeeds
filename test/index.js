@@ -138,6 +138,15 @@ describe('Feeds API', function() {
 			}
 		});
 	});
+
+	it('Route - Feed', function (done) {
+		this.timeout(5000);
+		rq.get([url,'/feed/http%253A%252F%252Fwww.polygon.com%252Frss%252Findex.xml'].join(''), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
 });
 
 /** Make sure that the routing code compiles

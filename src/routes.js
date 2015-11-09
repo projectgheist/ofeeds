@@ -67,7 +67,7 @@ ap.get("/manage", function(req, res) {
 	});
 });
 
-/** subscription route */
+/** single feed route */
 ap.get("/feed/*", function(req, res) {
 	res.render('pages/landing', { 
 		'config': cf.site,

@@ -16,9 +16,12 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 		db
 			.findOrCreate(db.Post, {'feed':feed, 'guid':guid})
 			.then(function(post) {
+				console.log('store post')
+				console.log(post)
 				return post.save();
 			})
 			.then(function(post) {
+				console.log('/stored post')
 				var ref = post,
 					m = data['media:group'];
 				ref.title 		= (data.title ? ut.parseHtmlEntities(data.title) : 'No title');
