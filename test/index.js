@@ -53,6 +53,14 @@ describe('Routing', function() {
 			}
 		});
 	});
+	
+	it('Route - Manage', function (done) {
+		rq(url, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
 /*
 	it('Route - Login', function (done) {
 		rq([url,'/login'].join(''), function (error, response, body) {
