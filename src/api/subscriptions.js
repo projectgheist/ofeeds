@@ -129,20 +129,15 @@ function AllFeeds(req, res) {
 				break;
 		}
 	}
-
 	// declare feed options
 	var opts = {
 		sort: s,
 		limit: (!req.query.n ? false : req.query.n) // limit the amount of output feeds
 	};
-	console.log('o')
-	console.log(opts)
 	return db
 		.all(db.Feed, opts) // retrieve all feeds
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function(feeds) {
-			console.log('f')
-			console.log(feeds)
 			var a = feeds.map(function(f) {
 				var b = f.failedCrawlTime === undefined,
 					s = f.successfulCrawlTime === undefined,
@@ -159,15 +154,20 @@ function AllFeeds(req, res) {
 					creation:		f.creationTime
 				};
 			});
-			console.log('a')
-			console.log(a)
 			// retrieve the time till the next job needs to run
 			if (ag && ag.isReady()) {
-				console.log('agenda')
-				ag.jobs({ 
-					name: 'UpdateAllFeeds' 
-				}, function(err, jobs) {
-					if (err) console.log(err);
+				new rs.Promise(function(resolve, reject) {
+					ag.jobs({ 
+						name: 'UpdateAllFeeds' 
+					}, function(err, jobs) {
+						if (err) {
+							reject(err);
+						} else {
+							resolve(jobs);
+						}
+					})
+				})
+				.then(function(jobs) {
 					return res.json({
 						'nextRunIn': ((jobs.length > 0) ? jobs[0].attrs.nextRunAt : ''), 
 						'feeds': a
