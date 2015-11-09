@@ -96,6 +96,24 @@ describe('Feeds API', function() {
 			}
 		});
 	});
+
+	it('Search for feed (ValidFeedUrl)', function (done) {
+		this.timeout(5000);
+		rq.get({url: [url,'/api/0/subscription/search'].join(''), qs: {q:'http://www.polygon.com/rss/index.xml'}}, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
+
+	it('Refresh feed (ValidFeedUrl)', function (done) {
+		this.timeout(5000);
+		rq.get({url: [url,'/api/0/subscription/refresh'].join(''), qs: {q:'http://www.polygon.com/rss/index.xml'}}, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				done();
+			}
+		});
+	});
 });
 
 /** Make sure that the routing code compiles

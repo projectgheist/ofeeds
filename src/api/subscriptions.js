@@ -146,7 +146,7 @@ function AllFeeds(req, res) {
 				};
 			});
 			// retrieve the time till the next job needs to run
-			if (ag && ag.isReady()) {
+			/*if (ag && ag.isReady()) {
 				new rs.Promise(function(resolve, reject) {
 					ag.jobs({ 
 						name: 'UpdateAllFeeds' 
@@ -164,9 +164,9 @@ function AllFeeds(req, res) {
 						'feeds': a
 					});
 				});
-			} else {
+			} else {*/
 				return res.json({ 'feeds': a });
-			}
+			//}
 		});
 };
 
