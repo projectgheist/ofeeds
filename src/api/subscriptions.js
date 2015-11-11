@@ -35,11 +35,11 @@ var actions = {
 							return cr.FetchFeed(feed);
 						})
 						.then(function (f) {
-							// return feed
-							return { data: [f], type: (f.posts.length ? 'success' : 'danger') };
+							// return feed as array
+							return [f];
 						});
 				} else {
-					return { data: [], type: 'danger'};
+					return [];
 				}
 			});
 	},
@@ -48,7 +48,14 @@ var actions = {
 	 */
 	refresh: function (ctx, url) {
 		// Find feed for this URL in the database
-		return db.Feed.findOne({feedURL: url}).then(cr.FetchFeed);
+		return db.Feed.findOne({feedURL: url})
+		.then(function (feed) {
+			if (feed) {
+				return cr.FetchFeed(feed);
+			} else {
+				return false;
+			}
+		});
 	},
 	/** function subscribe
 	 * @param url: un-encoded
@@ -236,24 +243,25 @@ ap.get('/api/0/subscription/search', function (req, res) {
 		actions
 			.search(req, req.query.q)
 			.then(function (feeds) {
-				if (feeds.data.length) {
-					res.status(200).json(feeds.data.map(function (val) {
+				if (feeds.length) {
+					var a = feeds.map(function (val) {
 						var d = val.description;
 						return {
 							type: 'feed',
 							value: val.feedURL,
 							title: val.title,
 							description: (d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : ''),
-							alert: feeds.type
+							alert: 'success'
 						};
-					}));
+					});
+					res.status(200).json(a);
 				} else {
 					res.status(200).json({
 						type: 'feed',
 						value: req.query.q,
 						title: 'NotAFeed',
 						description: '',
-						alert: feeds.type
+						alert: 'danger'
 					});
 				}
 			});
@@ -265,25 +273,14 @@ ap.get('/api/0/subscription/refresh', function (req, res) {
 	if (req.query.q === undefined) {
 		res.status(400).end();
 	} else {
-		var u = decodeURIComponent(req.query.q);
-		if (!ut.startsWith(u, ['http://', 'https://'])) {
-			u = 'http://' + u;
-		}
-		// Check if URL
-		if (!ut.isUrl(u)) {
-			return res.json({
-				query: u,
-				numResults: 0
-			});
-		}
 		// creat or find URL in db
 		actions
 			.refresh(req, req.query.q)
 			.then(function (feed) {
 				res.status(200).json({
-					query: u,
+					query: decodeURIComponent(req.query.q),
 					numResults: feed ? 1 : 0,
-					streamId: 'feed/' + u
+					streamId: feed ? feed.stringID : ''
 				});
 			});
 	}
@@ -295,25 +292,14 @@ ap.post('/api/0/subscription/quickadd', function (req, res) {
 	if (!req.isAuthenticated()) {
 		res.status(400).end();
 	} else {
-		var u = decodeURIComponent(req.query.q);
-		if (!ut.startsWith(u, ['http://', 'https://'])) {
-			u = 'http://' + u;
-		}
-		// Check if URL
-		if (!ut.isUrl(u)) {
-			return res.json({
-				query: u,
-				numResults: 0
-			});
-		}
 		// creat or find URL in db
 		actions
 			.subscribe(req, req.query.q)
 			.then(function (feed) {
 				res.json({
-					query: u,
+					query: decodeURIComponent(req.query.q),
 					numResults: feed ? 1 : 0,
-					streamId: 'feed/' + u
+					streamId: feed ? feed.stringID : ''
 				});
 			});
 	}
