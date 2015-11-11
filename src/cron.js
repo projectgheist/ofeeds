@@ -244,12 +244,11 @@ function StorePosts (stream, feed, posts, guids) {
 								break; // stop for-loop
 							}
 						}
-						// image was already added
-						if (found) {
-							break; // stop switch-statement
+						// image has not been added already?
+						if (!found) {
+							// add to images array
+							images.other.push(obj);
 						}
-						// add to images array
-						images.other.push(obj);
 						break;
 					case 'IFRAME':
 						// add video url to array
@@ -266,11 +265,8 @@ function StorePosts (stream, feed, posts, guids) {
 		data.videos = videos;
 		// get the GUID of the post
 		var guid = (data.guid || data.link);
-		// does GUID already exist?
-		if (guids.indexOf(guid) > -1) {
-			// create a new unique one from the article information available
-			guid += ';' + (data.title || data.pubdate);
-		}
+		// does GUID already exist? else create a new unique one from the article information available
+		guid += (guids.indexOf(guid) <= -1) ? '' : [';', (data.title || data.pubdate)].join('');
 		// add to array
 		guids.push(guid);
 		// store data as ref
@@ -332,12 +328,10 @@ function PingFeed (feed) {
 					// console.log('Request Error: ' + feed.title + ' | ' + err + ' | ' + (res ? res.statusCode : 'N/A'))
 				}
 			})
-			.on('error', function (err) {
-				if (err) {
-					feed.lastModified = feed.failedCrawlTime = new Date();
-					feed.lastFailureWasParseFailure = true;
-					resolve(feed.save());
-				}
+			.on('error', function (ignore) {
+				feed.lastModified = feed.failedCrawlTime = new Date();
+				feed.lastFailureWasParseFailure = true;
+				resolve(feed.save());
 			})
 			.pipe(fp); // parse it through feedparser;
 	});

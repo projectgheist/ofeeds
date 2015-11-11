@@ -50,11 +50,7 @@ var actions = {
 		// Find feed for this URL in the database
 		return db.Feed.findOne({feedURL: url})
 		.then(function (feed) {
-			if (feed) {
-				return cr.FetchFeed(feed);
-			} else {
-				return false;
-			}
+			return (feed ? cr.FetchFeed(feed) : false);
 		});
 	},
 	/** function subscribe
@@ -174,7 +170,7 @@ ap.get('/api/0/subscription/list', function (req, res) {
 	} else {
 		// get tags
 		var tags = ut.parseTags(['user/-/state/reading-list', 'user/-/state/read'], req.user);
-		var tuc = 0;// total post unread count
+		var tuc = 0; // total post unread count
 		return db
 			.getTags(tags[0])
 			.then(function (rl) {
@@ -197,13 +193,6 @@ ap.get('/api/0/subscription/list', function (req, res) {
 					return db.Post
 						.find({ _id: {$in: f.posts}, tags: {$nin: results[1]} })
 						.then(function (c) {
-							// create array of users tags for this feed
-							var categories = f.tagsForUser(req.user).map(function (tag) {
-								return {
-									id: tag.stringID,
-									label: tag.name
-								};
-							});
 							// increment total unread count
 							tuc += c.length;
 							// create object
@@ -213,7 +202,10 @@ ap.get('/api/0/subscription/list', function (req, res) {
 								title: f.titleForUser(req.user),
 								unreadcount: c.length,
 								shortid: f.shortID,
-								categories: categories,
+								// create array of users tags for this feed
+								categories: f.tagsForUser(req.user).map(function (tag) {
+									return tag.name;
+								}),
 								crawlTime: f.successfulCrawlTime,
 								updated: f.lastModified,
 								creation: f.creationTime

@@ -11,8 +11,4 @@ var Tag = mg.Schema({
 	shortID: { type: String, default: sh.generate }
 });
 
-Tag.virtual('stringID').get(function () {
-	return ['user/', (this.user._id || this.user), '/', this.type, '/', this.name].join('');
-});
-
 module.exports = mg.model('Tag', Tag);
