@@ -11,7 +11,7 @@ var vd = require('validator');
 */
 exports.startsWith = function (val, str, out) {
 	// check if already an array, else make it an array
-	if (!Array.isArray(str)) {
+	if (!exports.isArray(str)) {
 		str = [str];
 	}
 	// loop array of strings
@@ -35,7 +35,7 @@ exports.stringInsert = function (o, i, p) {
 
 exports.stringReplace = function (val, str) {
 	// check if already an array, else make it an array
-	if (!Array.isArray(str)) {
+	if (!exports.isArray(str)) {
 		str = [str];
 	}
 	var re;
@@ -58,14 +58,6 @@ exports.ref = function (type) {
 	return {
 		type: mg.Schema.Types.ObjectId,
 		ref: type
-	};
-};
-
-exports.refAndIndex = function (type) {
-	return {
-		type: mg.Schema.Types.ObjectId,
-		ref: type,
-		index: 1
 	};
 };
 
@@ -121,7 +113,7 @@ exports.parseParameters = function (obj, user) {
 	}
 
 	// check if already an array, else make it an array
-	if (!Array.isArray(obj)) {
+	if (!exports.isArray(obj)) {
 		obj = [obj];
 	}
 
@@ -164,7 +156,7 @@ exports.parseFeeds = function (feeds) {
 	if (!feeds) {
 		return null;
 	}
-	if (!Array.isArray(feeds)) {
+	if (!exports.isArray(feeds)) {
 		feeds = [feeds];
 	}
 	for (var i = 0; i < feeds.length; i++) {
@@ -184,7 +176,7 @@ exports.parseItems = function (items) {
 	if (!items) {
 		return null;
 	}
-	if (!Array.isArray(items)) {
+	if (!exports.isArray(items)) {
 		items = [items];
 	}
 	for (var i = 0; i < items.length; i++) {
@@ -205,7 +197,7 @@ exports.parseTags = function (tags, user) {
 		return null;
 	}
 	// check if already an array, else make it an array
-	if (!Array.isArray(tags)) {
+	if (!exports.isArray(tags)) {
 		tags = [tags];
 	}
 	for (var i = 0; i < tags.length; i++) {

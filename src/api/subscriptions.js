@@ -22,7 +22,7 @@ var actions = {
 				if (results.length > 0) {
 					return results;
 				}
-				// make sure it starts with a certain prefix
+				// make sure it starts with a certain prefix (isn't necessary for find)
 				if (!ut.startsWith(url, ['http://', 'https://'])) {
 					// add prefix to the front of the string
 					url = 'http://' + url;
@@ -36,10 +36,11 @@ var actions = {
 						})
 						.then(function (f) {
 							// return feed
-							return { 'data': [f], 'type': (f.posts.length ? 'success' : 'danger') };
+							return { data: [f], type: (f.posts.length ? 'success' : 'danger') };
 						});
+				} else {
+					return { data: [], type: 'danger'};
 				}
-				return false;
 			});
 	},
 	/** function refresh
@@ -151,8 +152,6 @@ function AllFeeds (req, res) {
 						'nextRunIn': ((jobs.length > 0) ? jobs[0].attrs.nextRunAt : ''),
 						'feeds': a
 					});
-				}, function () {
-					return res.json({ 'feeds': a });
 				});
 		});
 }
@@ -237,26 +236,26 @@ ap.get('/api/0/subscription/search', function (req, res) {
 		actions
 			.search(req, req.query.q)
 			.then(function (feeds) {
-				var vs = [];
-				var at = false;// alert type?
-				// not an array?
-				if (!ut.isArray(feeds)) {
-					at = feeds.type;
-					feeds = feeds.data;
-				}
-				if (feeds && feeds.length) {
-					for (var i in feeds) {
-						var d = feeds[i].description;
-						vs.push({
+				if (feeds.data.length) {
+					res.status(200).json(feeds.data.map(function (val) {
+						var d = val.description;
+						return {
 							type: 'feed',
-							value: feeds[i].feedURL,
-							title: feeds[i].title,
+							value: val.feedURL,
+							title: val.title,
 							description: (d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : ''),
-							alert: at
-						});
-					}
+							alert: feeds.type
+						};
+					}));
+				} else {
+					res.status(200).json({
+						type: 'feed',
+						value: req.query.q,
+						title: 'NotAFeed',
+						description: '',
+						alert: feeds.type
+					});
 				}
-				res.status(200).json(vs);
 			});
 	}
 });
@@ -267,6 +266,9 @@ ap.get('/api/0/subscription/refresh', function (req, res) {
 		res.status(400).end();
 	} else {
 		var u = decodeURIComponent(req.query.q);
+		if (!ut.startsWith(u, ['http://', 'https://'])) {
+			u = 'http://' + u;
+		}
 		// Check if URL
 		if (!ut.isUrl(u)) {
 			return res.json({
@@ -280,7 +282,7 @@ ap.get('/api/0/subscription/refresh', function (req, res) {
 			.then(function (feed) {
 				res.status(200).json({
 					query: u,
-					numResults: 1,
+					numResults: feed ? 1 : 0,
 					streamId: 'feed/' + u
 				});
 			});
@@ -310,7 +312,7 @@ ap.post('/api/0/subscription/quickadd', function (req, res) {
 			.then(function (feed) {
 				res.json({
 					query: u,
-					numResults: 1,
+					numResults: feed ? 1 : 0,
 					streamId: 'feed/' + u
 				});
 			});

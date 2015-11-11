@@ -18,26 +18,15 @@ ag.define('UpdateAllFeeds', {
 	require('./cron').UpdateAllFeeds(done);
 });
 
-// Indicates that Agenda still needs to be started
-ag.isReady = function () {
-	return false;
-};
-
 ag.on('ready', function () {
 	// purge all unreferenced jobs from db
-	ag.purge(function (err, count) {
-		if (err) {
-			throw err;
-		}
+	ag.purge(function (ignore, count) {
 	});
 
 	// clear all pre-existing 'UpdateAllFeeds' jobs
 	ag.cancel({
 		name: 'UpdateAllFeeds'
-	}, function (err, count) {
-		if (err) {
-			throw err;
-		}
+	}, function (ignore, count) {
 	});
 
 	// set all jobs
@@ -45,30 +34,17 @@ ag.on('ready', function () {
 
 	// start cron jobs
 	ag.start();
-
-	// Indicates that Agenda started correctly
-	ag.isReady = function () {
-		return true;
-	};
 });
 
 /** function getAllJobs
  */
 ag.getAllJobs = function () {
 	return new rs.Promise(function (resolve, reject) {
-		if (ag && ag.isReady()) {
-			ag.jobs({
-				name: 'UpdateAllFeeds'
-			}, function (err, jobs) {
-				if (err) {
-					reject(err);
-				} else {
-					resolve(jobs);
-				}
-			});
-		} else {
-			reject();
-		}
+		ag.jobs({
+			name: 'UpdateAllFeeds'
+		}, function (ignore, jobs) {
+			resolve(jobs);
+		});
 	});
 };
 
