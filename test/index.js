@@ -139,7 +139,6 @@ describe('Feeds API', function () {
 	});
 
 	it('Load feed stream', function (done) {
-		this.timeout(5000);
 		rq(sr)
 			.get('/api/0/stream/contents')
 			.query({

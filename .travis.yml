@@ -19,6 +19,8 @@ install:
 before_script:
   - bower install
   - grunt
+  - sleep 15
+  - mongo --version
 script:
   - istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage
   - codecov
