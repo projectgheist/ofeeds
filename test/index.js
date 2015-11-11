@@ -30,9 +30,8 @@ describe('Startup', function() {
 /** Make sure that the routing code compiles
  */
 describe('Routing', function() {
-	it('Check compile', function (done) {
+	before(function () {
 		require('../src/routes');
-		done();
 	});
 
 	it('Route - Home', function (done) {
@@ -70,10 +69,9 @@ describe('Routing', function() {
 /** Make sure that the routing code compiles
  */
 describe('Feeds API', function() {
-	it('Check compile', function (done) {
+	before(function () {
 		require('../src/api/subscriptions');
 		require('../src/api/streams');
-		done();
 	});
 
 	it('Retrieve all feeds', function (done) {
@@ -151,9 +149,8 @@ describe('Feeds API', function() {
 /** Make sure that the routing code compiles
  */
 describe('Posts API', function() {
-	it('Check compile', function (done) {
+	before(function () {
 		require('../src/api/posts');
-		done();
 	});
 
 	it('Retrieve most recent posts', function (done) {
