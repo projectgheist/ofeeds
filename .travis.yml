@@ -27,8 +27,6 @@ install:
 before_script:
   - bower install
   - grunt
-  - mongo --version
 script:
-  - mongo --eval 'db.hostInfo()'
   - istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage
   - codecov
