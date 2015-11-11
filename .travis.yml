@@ -14,8 +14,7 @@ install:
   - tar xfz mongodb-linux-x86_64-$MONGODB_VERSION.tgz
   - export PATH=`pwd`/mongodb-linux-x86_64-$MONGODB_VERSION/bin:$PATH
   - mkdir -p data/db
-  - mongod --dbpath=data/db --quiet &
-  - sleep 15
+  - mongod --quiet --logpath=/var/log/mongodb.log --dbpath=data/db &
   - npm install -g grunt-cli
   - npm install -g bower
   - npm install -g happiness
