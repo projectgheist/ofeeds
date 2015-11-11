@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.org/projectgheist/ofeeds.svg?branch=master)](https://travis-ci.org/projectgheist/ofeeds)
 [![codecov.io](https://codecov.io/github/projectgheist/ofeeds/coverage.svg?branch=master)](https://codecov.io/github/projectgheist/ofeeds?branch=master)
 [![Coverage Status](https://coveralls.io/repos/projectgheist/ofeeds/badge.svg?branch=master&service=github)](https://coveralls.io/github/projectgheist/ofeeds?branch=master)
+[![js-happiness-style](https://img.shields.io/badge/code%20style-happiness-brightgreen.svg)](https://github.com/JedWatson/happiness)
 
 Warning: This is work in progress and not usable/stable yet!
 
