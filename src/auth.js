@@ -14,6 +14,9 @@ ap.use(require('express-session')({
 	resave: false,
     saveUninitialized: false
 }));
+
+/** Initialize passport
+ */
 ap.use(pp.initialize());
 ap.use(pp.session());
 
@@ -40,8 +43,8 @@ pp.serializeUser(function(user, done) {
 	done(null, user);
 });
 
-pp.deserializeUser(function(obj, done) {
-	done(null, obj);
+pp.deserializeUser(function(id, done) {
+	done(null, id);
 });
 
 pp.use(new gs({

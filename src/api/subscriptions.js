@@ -230,81 +230,89 @@ ap.get('/api/0/subscription/list', function(req, res) {
 
 // search for feeds and preview them before adding them to their account
 ap.get('/api/0/subscription/search', function(req, res) {
-	// create or find URL in db
-    actions
-		.search(req, req.query.q)
-		.then(function(feeds) {
-			var vs = [],
-				at = false; // alert type?
-			// not an array?
-			if (!ut.isArray(feeds)) {
-				at = feeds.type;
-				feeds = feeds.data;
-			}
-			if (feeds && feeds.length) {
-				for (var i in feeds) {
-					var d = feeds[i].description;
-					vs.push({
-						type:'feed',
-						value:feeds[i].feedURL,
-						title:feeds[i].title,
-						description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : ''),
-						alert: at
-					});
-				};
-			}
-			// always return something, don't make it return errors
-			res.json(vs);
-		});
+	if (req.query.q === undefined) {
+		res.status(400).end();
+	} else {
+		// create or find URL in db
+		actions
+			.search(req, req.query.q)
+			.then(function(feeds) {
+				var vs = [],
+					at = false; // alert type?
+				// not an array?
+				if (!ut.isArray(feeds)) {
+					at = feeds.type;
+					feeds = feeds.data;
+				}
+				if (feeds && feeds.length) {
+					for (var i in feeds) {
+						var d = feeds[i].description;
+						vs.push({
+							type:'feed',
+							value:feeds[i].feedURL,
+							title:feeds[i].title,
+							description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : ''),
+							alert: at
+						});
+					};
+				}
+				res.status(200).json(vs);
+			});
+	}
 });
 
 // fetch a feed
 ap.get('/api/0/subscription/refresh', function(req, res) {
-	var u = decodeURIComponent(req.query.q);
-	// Check if URL
-    if (!ut.isUrl(u)) {
-        return res.json({
-            query: u,
-            numResults: 0
-        });
-    }
-	// creat or find URL in db
-    actions
-		.refresh(req, req.query.q)
-		.then(function(feed) {
-			res.json({
+	if (req.query.q === undefined) {
+		res.status(400).end();
+	} else {
+		var u = decodeURIComponent(req.query.q);
+		// Check if URL
+		if (!ut.isUrl(u)) {
+			return res.json({
 				query: u,
-				numResults: 1,
-				streamId: 'feed/' + u
+				numResults: 0
 			});
-		});
+		}
+		// creat or find URL in db
+		actions
+			.refresh(req, req.query.q)
+			.then(function(feed) {
+				res.status(200).json({
+					query: u,
+					numResults: 1,
+					streamId: 'feed/' + u
+				});
+			});
+	}
 });
 
 // subscribe to feed
 ap.post('/api/0/subscription/quickadd', function(req, res) {
    	// is user logged in?
 	if (!req.isAuthenticated()) {
-        return;
-	}
-	var u = decodeURIComponent(req.query.q);
-	if (!ut.startsWith(u, ['http://','https://'])) {
-		u = 'http://' + u;
-	}
-	// Check if URL
-    if (!ut.isUrl(u)) {
-        return res.json({
-            query: u,
-            numResults: 0
-        });
-    }
-	// creat or find URL in db
-    actions
-		.subscribe(req, req.query.q)
-		.then(function(feed) {
-			res.json({
+		res.status(400).end();
+	} else {
+		var u = decodeURIComponent(req.query.q);
+		if (!ut.startsWith(u, ['http://','https://'])) {
+			u = 'http://' + u;
+		}
+		// Check if URL
+		if (!ut.isUrl(u)) {
+			return res.json({
 				query: u,
-				numResults: 1,
-				streamId: 'feed/' + u
+				numResults: 0
 			});
-		});
+		}
+		// creat or find URL in db
+		actions
+			.subscribe(req, req.query.q)
+			.then(function(feed) {
+				res.json({
+					query: u,
+					numResults: 1,
+					streamId: 'feed/' + u
+				});
+			});
+	}
 });

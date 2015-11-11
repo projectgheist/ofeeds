@@ -1,8 +1,8 @@
 var as = require('assert'),
-	rq = require('request'),
-	ap,
-	cf,
-	url;
+	ap = require('../src/app'),
+	cf = require('../config'),
+	sr = ap.listen(cf.Port(), cf.IpAddr()),
+	rq = require('supertest');
 
 /** Make sure that the utilities code compiles
  */
@@ -16,17 +16,6 @@ describe('Utilities', function() {
 /** Start the server on a specific port
  */
 describe('Startup', function() {
-	it('Check config file', function (done) {
-		cf = require('../config');
-		done();
-	});
-	
-	it('Start server', function (done) {
-		ap = require('../src/app');
-		url = ['http://',cf.IpAddr(),':',cf.Port()].join('');
-		done();
-	});
-	
 	it('Start database', function (done) {
 		require('../src/storage');
 		done();
@@ -47,19 +36,17 @@ describe('Routing', function() {
 	});
 
 	it('Route - Home', function (done) {
-		rq(url, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/')
+			.expect(200)
+			.end(done);
 	});
 	
 	it('Route - Manage', function (done) {
-		rq(url, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/manage')
+			.expect(200)
+			.end(done);
 	});
 /*
 	it('Route - Login', function (done) {
@@ -85,88 +72,79 @@ describe('Routing', function() {
 describe('Feeds API', function() {
 	it('Check compile', function (done) {
 		require('../src/api/subscriptions');
+		require('../src/api/streams');
 		done();
 	});
 
 	it('Retrieve all feeds', function (done) {
-		this.timeout(5000);
-		rq([url,'/api/0/subscription/list'].join(''), function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/api/0/subscription/list')
+			.expect(200)
+			.end(done);
 	});
 	
-	it('Search for feed (noFeedUrl)', function (done) {
-		this.timeout(5000);
-		rq.get({url: [url,'/api/0/subscription/search'].join(''), qs: {q:'noFeedUrl'}}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+	it('Search for feed (noQuery)', function (done) {
+		rq(sr)
+			.get('/api/0/subscription/search')
+			.expect(400)
+			.end(done);
 	});
 
-	it('Refresh feed (noFeedUrl)', function (done) {
-		this.timeout(5000);
-		rq.get({url: [url,'/api/0/subscription/refresh'].join(''), qs: {q:'noFeedUrl'}}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+	it('Refresh feed (noQuery)', function (done) {
+		rq(sr)
+			.get('/api/0/subscription/refresh')
+			.expect(400)
+			.end(done);
 	});
 
 	it('Search for feed (InvalidFeedUrl)', function (done) {
-		this.timeout(5000);
-		rq.get({url: [url,'/api/0/subscription/search'].join(''), qs: {q:'https://www.google.com/'}}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/api/0/subscription/search')
+			.query({q:'https://www.google.com/'})
+			.expect(200)
+			.end(done);
 	});
 
 	it('Refresh feed (InvalidFeedUrl)', function (done) {
-		this.timeout(5000);
-		rq.get({url: [url,'/api/0/subscription/refresh'].join(''), qs: {q:'https://www.google.com/'}}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/api/0/subscription/refresh')
+			.query({q:'https://www.google.com/'})
+			.expect(200)
+			.end(done);
 	});
 
 	it('Search for feed (ValidFeedUrl)', function (done) {
-		this.timeout(5000);
-		rq.get({url: [url,'/api/0/subscription/search'].join(''), qs: {q:'http://www.polygon.com/rss/index.xml'}}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/api/0/subscription/search')
+			.query({q:'http://www.polygon.com/rss/index.xml'})
+			.expect(200)
+			.end(done);
 	});
 
 	it('Refresh feed (ValidFeedUrl)', function (done) {
-		this.timeout(5000);
-		rq.get({url: [url,'/api/0/subscription/refresh'].join(''), qs: {q:'http://www.polygon.com/rss/index.xml'}}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/api/0/subscription/refresh')
+			.query({q:'http://www.polygon.com/rss/index.xml'})
+			.expect(200)
+			.end(done);
 	});
 
 	it('Route - Feed', function (done) {
-		this.timeout(5000);
-		rq.get([url,'/feed/http%253A%252F%252Fwww.polygon.com%252Frss%252Findex.xml'].join(''), function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/feed/http%253A%252F%252Fwww.polygon.com%252Frss%252Findex.xml')
+			.expect(200)
+			.end(done);
 	});
 
 	it('Load feed stream', function (done) {
-		this.timeout(5000);
-		rq.get([url,'/api/0/stream/contents?type=feed&value=http%253A%252F%252Fwww.polygon.com%252Frss%252Findex.xml'].join(''), function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/api/0/stream/contents')
+			.query({
+				type:'feed',
+				value:'http%253A%252F%252Fwww.polygon.com%252Frss%252Findex.xml'
+			})
+			.expect(200)
+			.end(done);
 	});
 });
 
@@ -179,18 +157,16 @@ describe('Posts API', function() {
 	});
 
 	it('Retrieve most recent posts', function (done) {
-		rq([url,'/api/0/posts'].join(''), function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/api/0/posts')
+			.expect(200)
+			.end(done);
 	});
 
 	it('Retrieve post BY id', function (done) {
-		rq([url,'/api/0/post'].join(''), {}, function (error, response, body) {
-			if (!error && response.statusCode == 400) {
-				done();
-			}
-		});
+		rq(sr)
+			.get('/api/0/post')
+			.expect(400)
+			.end(done);
 	});
 });
