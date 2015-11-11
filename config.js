@@ -65,8 +65,10 @@ module.exports.db = function () {
 		var env = JSON.parse(process.env.VCAP_SERVICES);
 		// support multiple mongodb configurations
 		if (env['mongodb-1.8']) {
-			return env['mongodb-1.8'][0]['credentials'];} else if (env['mongodb2-2.4.8']) {
-			return env['mongodb2-2.4.8'][0]['credentials'];}
+			return env['mongodb-1.8'][0]['credentials'];
+		} else if (env['mongodb2-2.4.8']) {
+			return env['mongodb2-2.4.8'][0]['credentials'];
+		}
 	} else {
 		return {
 			hostname: process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost',

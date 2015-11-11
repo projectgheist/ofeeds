@@ -6,13 +6,13 @@ var cf = require('../config'),
 	mg = require('mongoose'),
 	db = require('./storage'),
 	ap = require('./app');
-	
+
 /** Load configurations
  */
 ap.use(require('express-session')({
 	secret: 'ofeeds_secret_key',
 	resave: false,
-    saveUninitialized: false
+	saveUninitialized: false
 }));
 
 /** Initialize passport
@@ -22,15 +22,15 @@ ap.use(pp.session());
 
 // Redirect the user to Google for authentication.  When complete, Google
 // will redirect the user back to the aplication at '/auth/google/callback'
-ap.get('/auth/google', 
-		pp.authenticate('google', { scope: 'https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email' }));
+ap.get('/auth/google',
+	pp.authenticate('google', { scope: 'https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email' }));
 
 // Google will redirect the user to this URL after authentication.  Finish
 // the process by verifying the assertion.  If valid, the user will be
 // logged in.  Otherwise, authentication has failed.
-ap.get('/auth/google/callback', 
-		pp.authenticate('google', { successRedirect: '/subscription/user/reading-list',
-									failureRedirect: '/' }));
+ap.get('/auth/google/callback',
+	pp.authenticate('google', { successRedirect: '/subscription/user/reading-list',
+	failureRedirect: '/' }));
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -39,34 +39,34 @@ ap.get('/auth/google/callback',
 //   the user by ID when deserializing.  However, since this example does not
 //   have a database of user records, the complete Google profile is serialized
 //   and deserialized.
-pp.serializeUser(function(user, done) {
+pp.serializeUser(function (user, done) {
 	done(null, user);
 });
 
-pp.deserializeUser(function(id, done) {
+pp.deserializeUser(function (id, done) {
 	done(null, id);
 });
 
 pp.use(new gs({
-		clientID: 		cf.Google().ClientID,
-		clientSecret: 	cf.Google().ClientSecret,
-		callbackURL: 	cf.Url() + '/auth/google/callback'
-	},
-	function(token, tokenSecret, profile, done) {
+	clientID: cf.Google().ClientID,
+	clientSecret: cf.Google().ClientSecret,
+	callbackURL: cf.Url() + '/auth/google/callback'
+},
+	function (token, tokenSecret, profile, done) {
 		// asynchronous verification, for effect...
 		process.nextTick(function () {
 			return db.findOrCreate(db.User, {openID: profile.id})
-			.then(function(user) {
-				// store retrieved info
-				user.provider 	= profile.provider;
-				user.email		= profile.emails[0].value;
-				user.name		= profile.displayName;
-				// store in db
-				return user.save();
-			})
-			.then(function(user) {
-				return done(null, user);
-			});
+				.then(function (user) {
+					// store retrieved info
+					user.provider = profile.provider;
+					user.email = profile.emails[0].value;
+					user.name = profile.displayName;
+					// store in db
+					return user.save();
+				})
+				.then(function (user) {
+					return done(null, user);
+				});
 		});
 	}
 ));

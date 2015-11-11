@@ -1,26 +1,26 @@
 /** Includes
  */
 var mg = require('mongoose'),
-    rs = require('rsvp'),
-    pr = rs.Promise,
+	rs = require('rsvp'),
+	pr = rs.Promise,
 	cf = require('../config'),
 	ut = require('./utils');
 
 /** Needs to be done before promisifyAll
  * export the models
  */
-exports.User 	= require('./models/user');
-exports.Feed 	= require('./models/feed');
-exports.Post 	= require('./models/post');
-exports.Tag 	= require('./models/tag');
-exports.Pref 	= require('./models/pref');
+exports.User = require('./models/user');
+exports.Feed = require('./models/feed');
+exports.Post = require('./models/post');
+exports.Tag = require('./models/tag');
+exports.Pref = require('./models/pref');
 
 // if database is already connected return
 if (!mg.connection || !mg.connection.db) {
 	// declare connection options
-	var options = { 
-		server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }, 
-		replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } } 
+	var options = {
+		server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
+		replset: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }
 	};
 	// try to connect to db
 	mg.connect(ut.getDBConnectionURL(cf.db()), options);
@@ -29,85 +29,84 @@ if (!mg.connection || !mg.connection.db) {
 	// Add promise support to Mongoose
 	require('mongoomise').promisifyAll(db, rs);
 	// error event
-	db.on('error', function(err) {
-	});
+	db.on('error', function (err) {});
 	// connection established event
-	db.once('open', function() {
+	db.once('open', function () {
 		require('./wait');
 	});
 }
 
 /** function all
  */
-exports.all = function(model, options) {
+exports.all = function (model, options) {
 	// use parameter or create empty object
-    options || (options = {});
+	options || (options = {});
 	var q = model.find(options.query || {});
 	if (options.sort) {
-		q.sort(options.sort); 
+		q.sort(options.sort);
 	}
 	if (options.limit) {
-		q.limit(options.limit); 
+		q.limit(options.limit);
 	}
 	return q;
-}
+};
 
 /** function findOrCreate
  * use an empty callback function as a fourth parameter
  */
-exports.findOrCreate = function(model, item, debug) {
-    return exports.updateOrCreate(model, item, item, debug); 
+exports.findOrCreate = function (model, item, debug) {
+	return exports.updateOrCreate(model, item, item, debug);
 };
 
 /** function updateOrCreate
  */
-exports.updateOrCreate = function(model, item, update, debug) {
+exports.updateOrCreate = function (model, item, update, debug) {
 	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
 	var q = model.findOneAndUpdate(item, update, {upsert: true, 'new': true});
 	if (debug) console.log(q);
-    return q;
+	return q;
 };
 
 /** function editTags
  * Adds and removes tags from a subscription or post
  */
-exports.editTags = function(record, addTags, removeTags) {
-    // optional parameter declaration
+exports.editTags = function (record, addTags, removeTags) {
+	// optional parameter declaration
 	addTags || (addTags = []);
-    removeTags || (removeTags = []);
+	removeTags || (removeTags = []);
 
-	var add = addTags.map(function(tag) {
-        return exports.findOrCreate(exports.Tag, tag).then(function(t) {
-            record.tags.addToSet(t);
-        });
-    });
-    var remove = removeTags.map(function(tag) {
-        return exports.Tag.findOne(tag).then(function(t) {
-            record.tags.remove(t);
-        });
-    });
+	var add = addTags.map(function (tag) {
+		return exports.findOrCreate(exports.Tag, tag).then(function (t) {
+			record.tags.addToSet(t);
+		});
+	});
+	var remove = removeTags.map(function (tag) {
+		return exports.Tag.findOne(tag).then(function (t) {
+			record.tags.remove(t);
+		});
+	});
 	var all = add.concat(remove);
 	// returns a promise
-    return rs.all(all).then(function() {
-		return record; 
+	return rs.all(all).then(function () {
+		return record;
 	});
 };
 
 /** function getTags
  */
-exports.getTags = function(tags) {
+exports.getTags = function (tags) {
 	if (tags) {
 		if (!Array.isArray(tags)) {
 			tags = [tags];
 		}
 		// make sure it has elements inside the array
 		if (tags.length > 0) {
-        	return exports.Tag.find({ $or: tags });
+			return exports.Tag.find({ $or: tags });
 		}
 	}
 	// returns an empty promise
-	return new pr(function(resolve, reject) { resolve([]); });
-}
+	return new pr(function (resolve, reject) { resolve([]); });
+};
 
 // Returns a list of posts for a list of streams (feeds and tags) as parsed
 // by utils.parseStreams.
@@ -118,26 +117,26 @@ exports.getTags = function(tags) {
 //   maxTime - the date of the newest item to include
 //   limit - the maximum number of items to return
 //   sort - the field to sort (see mongoose docs)
-exports.getPosts = function(streams, options) {
+exports.getPosts = function (streams, options) {
 	// use parameter OR create empty object
-    options || (options = {});
-    // separate streams by type
-    var feeds = [], 
+	options || (options = {});
+	// separate streams by type
+	var feeds = [],
 		tags = [];
 	// loop all items in stream
-    for (var i in streams) {
+	for (var i in streams) {
 		if (streams[i].type === 'feed') {
-            feeds.push(streams[i].value);
-        } else { 
-            tags.push(streams[i].value);
+			feeds.push(streams[i].value);
+		} else {
+			tags.push(streams[i].value);
 		}
-    };
+	}
 	// load the tags to include and exclude
-    var includeTags, excludeTags;
-    //
+	var includeTags, excludeTags;
+	//
 	return rs
 		.all([exports.getTags(tags), exports.getTags(options.excludeTags)])
-		.then(function(multipleTags) {
+		.then(function (multipleTags) {
 			// store for later use
 			includeTags = multipleTags[0];
 			excludeTags = multipleTags[1];
@@ -149,7 +148,7 @@ exports.getPosts = function(streams, options) {
 				]
 			});
 		})
-		.then(function(rfeeds) {
+		.then(function (rfeeds) {
 			// find posts by feed and tags, and filter by date
 			var query = exports.Post.find({
 				$or: [
@@ -162,12 +161,12 @@ exports.getPosts = function(streams, options) {
 					$lt: new Date(parseInt(options.maxTime))
 				}
 			});
-			
+
 			// limit return query amount
 			if (options.limit) {
 				query.limit(options.limit);
 			}
-			
+
 			// sort return query
 			if (options.sort) {
 				query.sort(options.sort);
@@ -175,7 +174,7 @@ exports.getPosts = function(streams, options) {
 			/*if (options.count) {
 				query.count();
 			}*/
-			
+
 			// populate the referenced model variables of the return model
 			if (options.populate) {
 				// check if already an array, else make it an array
@@ -187,52 +186,52 @@ exports.getPosts = function(streams, options) {
 					query.populate(options.populate[i]);
 				}
 			}
-			return {'query':query,'feeds':rfeeds};
+			return {'query': query,'feeds': rfeeds};
 		});
 };
 
 //
-exports.formatPosts = function(user,posts) {
-	return posts.map(function(post) {
+exports.formatPosts = function (user, posts) {
+	return posts.map(function (post) {
 		var isRead = 0,
-			pts = (post.tags.length > 0) ? post.tags.map(function(t) {
+			pts = (post.tags.length > 0) ? post.tags.map(function (t) {
 				var r = t.stringID;
-				if (!isRead && r && ut.isRead(user,r)) {
+				if (!isRead && r && ut.isRead(user, r)) {
 					isRead = 1;
 				}
 				return r;
-        	}) : [];
-        return {
-            uid: post.shortid.toString(),
-            title: post.title,
+			}) : [];
+		return {
+			uid: post.shortid.toString(),
+			title: post.title,
 			read: isRead,
-            alternate: {
-                href: post.url,
-                type: 'text/html'
-            },
-            content: {
-                direction: 'ltr',
+			alternate: {
+				href: post.url,
+				type: 'text/html'
+			},
+			content: {
+				direction: 'ltr',
 				summary: post.summary,
-                content: post.body,
+				content: post.body,
 				images: post.images,
 				videos: post.videos
-            },
-            author: post.author,
-            published: (post.published || 0),
-            updated: (post.updated || 0),
-            categories: pts.concat(post.categories),
-            origin: {
-                streamId: post.feed.stringID,
-                title: post.feed.title,
-                favicon: post.feed.favicon,
-                url: post.feed.feedURL
-            },
+			},
+			author: post.author,
+			published: (post.published || 0),
+			updated: (post.updated || 0),
+			categories: pts.concat(post.categories),
+			origin: {
+				streamId: post.feed.stringID,
+				title: post.feed.title,
+				favicon: post.feed.favicon,
+				url: post.feed.feedURL
+			},
 			crawlSuccesful: post.feed.lastFailureWasParseFailure,
-            crawlTimeMsec: post.feed.successfulCrawlTime ? post.feed.successfulCrawlTime.getTime() : post.published,
-            timestampUsec: post.published ? post.published.getTime() : post.feed.successfulCrawlTime.getTime(),
-            likingUsers: [],
-            comments: [],
-            annotations: []
-        }; 
-    });
+			crawlTimeMsec: post.feed.successfulCrawlTime ? post.feed.successfulCrawlTime.getTime() : post.published,
+			timestampUsec: post.published ? post.published.getTime() : post.feed.successfulCrawlTime.getTime(),
+			likingUsers: [],
+			comments: [],
+			annotations: []
+		};
+	});
 };

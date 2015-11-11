@@ -11,19 +11,19 @@ var actions = {
 	/**
 	 * @param url: un-encoded
 	 */
-	search: function(ctx, url) {
-		//console.log("Search (A):" + url);
+	search: function (ctx, url) {
+		// console.log("Search (A):" + url);
 		// Find or create feed for this URL in the database
 		return db.Feed
-			.find({ $or: [{title: {$regex: new RegExp('.*'+url+'.*','i')}}, {feedURL: {$regex: url}}] })
+			.find({ $or: [{title: {$regex: new RegExp('.*' + url + '.*', 'i')}}, {feedURL: {$regex: url}}] })
 			.limit(6)
-			.then(function(results) {
+			.then(function (results) {
 				// feeds found that match the search expression
-				if (results.length > 0) { 
+				if (results.length > 0) {
 					return results;
 				}
 				// make sure it starts with a certain prefix
-				if (!ut.startsWith(url, ['http://','https://'])) {
+				if (!ut.startsWith(url, ['http://', 'https://'])) {
 					// add prefix to the front of the string
 					url = 'http://' + url;
 				}
@@ -31,12 +31,12 @@ var actions = {
 				if (ut.isUrl(url)) {
 					return db
 						.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)})
-						.then(function(feed) {
+						.then(function (feed) {
 							return cr.FetchFeed(feed);
 						})
-						.then(function(f) {
+						.then(function (f) {
 							// return feed
-							return { 'data':[f], 'type': (f.posts.length ? 'success' : 'danger') };
+							return { 'data': [f], 'type': (f.posts.length ? 'success' : 'danger') };
 						});
 				}
 				return false;
@@ -45,54 +45,54 @@ var actions = {
 	/**
 	 * @param url: un-encoded
 	 */
-	refresh: function(ctx, url) {
-        // Find feed for this URL in the database
-        return db.Feed.findOne({feedURL: url}).then(cr.FetchFeed);
+	refresh: function (ctx, url) {
+		// Find feed for this URL in the database
+		return db.Feed.findOne({feedURL: url}).then(cr.FetchFeed);
 	},
 	/**
 	 * @param url: un-encoded
 	 */
-    subscribe: function(ctx, url) {
-        // Find or create feed for this URL in the database
-        var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)}),
-		// Find or create a tag to add this feed to the users reading-list
+	subscribe: function (ctx, url) {
+		// Find or create feed for this URL in the database
+		var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)}),
+			// Find or create a tag to add this feed to the users reading-list
 			tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/reading-list', ctx.user)[0]);
 		// wait for all results to return before continuing
-        return rs.all([feed,tag]).then(function(results) {
+		return rs.all([feed, tag]).then(function (results) {
 			// local ref to feed
-            var f = results[0];
-            // if this feed doesn't have any subscribers, fetch the feed
-            if (f.numSubscribers === 0) {
-				return cr.FetchFeed(f).then(function(n) { 
-					return [n,results[1]]; 
-				}, function(err) {
+			var f = results[0];
+			// if this feed doesn't have any subscribers, fetch the feed
+			if (f.numSubscribers === 0) {
+				return cr.FetchFeed(f).then(function (n) {
+					return [n, results[1]];
+				}, function (err) {
 					return [];
 				});
-            }
+			}
 			return results;
-        }).then(function(results) {
+		}).then(function (results) {
 			if (results.length <= 0) {
 				return {};
 			}
- 			// local ref to feed and tag variable
-            var f = results[0],
+			// local ref to feed and tag variable
+			var f = results[0],
 				t = results[1];
 			// Subscribe to the feed if the tag was not found
-            if (!~f.tags.indexOf(t.id)) {
+			if (!~f.tags.indexOf(t.id)) {
 				// add tag to feed's tag list
 				f.tags.addToSet(t);
 				// increment subscriber count
-                f.numSubscribers++; 
-            }
+				f.numSubscribers++;
+			}
 			// update db and return feed
 			return f.save();
 		});
-    }
+	}
 };
 
 /**
  */
-function AllFeeds(req, res) {
+function AllFeeds (req, res) {
 	var s;
 	if (!req.query.r) {
 		s = {title: 1}; // alphabetical
@@ -106,9 +106,9 @@ function AllFeeds(req, res) {
 				break;
 			case 's': // number of subscribers
 				s = [
-					['numSubscribers',-1], // highest number first
-					['title',1] // alphabetical
-					];
+					['numSubscribers', -1], // highest number first
+					['title', 1] // alphabetical
+				];
 				break;
 			case 'a': // creation time
 				s = {creationTime: -1}; // newest feed first
@@ -126,52 +126,52 @@ function AllFeeds(req, res) {
 	return db
 		.all(db.Feed, opts) // retrieve all feeds
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
-		.then(function(feeds) {
-			var a = feeds.map(function(f) {
+		.then(function (feeds) {
+			var a = feeds.map(function (f) {
 				var b = f.failedCrawlTime === undefined,
 					s = f.successfulCrawlTime === undefined,
 					r = (b && s) ? false : ((!b && !s) ? (mm(f.successfulCrawlTime) > mm(f.failedCrawlTime)) : (b && !s));
 				return {
-					favicon:		f.favicon || '',
-					id: 			f.feedURL, // its already encoded
-					postCount:		f.posts ? f.posts.length : 0,
-					title: 			f.title || decodeURIComponent(f.feedURL),
-					shortid: 		f.shortID,
-					crawlTime:		f.successfulCrawlTime || undefined,
-					updated:		f.lastModified || undefined,
-					crawlSuccesful:	r,
-					creation:		f.creationTime
+					favicon: f.favicon || '',
+					id: f.feedURL, // its already encoded
+					postCount: f.posts ? f.posts.length : 0,
+					title: f.title || decodeURIComponent(f.feedURL),
+					shortid: f.shortID,
+					crawlTime: f.successfulCrawlTime || undefined,
+					updated: f.lastModified || undefined,
+					crawlSuccesful: r,
+					creation: f.creationTime
 				};
 			});
 			// retrieve the time till the next job needs to run
 			ag
 				.getAllJobs()
-				.then(function(jobs) {
+				.then(function (jobs) {
 					return res.json({
-						'nextRunIn': ((jobs.length > 0) ? jobs[0].attrs.nextRunAt : ''), 
+						'nextRunIn': ((jobs.length > 0) ? jobs[0].attrs.nextRunAt : ''),
 						'feeds': a
 					});
-				}, function() {
+				}, function () {
 					return res.json({ 'feeds': a });
 				});
 		});
-};
+}
 
 // lists all of the feeds in the database
 ap.get('/api/0/feeds/list', AllFeeds);
 
 // lists all of the feeds a user is subscribed to
-ap.get('/api/0/subscription/list', function(req, res) {
+ap.get('/api/0/subscription/list', function (req, res) {
 	// is user logged in?
 	if (!req.isAuthenticated()) {
 		return AllFeeds(req, res);
 	} else {
 		// get tags
-		var tags = ut.parseTags(['user/-/state/reading-list','user/-/state/read'], req.user),
-			tuc = 0; // total post unread count
+		var tags = ut.parseTags(['user/-/state/reading-list', 'user/-/state/read'], req.user),
+			tuc = 0;// total post unread count
 		return db
 			.getTags(tags[0])
-			.then(function(rl) {
+			.then(function (rl) {
 				// no feeds returned
 				if (!rl) {
 					return [];
@@ -184,43 +184,43 @@ ap.get('/api/0/subscription/list', function(req, res) {
 						]);
 				}
 			})
-			.then(function(results) {
+			.then(function (results) {
 				// create array
-				var a = results[0].map(function(f) {
+				var a = results[0].map(function (f) {
 					// find posts in feed WHERE 'read'-tag 'not in' array
 					return db.Post
 						.find({ _id: {$in: f.posts}, tags: {$nin: results[1]} })
-						.then(function(c) {
+						.then(function (c) {
 							// create array of users tags for this feed
-							var categories = f.tagsForUser(req.user).map(function(tag) {
+							var categories = f.tagsForUser(req.user).map(function (tag) {
 								return {
-									id: 	tag.stringID,
-									label: 	tag.name
+									id: tag.stringID,
+									label: tag.name
 								};
 							});
 							// increment total unread count
 							tuc += c.length;
 							// create object
 							return {
-								favicon:		f.favicon,
-								id: 			encodeURIComponent(['feed/',f.feedURL].join('')),
-								title: 			f.titleForUser(req.user),
-								unreadcount: 	c.length,
-								shortid: 		f.shortID,
-								categories: 	categories,
-								crawlTime:		f.successfulCrawlTime,
-								updated:		f.lastModified,
-								creation:		f.creationTime
+								favicon: f.favicon,
+								id: encodeURIComponent(['feed/', f.feedURL].join('')),
+								title: f.titleForUser(req.user),
+								unreadcount: c.length,
+								shortid: f.shortID,
+								categories: categories,
+								crawlTime: f.successfulCrawlTime,
+								updated: f.lastModified,
+								creation: f.creationTime
 							};
 						});
 				});
-				return rs.all(a);			
+				return rs.all(a);
 			})
-			.then(function(s) {
+			.then(function (s) {
 				// add separate reading-list element
 				s.push({
-					id:encodeURIComponent('label/reading-list'),
-					unreadcount:tuc
+					id: encodeURIComponent('label/reading-list'),
+					unreadcount: tuc
 				});
 				// return json value
 				return res.json({'feeds': s});
@@ -229,16 +229,16 @@ ap.get('/api/0/subscription/list', function(req, res) {
 });
 
 // search for feeds and preview them before adding them to their account
-ap.get('/api/0/subscription/search', function(req, res) {
+ap.get('/api/0/subscription/search', function (req, res) {
 	if (req.query.q === undefined) {
 		res.status(400).end();
 	} else {
 		// create or find URL in db
 		actions
 			.search(req, req.query.q)
-			.then(function(feeds) {
+			.then(function (feeds) {
 				var vs = [],
-					at = false; // alert type?
+					at = false;// alert type?
 				// not an array?
 				if (!ut.isArray(feeds)) {
 					at = feeds.type;
@@ -248,13 +248,13 @@ ap.get('/api/0/subscription/search', function(req, res) {
 					for (var i in feeds) {
 						var d = feeds[i].description;
 						vs.push({
-							type:'feed',
-							value:feeds[i].feedURL,
-							title:feeds[i].title,
-							description:(d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : ''),
+							type: 'feed',
+							value: feeds[i].feedURL,
+							title: feeds[i].title,
+							description: (d ? (d.length < 32 ? d : (d.substring(0, 28) + ' ...')) : ''),
 							alert: at
 						});
-					};
+					}
 				}
 				res.status(200).json(vs);
 			});
@@ -262,7 +262,7 @@ ap.get('/api/0/subscription/search', function(req, res) {
 });
 
 // fetch a feed
-ap.get('/api/0/subscription/refresh', function(req, res) {
+ap.get('/api/0/subscription/refresh', function (req, res) {
 	if (req.query.q === undefined) {
 		res.status(400).end();
 	} else {
@@ -277,7 +277,7 @@ ap.get('/api/0/subscription/refresh', function(req, res) {
 		// creat or find URL in db
 		actions
 			.refresh(req, req.query.q)
-			.then(function(feed) {
+			.then(function (feed) {
 				res.status(200).json({
 					query: u,
 					numResults: 1,
@@ -288,13 +288,13 @@ ap.get('/api/0/subscription/refresh', function(req, res) {
 });
 
 // subscribe to feed
-ap.post('/api/0/subscription/quickadd', function(req, res) {
-   	// is user logged in?
+ap.post('/api/0/subscription/quickadd', function (req, res) {
+	// is user logged in?
 	if (!req.isAuthenticated()) {
 		res.status(400).end();
 	} else {
 		var u = decodeURIComponent(req.query.q);
-		if (!ut.startsWith(u, ['http://','https://'])) {
+		if (!ut.startsWith(u, ['http://', 'https://'])) {
 			u = 'http://' + u;
 		}
 		// Check if URL
@@ -307,7 +307,7 @@ ap.post('/api/0/subscription/quickadd', function(req, res) {
 		// creat or find URL in db
 		actions
 			.subscribe(req, req.query.q)
-			.then(function(feed) {
+			.then(function (feed) {
 				res.json({
 					query: u,
 					numResults: 1,

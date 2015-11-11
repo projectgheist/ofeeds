@@ -1,40 +1,40 @@
 /** Includes
  */
-var fp = require('feedparser'),
-	rq = require('request'),
-	rs = require('rsvp'),
-	pr = require("../node_modules/feedparser/node_modules/sax/lib/sax.js").parser(false),
-	db = require('./storage'),
-	mm = require('moment'),
-	ut = require('./utils');
+var fp = require('feedparser');
+var rq = require('request');
+var rs = require('rsvp');
+var pr = require('../node_modules/feedparser/node_modules/sax/lib/sax.js').parser(false);
+var db = require('./storage');
+var mm = require('moment');
+var ut = require('./utils');
 
 /** function FindOrCreatePost
  */
-exports.FindOrCreatePost = function(feed, guid, data) {
-    // return a new promise
-	return new rs.Promise(function(resolve, reject) {
+exports.FindOrCreatePost = function (feed, guid, data) {
+	// return a new promise
+	return new rs.Promise(function (resolve, reject) {
 		db
-			.findOrCreate(db.Post, {'feed':feed, 'guid':guid})
-			.then(function(post) {
+			.findOrCreate(db.Post, {'feed': feed, 'guid': guid})
+			.then(function (post) {
 				return post.save();
 			})
-			.then(function(post) {
-				var ref = post,
-					m = data['media:group'];
-				ref.title 		= (data.title ? ut.parseHtmlEntities(data.title) : 'No title');
-				ref.body		= data.description ? data.description : (m && m['media:description'] && m['media:description']['#'] ? m['media:description']['#'] : '');
-				ref.body		= CleanupDescription(ref.body || '', data.images);
-				ref.summary		= CleanupSummary(ref.body);
-				ref.images		= data.images || undefined;
-				ref.videos		= data.videos || [];
+			.then(function (post) {
+				var ref = post;
+				var m = data['media:group'];
+				ref.title = (data.title ? ut.parseHtmlEntities(data.title) : 'No title');
+				ref.body = data.description ? data.description : ((m && m['media:description'] && m['media:description']['#']) ? m['media:description']['#'] : '');
+				ref.body = CleanupDescription(ref.body || '', data.images);
+				ref.summary = CleanupSummary(ref.body);
+				ref.images = data.images || undefined;
+				ref.videos = data.videos || [];
 				// prevent the publish date to be overridden
-				ref.published 	= SelectPublishedDate(ref, data);
+				ref.published = SelectPublishedDate(ref, data);
 				// time the post has been last modified
-				ref.updated 	= mm();
-				ref.author		= (data.author ? data.author.trim() : '');
-				ref.url			= data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
-				ref.commentsURL	= data.comments || '';
-				ref.categories 	= data.categories || undefined;
+				ref.updated = mm();
+				ref.author = (data.author ? data.author.trim() : '');
+				ref.url = data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
+				ref.commentsURL = data.comments || '';
+				ref.categories = data.categories || undefined;
 				// if feeds post variable doesn't exist, make it an array
 				feed.posts || (feed.posts = []);
 				// add post to posts array
@@ -47,7 +47,7 @@ exports.FindOrCreatePost = function(feed, guid, data) {
 
 /** function SelectPublishedDate
  */
-function SelectPublishedDate(prev,data,debug) {
+function SelectPublishedDate (prev, data, debug) {
 	if (data['rss:pubdate'] && data['rss:pubdate']['#']) {
 		if (debug) console.log('rss:pubdate: ' + data['rss:pubdate']['#']);
 		return mm(new Date(data['rss:pubdate']['#']).toISOString());
@@ -68,7 +68,7 @@ function SelectPublishedDate(prev,data,debug) {
 
 /** function CleanupSummary
  */
-function CleanupSummary(data,debug) {
+function CleanupSummary (data, debug) {
 	// early escape on no string
 	if (!data || data.length <= 0) {
 		return '';
@@ -78,26 +78,26 @@ function CleanupSummary(data,debug) {
 		.replace(/<br[\s\S]*?>/gi, ' ')
 		.replace(/<.*?>/gi, '')
 		.trim();
-};
+}
 
 /** function CleanupDescription
  */
-function CleanupDescription(data,images,debug) {
+function CleanupDescription (data, images, debug) {
 	// early escape on no string
 	if (!data || data.length <= 0) {
 		return '';
 	}
-	
+
 	data = data
 		.replace(/<\/img>|<hr>|<\/*h\d>/gi, '') // remove headings OR separator
 		.replace(/<br[\s\S]*?>/gi, ' ') // remove new lines
 		.replace(/(<script)[\s\S]*?(<\/script>)/gi, '') // remove scripts
 		.replace(/(<iframe)[\s\S]*?(\/iframe>)/gi, ''); // remove iframes
-		
-	var p, // needs to be a separate variable otherwise it will be an infinite loop
-		e,
-		i = []; // array of image urls to remove
-	
+
+	// p: needs to be a separate variable otherwise it will be an infinite loop
+	var p, e;
+	var i = [];// array of image urls to remove
+
 	// remove thumbnails
 	if (images) {
 		if (images.small.length) i = i.concat(images.small);
@@ -113,74 +113,74 @@ function CleanupDescription(data,images,debug) {
 			}
 		}
 	}
-	
+
 	data = data
 		.replace(/(<img\s)(.*?)((height|width)="1"\s*)+(.*?>)/gi, '') // remove ad images
 		.replace(/<a\s?.*?>[\s\n]*<\/a>/gi, ''); // remove empty links
-	
+
 	// add new tab to all links
 	p = /<a\s/gi;
 	while ((e = p.exec(data)) !== null) {
 		data = ut.stringInsert(data, 'target="_blank"', e.index + 3);
 	}
-	
+
 	// return values
 	return data.trim();
-};
+}
 
 /** function UpdateFeed
  */
-exports.UpdateFeed = function(feed, posts) {
+exports.UpdateFeed = function (feed, posts) {
 	// wait for posts to finish saving then mark crawl success or failure
 	return rs
 		.all(posts)
-		.then(function() {
+		.then(function () {
 			feed.successfulCrawlTime = new Date();
 			// set new modified date
 			feed.lastModified = mm();
 			// save feed in db and return
 			return feed.save();
-		})
+		});
 };
 
 /** function AllowFetch
 	 if feed is valid AND if it was updated more then 2 minutes ago
  */
-exports.AllowFetch = function(feed, debug) {
+exports.AllowFetch = function (feed, debug) {
 	return feed && (!feed.successfulCrawlTime || (feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') > 2));
 };
 
 /** function StoreMetaData
  */
-function StoreMetaData(feed, meta) {
-	//if (meta.xmlurl) {
+function StoreMetaData (feed, meta) {
+	// if (meta.xmlurl) {
 	//	feed.feedURL = meta.xmlurl;
-	//}
-	feed.favicon	= meta.favicon || (meta['atom:icon'] && meta['atom:icon']['#']) || (meta.image && meta.image.url) || '';
-	feed.siteURL 	= meta.link || '';
-	feed.title 		= meta.title ? ut.parseHtmlEntities(meta.title).trim() : '';
+	// }
+	feed.favicon = meta.favicon || (meta['atom:icon'] && meta['atom:icon']['#']) || (meta.image && meta.image.url) || '';
+	feed.siteURL = meta.link || '';
+	feed.title = meta.title ? ut.parseHtmlEntities(meta.title).trim() : '';
 	feed.description = meta.description || '';
-	feed.author 	= meta.author || '';
-	feed.language 	= meta.language || '';
-	feed.copywrite 	= meta.copywrite || '';
+	feed.author = meta.author || '';
+	feed.language = meta.language || '';
+	feed.copywrite = meta.copywrite || '';
 	feed.categories = meta.categories || '';
-};
+}
 
 /** function StorePosts
  */
-function StorePosts(stream, feed, posts, guids) {
-	//console.log("StorePosts (A)");
+function StorePosts (stream, feed, posts, guids) {
+	// console.log("StorePosts (A)");
 	// data contains all the post information
-	var data,
-		ignoreImages = false;
-	while (data = stream.read()) {
+	var data;
+	var ignoreImages = false;
+	while ((data = stream.read()) !== null) {
 		var images = {
-				small: [],
-				other: []
-			},
-			videos = [];
+			small: [],
+			other: []
+		};
+		var videos = [];
 
-		//console.log("StorePosts (B)");
+		// console.log("StorePosts (B)");
 		// Store original thumbnail url
 		if (data.image !== undefined &&
 			data.image.url &&
@@ -188,7 +188,7 @@ function StorePosts(stream, feed, posts, guids) {
 			images.small.push({ 'url': data.image.url });
 		}
 
-		//console.log("StorePosts (C)");
+		// console.log("StorePosts (C)");
 		// Used by DeviantArt
 		var thumbnails = data['media:thumbnail'] || (data['media:group'] ? data['media:group']['media:thumbnail'] : undefined);
 		if (thumbnails) {
@@ -201,10 +201,10 @@ function StorePosts(stream, feed, posts, guids) {
 				}
 			}
 		}
-		
-		//console.log("StorePosts (D)");
+
+		// console.log("StorePosts (D)");
 		// Used by DeviantArt, Youtube, Imgur
-		var m = data['media:content'] || (data['media:group'] ? data['media:group']['media:content'] : undefined);
+		var m = data['media:content'] || (data['media:group']? data['media:group']['media:content']: undefined);
 		if (m && m['@']) {
 			if (m['@'].medium && m['@'].medium === 'image') {
 				images.other.push(m['@']);
@@ -213,47 +213,51 @@ function StorePosts(stream, feed, posts, guids) {
 				videos.push(m['@'].url);
 			}
 		}
-		
-		//console.log("StorePosts (E)");
+
+		// console.log("StorePosts (E)");
 		// Retrieve all the images from the post description
 		if (data.description !== null) {
-			pr.onopentag = function(tag) {
+			pr.onopentag = function (tag) {
 				// NOTE: tag names and attributes are all in CAPS
 				switch (tag.name) {
-				case 'IMG':
-					// ignoreImages OR width and height are 1 OR isn't a valid image extension
-					if (ignoreImages || 
-						parseInt(tag.attributes.WIDTH) <= 1 ||
-						parseInt(tag.attributes.HEIGHT) <= 1 ||
-						!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(tag.attributes.SRC)) {
-						break;
-					}
-					// create new image object
-					var obj = {'url':tag.attributes.SRC,'width':tag.attributes.WIDTH || 0,'height':tag.attributes.HEIGHT || 0},
-						found = false;
-					// check if image already exists in list
-					for (var i in images.other) {
-						// url comparison
-						if (images.other[i].url === obj.url) {
-							found = true;
-							break; // stop for-loop
+					case 'IMG':
+						// ignoreImages OR width and height are 1 OR isn't a valid image extension
+						if (ignoreImages ||
+							parseInt(tag.attributes.WIDTH, 0) <= 1 ||
+							parseInt(tag.attributes.HEIGHT, 0) <= 1 ||
+							!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(tag.attributes.SRC)) {
+							break;
 						}
-					}
-					// image was already added
-					if (found) {
-						break; // stop switch-statement
-					}
-					// add to images array
-					images.other.push(obj);
-					break;
-				case 'IFRAME':
-					// add video url to array
-					videos.push(tag.attributes.SRC);
-					break;
+						// create new image object
+						var obj = {
+							'url': tag.attributes.SRC,
+							'width': tag.attributes.WIDTH || 0,
+							'height': tag.attributes.HEIGHT || 0
+						};
+						var found = false;
+						// check if image already exists in list
+						for (var i in images.other) {
+							// url comparison
+							if (images.other[i].url === obj.url) {
+								found = true;
+								break; // stop for-loop
+							}
+						}
+						// image was already added
+						if (found) {
+							break; // stop switch-statement
+						}
+						// add to images array
+						images.other.push(obj);
+						break;
+					case 'IFRAME':
+						// add video url to array
+						videos.push(tag.attributes.SRC);
+						break;
 				}
-			}
+			};
 			// Parse the post description for image/video tags
-			pr.write(data.description.toString("utf8")).close();
+			pr.write(data.description.toString('utf8')).close();
 		}
 		// default image container
 		data.images = images;
@@ -271,26 +275,26 @@ function StorePosts(stream, feed, posts, guids) {
 		// store data as ref
 		posts.push(exports.FindOrCreatePost(feed, guid, data));
 	}
-};
+}
 
 /** function PingFeed
  @param feed: the database feed object
 */
-function PingFeed(feed) {
-	//console.log("PingFeed - " + feed.title);
-	return new rs.Promise(function(resolve, reject) {
+function PingFeed (feed) {
+	// console.log("PingFeed - " + feed.title);
+	return new rs.Promise(function (resolve, reject) {
 		// pre-define variables
 		var postGUIDs = [],
 			posts = [],
 			feedparser = new fp(),
 			fp_err;
-		
+
 		feedparser
-			.on('error', function(error) {	
+			.on('error', function (error) {
 				// always handle errors
 				fp_err = error;
 			})
-			.on('meta', function(meta) {
+			.on('meta', function (meta) {
 				StoreMetaData(feed, meta);
 			})
 			// when a post is detected
@@ -298,7 +302,7 @@ function PingFeed(feed) {
 				StorePosts(this, feed, posts, postGUIDs);
 			})
 			// when the end of the feed is reached
-			.on('end', function() {
+			.on('end', function () {
 				if (fp_err) {
 					// if url as been flagged not to be a feed
 					if (fp_err.message.match(/^Not a feed/)) {
@@ -318,17 +322,17 @@ function PingFeed(feed) {
 		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
 		rq
 			.get({
-				timeout:	(1000 * 3),
-				url: 		decodeURIComponent(feed.feedURL), 
-				headers: 	{'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
+				timeout: (1000 * 3),
+				url: decodeURIComponent(feed.feedURL),
+				headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 			}, function (err, res, user) {
 				// is it an invalid url?
 				if ((err && err.code === 'ETIMEDOUT') || (res && res.statusCode !== 200)) {
-					//console.log('Request Error: ' + feed.title + ' | ' + err + ' | ' + (res ? res.statusCode : 'N/A'))
+					// console.log('Request Error: ' + feed.title + ' | ' + err + ' | ' + (res ? res.statusCode : 'N/A'))
 				}
 			})
-			.on('error', function(err) {
-				//console.log('Done - Error UpdateFeed: ' + feed.feedURL)
+			.on('error', function (err) {
+				// console.log('Done - Error UpdateFeed: ' + feed.feedURL)
 				feed.lastModified = feed.failedCrawlTime = new Date();
 				feed.lastFailureWasParseFailure = true;
 				resolve(feed.save());
@@ -339,7 +343,7 @@ function PingFeed(feed) {
 
 /** function FetchFeed
  */
-exports.FetchFeed = function(feed) {
+exports.FetchFeed = function (feed) {
 	// is feed fetching allowed?
 	if (exports.AllowFetch(feed)) {
 		return PingFeed(feed);
@@ -350,24 +354,24 @@ exports.FetchFeed = function(feed) {
 
 /** function UpdateAllFeeds
  */
-exports.UpdateAllFeeds = function(done) {
+exports.UpdateAllFeeds = function (done) {
 	// declare options object
-	var opts	= {};
+	var opts = {};
 	// get oldest updated feeds
-	opts.query 	= {};
+	opts.query = {};
 	// oldest feeds first
-	opts.sort 	= {lastModified:1};
+	opts.sort = {lastModified: 1};
 	// limit the amount of feeds
-	opts.limit 	= 15;
+	opts.limit = 15;
 	// do database related things
 	db
 		.all(db.Feed, opts) // retrieve all feeds
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
-		.then(function(feeds) {
+		.then(function (feeds) {
 			// execute FetchFeed promises
-			return rs.all(feeds.map(function(val) { return exports.FetchFeed(val); }));
+			return rs.all(feeds.map(function (val) { return exports.FetchFeed(val); }));
 		})
-		.then(function() {
+		.then(function () {
 			done();
 		});
 };

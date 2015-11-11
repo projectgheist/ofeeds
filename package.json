@@ -34,13 +34,13 @@
 	"happiness": "^1.0.7",
     "supertest": "^1.1.0"
   },
-  "standard": {
-  "ignore": [
-    "/public/",
-    "/private/",
-    "/views/",
-	"Gruntfile.js"
-  ]
+  "happiness": {
+    "ignore": [
+	  "/public/",
+	  "/private/",
+	  "/views/",
+	  "Gruntfile.js"
+    ]
   },
   "scripts": {
     "test": "happiness && mocha test"

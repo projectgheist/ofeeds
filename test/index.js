@@ -1,8 +1,11 @@
-var as = require('assert'),
-	ap = require('../src/app'),
-	cf = require('../config'),
-	sr = ap.listen(cf.Port(), cf.IpAddr()),
-	rq = require('supertest');
+/* global describe, before, it */
+
+/** Includes
+ */
+var ap = require('../src/app');
+var cf = require('../config');
+var sr = ap.listen(cf.Port(), cf.IpAddr());
+var rq = require('supertest');
 
 /** Make sure that the utilities code compiles
  */
@@ -47,7 +50,7 @@ describe('Routing', function () {
 			.expect(200)
 			.end(done);
 	});
-/*
+/* @todo
 	it('Route - Login', function (done) {
 		rq([url,'/login'].join(''), function (error, response, body) {
 			if (!error && response.statusCode == 200) {

@@ -5,14 +5,14 @@ var mg = require('mongoose'),
 	sh = require('shortid');
 
 var Tag = mg.Schema({
-    user: ut.ref('User'),
-    type: String, // state or label
-    name: String, // encoded url or ...
-    shortID: { type: String, default: sh.generate }
+	user: ut.ref('User'),
+	type: String, // state or label
+	name: String, // encoded url or ...
+	shortID: { type: String, default: sh.generate }
 });
 
-Tag.virtual('stringID').get(function() {
-    return ['user/',(this.user._id || this.user),'/',this.type,'/',this.name].join('');
+Tag.virtual('stringID').get(function () {
+	return ['user/',(this.user._id || this.user), '/', this.type, '/', this.name].join('');
 });
 
 module.exports = mg.model('Tag', Tag);

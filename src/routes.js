@@ -8,61 +8,61 @@ var cf = require('../config'),
 //   the request is authenticated (typically via a persistent login session),
 //   the request will proceed.  Otherwise, the user will be redirected to the
 //   login page.
-function ensureAuth(req, res, next) {
-	if (req.isAuthenticated()) { 
-		return next(); 
+function ensureAuth (req, res, next) {
+	if (req.isAuthenticated()) {
+		return next();
 	}
 	res.redirect('/');
 }
 
 /** home route */
-ap.get("/", function(req, res) {
+ap.get('/', function (req, res) {
 	if (req.isAuthenticated()) {
 		res.redirect('/subscription/user/reading-list');
 	} else {
-		res.render('pages/landing', { 
+		res.render('pages/landing', {
 			'config': cf.site
 		});
 	}
 });
 
 /** login route */
-ap.get("/login", function(req, res) {
+ap.get('/login', function (req, res) {
 	res.redirect('/');
 });
 
 /** logout route */
-ap.get("/logout", ensureAuth, function(req, res) {
-	req.logout(); 
-	res.redirect('/'); 
+ap.get('/logout', ensureAuth, function (req, res) {
+	req.logout();
+	res.redirect('/');
 });
 
 /** manage route */
-ap.get("/manage", function(req, res) {
-	res.render('pages/landing', { 
+ap.get('/manage', function (req, res) {
+	res.render('pages/landing', {
 		'config': cf.site,
 		'user': req.user
 	});
 });
 
 /** single feed route */
-ap.get("/feed/*", function(req, res) {
-	res.render('pages/landing', { 
+ap.get('/feed/*', function (req, res) {
+	res.render('pages/landing', {
 		'config': cf.site,
 		'user': req.user
 	});
 });
 
 /** single post route */
-ap.get("/post/*", function(req, res) {
-	res.render('pages/landing', { 
+ap.get('/post/*', function (req, res) {
+	res.render('pages/landing', {
 		'config': cf.site,
 		'user': req.user
 	});
 });
 
 /** templates route */
-ap.get("/views/*", function(req, res) {
+ap.get('/views/*', function (req, res) {
 	if (Object.keys(req.params).length) {
 		res.render(req.params[0], {
 			'config': cf.site,
