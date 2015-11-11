@@ -1,7 +1,7 @@
 /** Includes
  */
-var mg = require('mongoose'),
-	ut = require('../utils');
+var mg = require('mongoose');
+var ut = require('../utils');
 
 var Preference = mg.Schema({
 	user: ut.ref('User'),

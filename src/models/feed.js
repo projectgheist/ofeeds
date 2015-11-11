@@ -1,8 +1,8 @@
 /** Includes
  */
-var mg = require('mongoose'),
-	ut = require('../utils'),
-	sh = require('shortid');
+var mg = require('mongoose');
+var ut = require('../utils');
+var sh = require('shortid');
 
 // A Feed containing posts, shared across all users
 var Feed = mg.Schema({
@@ -19,7 +19,7 @@ var Feed = mg.Schema({
 	posts: [ut.ref('Post')],
 
 	// tags and titles for individual users
-	// a user is considered subscribed to a feed if there is a 
+	// a user is considered subscribed to a feed if there is a
 	// user/-/state/reading-list tag on the feed for that user
 	tags: [ut.ref('Tag')],
 	numSubscribers: { type: Number, default: 0 },
@@ -31,7 +31,7 @@ var Feed = mg.Schema({
 	failedCrawlTime: Date,
 	lastFailureWasParseFailure: { type: Boolean, default: false },
 	lastModified: { type: Date, default: Date.now },
-	creationTime: { type: Date, default: Date.now },
+	creationTime: { type: Date, default: Date.now }
 });
 
 Feed.virtual('stringID').get(function () {

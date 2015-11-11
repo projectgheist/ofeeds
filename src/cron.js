@@ -1,12 +1,13 @@
 /** Includes
  */
-var fp = require('feedparser');
 var rq = require('request');
 var rs = require('rsvp');
 var pr = require('../node_modules/feedparser/node_modules/sax/lib/sax.js').parser(false);
 var db = require('./storage');
 var mm = require('moment');
 var ut = require('./utils');
+
+var FeedParser = require('feedparser');
 
 /** function FindOrCreatePost
  */
@@ -204,7 +205,7 @@ function StorePosts (stream, feed, posts, guids) {
 
 		// console.log("StorePosts (D)");
 		// Used by DeviantArt, Youtube, Imgur
-		var m = data['media:content'] || (data['media:group']? data['media:group']['media:content']: undefined);
+		var m = data['media:content'] || (data['media:group'] ? data['media:group']['media:content'] : undefined);
 		if (m && m['@']) {
 			if (m['@'].medium && m['@'].medium === 'image') {
 				images.other.push(m['@']);
@@ -284,12 +285,12 @@ function PingFeed (feed) {
 	// console.log("PingFeed - " + feed.title);
 	return new rs.Promise(function (resolve, reject) {
 		// pre-define variables
-		var postGUIDs = [],
-			posts = [],
-			feedparser = new fp(),
-			fp_err;
+		var postGUIDs = [];
+		var posts = [];
+		var fp = new FeedParser();
+		var fp_err;
 
-		feedparser
+		fp
 			.on('error', function (error) {
 				// always handle errors
 				fp_err = error;
@@ -332,12 +333,13 @@ function PingFeed (feed) {
 				}
 			})
 			.on('error', function (err) {
-				// console.log('Done - Error UpdateFeed: ' + feed.feedURL)
-				feed.lastModified = feed.failedCrawlTime = new Date();
-				feed.lastFailureWasParseFailure = true;
-				resolve(feed.save());
+				if (err) {
+					feed.lastModified = feed.failedCrawlTime = new Date();
+					feed.lastFailureWasParseFailure = true;
+					resolve(feed.save());
+				}
 			})
-			.pipe(feedparser); // parse it through feedparser;
+			.pipe(fp); // parse it through feedparser;
 	});
 }
 

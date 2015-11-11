@@ -1,8 +1,8 @@
 /** Includes
  */
-var mg = require('mongoose'),
-	ut = require('../utils'),
-	sh = require('shortid');
+var mg = require('mongoose');
+var ut = require('../utils');
+var sh = require('shortid');
 
 var Tag = mg.Schema({
 	user: ut.ref('User'),
@@ -12,7 +12,7 @@ var Tag = mg.Schema({
 });
 
 Tag.virtual('stringID').get(function () {
-	return ['user/',(this.user._id || this.user), '/', this.type, '/', this.name].join('');
+	return ['user/', (this.user._id || this.user), '/', this.type, '/', this.name].join('');
 });
 
 module.exports = mg.model('Tag', Tag);

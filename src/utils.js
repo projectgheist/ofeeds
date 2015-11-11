@@ -1,6 +1,6 @@
 /** Includes
  */
-var mg = require('mongoose'),
+var mg = require('mongoose');
 var vd = require('validator');
 
 /** function startsWith
@@ -24,7 +24,7 @@ exports.startsWith = function (val, str, out) {
 	return false;
 };
 
-/**
+/** function stringInsert
 @param o: original string
 @param i: string to insert
 @param p: insert position
@@ -41,7 +41,7 @@ exports.stringReplace = function (val, str) {
 	var re;
 	for (var i in str) {
 		re = new RegExp('(' + str[i] + ')(?:.*?)', 'i');
-		val = val.replace(re, parseInt(i) + 1);
+		val = val.replace(re, parseInt(i, 0) + 1);
 	}
 	return val;
 };
@@ -133,9 +133,9 @@ exports.parseParameters = function (obj, user) {
 			value: urls[0]};
 		} else {
 			var tags = exports.parseTags(obj[i], user);
-			if (!tags)
+			if (!tags) {
 				return null;
-
+			}
 			obj[i] = {
 				type: 'tag',
 			value: tags[0]};
@@ -144,7 +144,7 @@ exports.parseParameters = function (obj, user) {
 	return obj;
 };
 
-/**
+/** function parseHtmlEntities
 */
 exports.parseHtmlEntities = function (str) {
 	if (!str) {
@@ -158,7 +158,7 @@ exports.parseHtmlEntities = function (str) {
 		.trim();
 };
 
-/**
+/** function parseFeeds
 */
 exports.parseFeeds = function (feeds) {
 	if (!feeds) {
@@ -168,13 +168,13 @@ exports.parseFeeds = function (feeds) {
 		feeds = [feeds];
 	}
 	for (var i = 0; i < feeds.length; i++) {
-		if (!/^feed\//.test(feeds[i]))
+		if (!/^feed\//.test(feeds[i])) {
 			return null;
-
+		}
 		var url = feeds[i].slice(5);
-		if (!exports.isUrl(url))
+		if (!exports.isUrl(url)) {
 			return null;
-
+		}
 		feeds[i] = url;
 	}
 	return feeds;
@@ -217,7 +217,7 @@ exports.parseTags = function (tags, user) {
 		tags[i] = {
 			'user': user._id, // reference to user db object
 			type: match[2],	// string: state or label
-			name: match[3],	// string: url 
+			name: match[3] // string: url
 		};
 	}
 	return tags;

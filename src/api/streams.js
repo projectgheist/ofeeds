@@ -1,13 +1,13 @@
-var ap = require('../app'),
-	db = require('../storage'),
-	ut = require('../utils');
+var ap = require('../app');
+var db = require('../storage');
+var ut = require('../utils');
 
-/**
+/** function formatPosts
  * @param posts: Array of posts to format
- * @param feed: information related to the feed 
+ * @param feed: information related to the feed
  */
 function formatPosts (user, feed, posts, tags, obj) {
-	// creates a new array with the posts 
+	// creates a new array with the posts
 	var items = db.formatPosts(user, posts);
 	//
 	if (!feed && tags && tags.length > 0) {
@@ -33,7 +33,7 @@ function formatPosts (user, feed, posts, tags, obj) {
 	return obj;
 }
 
-/**
+/** function retrieveStream
  */
 ap.get('/api/0/stream/contents*', function (req, res) {
 	var streams = [];
@@ -47,25 +47,31 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 			streams.push(req.query);
 		}
 	}
+
 	if (!streams) {
 		return res.status(400).send('InvalidStream');
 	}
+
 	// auth is not required for public streams (e.g. feeds)
-	/*if (hasTagStreams(streams) && !utils.checkAuth(req, res))
+	/* if (hasTagStreams(streams) && !utils.checkAuth(req, res))
 	    return;
-	    */
+	*/
 	if (req.query.n && !/^[0-9]+$/.test(req.query.n)) {
 		return res.status(400).send('InvalidCount');
 	}
+
 	if (req.query.ot && !/^[0-9]+$/.test(req.query.ot)) {
 		return res.status(400).send('InvalidTime');
 	}
+
 	if (req.query.nt && !/^[0-9]+$/.test(req.query.nt)) {
 		return res.status(400).send('InvalidTime');
 	}
+
 	if (req.query.r && !/^[no]$/.test(req.query.r)) {
 		return res.status(400).send('InvalidRank');
 	}
+
 	var excludeTags = ut.parseTags(req.query.xt, req.user);
 	if (req.query.xt && !excludeTags) {
 		return res.status(400).send('InvalidTag');
@@ -81,21 +87,20 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 			populate: ['feed', 'tags']
 		})
 		.then(function (item) {
-			// console.log('stream/contents (A)')
 			item.query
 				.then(function (posts) {
 					// console.log('stream/contents (B)')
-					var isFeed = (streams[0].type === 'feed'), // boolean: TRUE if feed
-						value = streams[0].value,				// string: site URL
-						hasPosts = (posts.length > 0 && posts[0]), // boolean: TRUE if feed object
-						feed = !ut.isArray(item.feeds) ? item.feeds : item.feeds[0];// reference to feed db obj
+					var isFeed = (streams[0].type === 'feed'); // boolean: TRUE if feed
+					var value = streams[0].value; // string: site URL
+					var hasPosts = (posts.length > 0 && posts[0]); // boolean: TRUE if feed object
+					var feed = !ut.isArray(item.feeds) ? item.feeds : item.feeds[0]; // reference to feed db obj
 					var obj = feed ? {
 						id: encodeURIComponent(isFeed ? feed.stringID : ''),
 						feedURL: decodeURIComponent(isFeed ? feed.feedURL : value),
-						title: isFeed ? feed.title        : value,
-						description: isFeed ? feed.description  : '',
+						title: isFeed ? feed.title : value,
+						description: isFeed ? feed.description : '',
 						direction: 'ltr',
-						siteURL: isFeed ? feed.siteURL      : '',
+						siteURL: isFeed ? feed.siteURL : '',
 						updated: isFeed ? feed.lastModified : '',
 						self: ut.fullURL(req),
 						creation: isFeed ? feed.creationTime : '',

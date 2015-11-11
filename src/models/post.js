@@ -1,8 +1,8 @@
 /** Includes
  */
-var mg = require('mongoose'),
-	sh = require('shortid'),
-	ut = require('../utils');
+var mg = require('mongoose');
+var sh = require('shortid');
+var ut = require('../utils');
 
 // A Post in a Feed, shared across all users
 // User specific tags stored here to avoid having separate post records for each user
@@ -38,10 +38,10 @@ var Post = mg.Schema({
 	tags: [ut.ref('Tag')]
 });
 
-/**
+/** Make sure that posts have unique indices
  */
 Post.index({guid: 1, shortid: 1}, {unique: true});
 
-/**
+/** Export
  */
 module.exports = mg.model('Post', Post);

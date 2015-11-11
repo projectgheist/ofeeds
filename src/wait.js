@@ -1,11 +1,14 @@
-var ut = require('./utils'),
-	cf = require('../config'),
-	rs = require('rsvp'),
-	mg = require('mongoose'),
-	Agenda = require('agenda'),
-	ag = new Agenda({ db: { address: ut.getDBConnectionURL(cf.db(), true), collection: 'crons' },
-		defaultLockLifetime: 1000 * 30
-	});
+var ut = require('./utils');
+var cf = require('../config');
+var rs = require('rsvp');
+var Agenda = require('agenda');
+var ag = new Agenda({
+	db: {
+		address: ut.getDBConnectionURL(cf.db(), true),
+		collection: 'crons'
+	},
+	defaultLockLifetime: 1000 * 30
+});
 
 /** function UpdateAllFeeds
  */
@@ -22,12 +25,20 @@ ag.isReady = function () {
 
 ag.on('ready', function () {
 	// purge all unreferenced jobs from db
-	ag.purge(function (err, numRemoved) {});
+	ag.purge(function (err, count) {
+		if (err) {
+			throw err;
+		}
+	});
 
 	// clear all pre-existing 'UpdateAllFeeds' jobs
 	ag.cancel({
 		name: 'UpdateAllFeeds'
-	}, function (err, numRemoved) {});
+	}, function (err, count) {
+		if (err) {
+			throw err;
+		}
+	});
 
 	// set all jobs
 	ag.every('5 minutes', 'UpdateAllFeeds');
@@ -41,7 +52,7 @@ ag.on('ready', function () {
 	};
 });
 
-/**
+/** function getAllJobs
  */
 ag.getAllJobs = function () {
 	return new rs.Promise(function (resolve, reject) {

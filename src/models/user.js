@@ -1,7 +1,6 @@
 /** Includes
  */
-var mg = require('mongoose'),
-	ut = require('../utils');
+var mg = require('mongoose');
 
 var User = mg.Schema({
 	openID: { type: String, required: true, unique: true },

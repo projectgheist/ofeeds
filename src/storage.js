@@ -1,10 +1,9 @@
 /** Includes
  */
-var mg = require('mongoose'),
-	rs = require('rsvp'),
-	pr = rs.Promise,
-	cf = require('../config'),
-	ut = require('./utils');
+var mg = require('mongoose');
+var rs = require('rsvp');
+var cf = require('../config');
+var ut = require('./utils');
 
 /** Needs to be done before promisifyAll
  * export the models
@@ -28,8 +27,6 @@ if (!mg.connection || !mg.connection.db) {
 	var db = mg.connection;
 	// Add promise support to Mongoose
 	require('mongoomise').promisifyAll(db, rs);
-	// error event
-	db.on('error', function (err) {});
 	// connection established event
 	db.once('open', function () {
 		require('./wait');
@@ -76,14 +73,16 @@ exports.editTags = function (record, addTags, removeTags) {
 	removeTags || (removeTags = []);
 
 	var add = addTags.map(function (tag) {
-		return exports.findOrCreate(exports.Tag, tag).then(function (t) {
-			record.tags.addToSet(t);
-		});
+		return exports.findOrCreate(exports.Tag, tag)
+			.then(function (t) {
+				record.tags.addToSet(t);
+			});
 	});
 	var remove = removeTags.map(function (tag) {
-		return exports.Tag.findOne(tag).then(function (t) {
-			record.tags.remove(t);
-		});
+		return exports.Tag.findOne(tag)
+			.then(function (t) {
+				record.tags.remove(t);
+			});
 	});
 	var all = add.concat(remove);
 	// returns a promise
@@ -104,8 +103,7 @@ exports.getTags = function (tags) {
 			return exports.Tag.find({ $or: tags });
 		}
 	}
-	// returns an empty promise
-	return new pr(function (resolve, reject) { resolve([]); });
+	return [];
 };
 
 // Returns a list of posts for a list of streams (feeds and tags) as parsed
@@ -121,8 +119,8 @@ exports.getPosts = function (streams, options) {
 	// use parameter OR create empty object
 	options || (options = {});
 	// separate streams by type
-	var feeds = [],
-		tags = [];
+	var feeds = [];
+	var tags = [];
 	// loop all items in stream
 	for (var i in streams) {
 		if (streams[i].type === 'feed') {
@@ -157,8 +155,8 @@ exports.getPosts = function (streams, options) {
 				],
 				tags: { $nin: excludeTags },
 				updated: {
-					$gte: new Date(parseInt(options.minTime)),
-					$lt: new Date(parseInt(options.maxTime))
+					$gte: new Date(parseInt(options.minTime, 0)),
+					$lt: new Date(parseInt(options.maxTime, Number.MAX_VALUE))
 				}
 			});
 
@@ -171,9 +169,6 @@ exports.getPosts = function (streams, options) {
 			if (options.sort) {
 				query.sort(options.sort);
 			}
-			/*if (options.count) {
-				query.count();
-			}*/
 
 			// populate the referenced model variables of the return model
 			if (options.populate) {
@@ -186,15 +181,15 @@ exports.getPosts = function (streams, options) {
 					query.populate(options.populate[i]);
 				}
 			}
-			return {'query': query,'feeds': rfeeds};
+			return { 'query': query, 'feeds': rfeeds };
 		});
 };
 
 //
 exports.formatPosts = function (user, posts) {
 	return posts.map(function (post) {
-		var isRead = 0,
-			pts = (post.tags.length > 0) ? post.tags.map(function (t) {
+		var isRead = 0;
+		var pts = (post.tags.length > 0) ? post.tags.map(function (t) {
 				var r = t.stringID;
 				if (!isRead && r && ut.isRead(user, r)) {
 					isRead = 1;

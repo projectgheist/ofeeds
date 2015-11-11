@@ -1,10 +1,8 @@
-var ap = require('../app'),
-	rs = require('rsvp'),
-	db = require('../storage'),
-	cf = require('../../config'),
-	ut = require('../utils');
+var ap = require('../app');
+var db = require('../storage');
+var ut = require('../utils');
 
-/**
+/** function retrieveAllPosts
  */
 ap.get('/api/0/posts', function (req, res) {
 	// make options variable
@@ -22,12 +20,14 @@ ap.get('/api/0/posts', function (req, res) {
 		});
 });
 
-/** retrieve a single post
+/** function retrievePost
  */
 ap.get('/api/0/post*', function (req, res) {
 	// has parameters?
-	var q = req.params.length ? req.params[0]: req.query;
-	if (q && q.value) {
+	var q = req.query;
+	if (!q || !q.value) {
+		return res.status(400).send('InvalidParams');
+	} else {
 		// create query
 		db.Post
 			.find({
@@ -36,9 +36,7 @@ ap.get('/api/0/post*', function (req, res) {
 			.populate('feed') // replacing the specified paths in the document with document(s) from other collection(s)
 			.then(function (post) {
 				var fp = db.formatPosts({}, post);// formatted posts
-				return res.json(fp.length && ut.isArray(fp) ? fp[0]: {});
+				return res.status(200).json(fp.length && ut.isArray(fp) ? fp[0] : {});
 			});
-	} else {
-		return res.status(400).send('InvalidParams');
 	}
 });

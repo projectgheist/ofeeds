@@ -1,13 +1,10 @@
-var ex = require('express'),
-	rs = require('rsvp'),
-	db = require('../storage'),
-	ut = require('../utils'),
-	cf = require('../../config');
-
-var app = module.exports = ex();
+var rs = require('rsvp');
+var db = require('../storage');
+var ut = require('../utils');
+var ap = require('../app');
 
 // To mark a post as read,starred,...
-app.post('/api/0/tags/edit', function (req, res) {
+ap.post('/api/0/tags/edit', function (req, res) {
 	// is user logged in?
 	if (!req.isAuthenticated()) {
 		return;
@@ -17,8 +14,8 @@ app.post('/api/0/tags/edit', function (req, res) {
 	if (!items) {
 		return res.statuc(400); // Invalid item
 	}
-	var at = ut.parseTags(p['a'] || 0, req.user), // tags to add to the item
-		rt = ut.parseTags(p['r'] || 0, req.user);// tags to remove from the item
+	var at = ut.parseTags(p['a'] || 0, req.user); // tags to add to the item
+	var rt = ut.parseTags(p['r'] || 0, req.user); // tags to remove from the item
 	// TODO: use streams to filter
 	db.Post.where('_id').in(items)
 		.then(function (posts) {
@@ -35,13 +32,13 @@ app.post('/api/0/tags/edit', function (req, res) {
 });
 
 // rename a stream folder
-app.post('/api/0/tags/rename', function (req, res) {
+ap.post('/api/0/tags/rename', function (req, res) {
 	// is user logged in?
 	if (!req.isAuthenticated()) {
 		return;
 	}
-	var orig = ut.parseTags(req.body.s, req.user),
-		dest = ut.parseTags(req.body.dest, req.user);
+	var orig = ut.parseTags(req.body.s, req.user);
+	var dest = ut.parseTags(req.body.dest, req.user);
 	if (!orig || !dest) {
 		return res.send(400, 'Error=InvalidStream');
 	}
@@ -54,7 +51,7 @@ app.post('/api/0/tags/rename', function (req, res) {
 });
 
 // mark all posts in a stream as read
-app.post('/api/0/tag/mark-all-as-read', function (req, res) {
+ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 	if (!req.isAuthenticated()) {
 		return;
 	}
@@ -76,8 +73,8 @@ app.post('/api/0/tag/mark-all-as-read', function (req, res) {
 	var posts = db.postsForStreams(streams, options);
 
 	rs.all([tag, posts]).then(function (results) {
-		var tag = results[0],
-			posts = results[1];
+		var tag = results[0];
+		var posts = results[1];
 
 		// Add the tag to each of them
 		return rs.all(posts.map(function (post) {

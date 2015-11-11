@@ -1,8 +1,8 @@
 /** Module dependencies
  */
-var ex = require('express'),
-	cf = require('../config'),
-	ap = ex();
+var ex = require('express');
+var cf = require('../config');
+var ap = ex();
 
 /** Load configurations
  */

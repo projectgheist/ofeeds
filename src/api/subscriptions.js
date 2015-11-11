@@ -1,14 +1,14 @@
-var ap = require('../app'),
-	rs = require('rsvp'),
-	db = require('../storage'),
-	cr = require('../cron'),
-	mm = require('moment'),
-	ut = require('../utils'),
-	ag = require('../wait');
+var ap = require('../app');
+var rs = require('rsvp');
+var db = require('../storage');
+var cr = require('../cron');
+var mm = require('moment');
+var ut = require('../utils');
+var ag = require('../wait');
 
 // @todo: functions need to be merged
 var actions = {
-	/**
+	/** function search
 	 * @param url: un-encoded
 	 */
 	search: function (ctx, url) {
@@ -42,41 +42,41 @@ var actions = {
 				return false;
 			});
 	},
-	/**
+	/** function refresh
 	 * @param url: un-encoded
 	 */
 	refresh: function (ctx, url) {
 		// Find feed for this URL in the database
 		return db.Feed.findOne({feedURL: url}).then(cr.FetchFeed);
 	},
-	/**
+	/** function subscribe
 	 * @param url: un-encoded
 	 */
 	subscribe: function (ctx, url) {
 		// Find or create feed for this URL in the database
-		var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)}),
-			// Find or create a tag to add this feed to the users reading-list
-			tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/reading-list', ctx.user)[0]);
+		var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)});
+		// Find or create a tag to add this feed to the users reading-list
+		var tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/reading-list', ctx.user)[0]);
 		// wait for all results to return before continuing
 		return rs.all([feed, tag]).then(function (results) {
 			// local ref to feed
 			var f = results[0];
 			// if this feed doesn't have any subscribers, fetch the feed
 			if (f.numSubscribers === 0) {
-				return cr.FetchFeed(f).then(function (n) {
-					return [n, results[1]];
-				}, function (err) {
-					return [];
-				});
+				return cr.FetchFeed(f)
+					.then(function (n) {
+						return [n, results[1]];
+					});
 			}
 			return results;
-		}).then(function (results) {
+		})
+		.then(function (results) {
 			if (results.length <= 0) {
 				return {};
 			}
 			// local ref to feed and tag variable
-			var f = results[0],
-				t = results[1];
+			var f = results[0];
+			var t = results[1];
 			// Subscribe to the feed if the tag was not found
 			if (!~f.tags.indexOf(t.id)) {
 				// add tag to feed's tag list
@@ -90,7 +90,7 @@ var actions = {
 	}
 };
 
-/**
+/** function AllFeeds
  */
 function AllFeeds (req, res) {
 	var s;
@@ -128,9 +128,9 @@ function AllFeeds (req, res) {
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function (feeds) {
 			var a = feeds.map(function (f) {
-				var b = f.failedCrawlTime === undefined,
-					s = f.successfulCrawlTime === undefined,
-					r = (b && s) ? false : ((!b && !s) ? (mm(f.successfulCrawlTime) > mm(f.failedCrawlTime)) : (b && !s));
+				var b = f.failedCrawlTime === undefined;
+				var s = f.successfulCrawlTime === undefined;
+				var r = (b && s) ? false : ((!b && !s) ? (mm(f.successfulCrawlTime) > mm(f.failedCrawlTime)) : (b && !s));
 				return {
 					favicon: f.favicon || '',
 					id: f.feedURL, // its already encoded
@@ -167,8 +167,8 @@ ap.get('/api/0/subscription/list', function (req, res) {
 		return AllFeeds(req, res);
 	} else {
 		// get tags
-		var tags = ut.parseTags(['user/-/state/reading-list', 'user/-/state/read'], req.user),
-			tuc = 0;// total post unread count
+		var tags = ut.parseTags(['user/-/state/reading-list', 'user/-/state/read'], req.user);
+		var tuc = 0;// total post unread count
 		return db
 			.getTags(tags[0])
 			.then(function (rl) {
@@ -237,8 +237,8 @@ ap.get('/api/0/subscription/search', function (req, res) {
 		actions
 			.search(req, req.query.q)
 			.then(function (feeds) {
-				var vs = [],
-					at = false;// alert type?
+				var vs = [];
+				var at = false;// alert type?
 				// not an array?
 				if (!ut.isArray(feeds)) {
 					at = feeds.type;
