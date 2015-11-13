@@ -122,13 +122,14 @@ function AllFeeds (req, res) {
 				break;
 		}
 	}
-	// declare feed options
-	var opts = {
-		sort: s,
-		limit: (!req.query.n ? false : req.query.n) // limit the amount of output feeds
-	};
+	// retrieve all feeds
 	return db
-		.all(db.Feed, opts) // retrieve all feeds
+		.all(db.Feed, {
+			// sort argument for the retrieved feeds
+			sort: s,
+			// limit the amount of output feeds
+			limit: req.query.n || false
+		})
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function (feeds) {
 			var a = feeds.map(function (f) {
@@ -138,7 +139,7 @@ function AllFeeds (req, res) {
 				return {
 					favicon: f.favicon || '',
 					id: f.feedURL, // its already encoded
-					postCount: f.posts ? f.posts.length : 0,
+					postCount: (f.posts ? f.posts.length : 0),
 					title: f.title || decodeURIComponent(f.feedURL),
 					shortid: f.shortID,
 					crawlTime: f.successfulCrawlTime || undefined,
@@ -221,7 +222,9 @@ ap.get('/api/0/subscription/list', function (req, res) {
 					unreadcount: tuc
 				});
 				// return json value
-				return res.json({'feeds': s});
+				return res.json({
+					'feeds': s
+				});
 			});
 	}
 });
@@ -265,7 +268,7 @@ ap.get('/api/0/subscription/refresh', function (req, res) {
 	if (req.query.q === undefined) {
 		res.status(400).end();
 	} else {
-		// creat or find URL in db
+		// create or find URL in db
 		actions
 			.refresh(req, req.query.q)
 			.then(function (feed) {

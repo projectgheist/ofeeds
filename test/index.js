@@ -5,38 +5,14 @@
 var ap = require('../src/app');
 var cf = require('../config');
 var sr = ap.listen(cf.Port(), cf.IpAddr());
+require('../src/storage');
+require('../src/auth');
+require('../src/routes');
 var rq = require('supertest');
-
-/** Make sure that the utilities code compiles
- */
-describe('Utilities', function () {
-	it('Check compile', function (done) {
-		require('../src/utils');
-		done();
-	});
-});
-
-/** Start the server on a specific port
- */
-describe('Startup', function () {
-	it('Start database', function (done) {
-		require('../src/storage');
-		done();
-	});
-
-	it('Enable authentication', function (done) {
-		require('../src/auth');
-		done();
-	});
-});
 
 /** Make sure that the routing code compiles
  */
 describe('Routing', function () {
-	before(function () {
-		require('../src/routes');
-	});
-
 	it('Route - Home', function (done) {
 		rq(sr)
 			.get('/')

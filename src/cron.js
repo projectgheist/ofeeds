@@ -26,14 +26,14 @@ exports.FindOrCreatePost = function (feed, guid, data) {
 				ref.body = data.description ? data.description : ((m && m['media:description'] && m['media:description']['#']) ? m['media:description']['#'] : '');
 				ref.body = CleanupDescription(ref.body || '', data.images);
 				ref.summary = CleanupSummary(ref.body);
-				ref.images = data.images || undefined;
-				ref.videos = data.videos || [];
+				ref.images = data.images;
+				ref.videos = data.videos;
 				// prevent the publish date to be overridden
 				ref.published = SelectPublishedDate(ref, data);
 				// time the post has been last modified
 				ref.updated = mm();
 				ref.author = (data.author ? data.author.trim() : '');
-				ref.url = data.link || (data['atom:link'] && data['atom:link']['@'].href) || '';
+				ref.url = data.link || (data['atom:link'] ? data['atom:link']['@'].href : '');
 				ref.commentsURL = data.comments || '';
 				ref.categories = data.categories || undefined;
 				// if feeds post variable doesn't exist, make it an array
@@ -101,8 +101,12 @@ function CleanupDescription (data, images, debug) {
 
 	// remove thumbnails
 	if (images) {
-		if (images.small.length) i = i.concat(images.small);
-		if (images.other.length) i.push(images.other[0]);
+		if (images.small.length) {
+			i = i.concat(images.small);
+		}
+		if (images.other.length) {
+			i.push(images.other[0]);
+		}
 		if (i.length) {
 			p = /<img\s.*?src="(.*?)"[\s\S][^>]*>/gi;
 			while ((e = p.exec(data)) !== null) {
@@ -136,6 +140,7 @@ exports.UpdateFeed = function (feed, posts) {
 	return rs
 		.all(posts)
 		.then(function () {
+			// set new successful crawl date
 			feed.successfulCrawlTime = new Date();
 			// set new modified date
 			feed.lastModified = mm();
@@ -341,33 +346,28 @@ function PingFeed (feed) {
  */
 exports.FetchFeed = function (feed) {
 	// is feed fetching allowed?
-	if (exports.AllowFetch(feed)) {
-		return PingFeed(feed);
-	}
-	// return a new promise
-	return feed;
+	return exports.AllowFetch(feed) ? PingFeed(feed) : feed;
 };
 
 /** function UpdateAllFeeds
  */
 exports.UpdateAllFeeds = function (done) {
-	// declare options object
-	var opts = {};
-	// get oldest updated feeds
-	opts.query = {};
-	// oldest feeds first
-	opts.sort = {lastModified: 1};
-	// limit the amount of feeds
-	opts.limit = 15;
-	// do database related things
+	// retrieve all feeds
 	db
-		.all(db.Feed, opts) // retrieve all feeds
+		.all(db.Feed, {
+			// get oldest updated feeds
+			query: {},
+			// oldest feeds first
+			sort: {lastModified: 1},
+			// limit the amount of feeds
+			limit: 15
+		})
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function (feeds) {
 			// execute FetchFeed promises
-			return rs.all(feeds.map(function (val) { return exports.FetchFeed(val); }));
+			return rs.all(feeds.map(function (val) {
+				return exports.FetchFeed(val);
+			}));
 		})
-		.then(function () {
-			done();
-		});
+		.then(done);
 };

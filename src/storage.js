@@ -27,6 +27,8 @@ if (!mg.connection || !mg.connection.db) {
 	var db = mg.connection;
 	// Add promise support to Mongoose
 	require('mongoomise').promisifyAll(db, rs);
+	// error event
+	db.on('error', function (ignore) {});
 	// connection established event
 	db.once('open', function () {
 		require('./wait');
