@@ -18,14 +18,10 @@ install:
   - npm install -g grunt-cli
   - npm install -g bower
   - npm install -g happiness
-  - npm install -g mocha
-  - npm install -g codecov
-  - npm install -g coveralls
   - npm install -g istanbul
   - npm install
 before_script:
   - bower install
   - grunt
 script:
-  - istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage
-  - codecov
+  - istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/codecov.io/bin/codecov.io.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
