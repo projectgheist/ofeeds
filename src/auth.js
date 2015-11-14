@@ -46,8 +46,8 @@ pp.deserializeUser(function (obj, done) {
 });
 
 pp.use(new Strategy({
-		clientID: cf.Google().ClientID,
-		clientSecret: cf.Google().ClientSecret,
+		clientID: process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID',
+		clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET',
 		callbackURL: cf.Url() + '/auth/google/callback'
 	},
 	function (token, tokenSecret, profile, done) {
