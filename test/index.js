@@ -107,7 +107,7 @@ describe('Feeds API', function () {
 			.get('/api/0/subscription/search')
 			.query({q: 'https://www.google.com/'})
 			.expect(200)
-			.end(done});
+			.end(done);
 	});
 
 	it('Refresh feed (InvalidFeedUrl)', function (done) {
