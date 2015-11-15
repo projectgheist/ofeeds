@@ -11,7 +11,7 @@ require('../src/routes');
 require('../src/api/subscriptions');
 require('../src/api/streams');
 require('../src/api/posts');
-var rq = require('supertest');
+var rq = require('supertest').agent(sr);
 
 /** Create mock passportjs strategy
  */
@@ -32,43 +32,29 @@ pp.use(
  */
 describe('Routing', function () {
 	it('Route - Home', function (done) {
-		rq(sr)
+		rq
 			.get('/')
 			.expect(200)
 			.end(done);
 	});
 
 	it('Route - Manage', function (done) {
-		rq(sr)
+		rq
 			.get('/manage')
 			.expect(200)
 			.end(done);
 	});
 
 	it('Create mock strategy', function (done) {
-		ap
-			.route('/login')
-			.post(function * (next) {
-				var ctx = this;
-				if (this.request.body) {
-					yield pp.authenticate('local', function * (ignore, user, info) {
-						if (user) {
-							yield ctx.login(user);
-							ctx.session.user = user;
-							ctx.body = { success: true };
-							ctx.status = 200;
-						} else {
-							ctx.body = { success: false };
-							ctx.status = 400;
-						}
-					})
-					.call(this, next);
-				} else {
-					ctx.body = { success: false };
-					ctx.status = 400;
-					yield next;
-				}
+		ap.post('/login', function (req, res, next) {
+			pp.authenticate('local', function (err, user, info) {
+				if (err) { return next(err); }
+				req.login(user, function (ignore) {
+					if (err) { return next(err); }
+					return res.redirect('/');
+				});
 			});
+		});
 		done();
 	});
 
@@ -80,7 +66,7 @@ describe('Routing', function () {
 				username: 'test',
 				password: 'test'
 			})
-			.expect(200)
+			.expect(302)
 			.end(done);
 	});
 
@@ -96,36 +82,36 @@ describe('Routing', function () {
  */
 describe('Feeds API', function () {
 	it('Retrieve all feeds', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/subscription/list')
 			.expect(200)
 			.end(done);
 	});
 
 	it('Search for feed (noQuery)', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/subscription/search')
 			.expect(400)
 			.end(done);
 	});
 
 	it('Refresh feed (noQuery)', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/subscription/refresh')
 			.expect(400)
 			.end(done);
 	});
 
 	it('Search for feed (InvalidFeedUrl)', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/subscription/search')
 			.query({q: 'https://www.google.com/'})
 			.expect(200)
-			.end(done);
+			.end(done});
 	});
 
 	it('Refresh feed (InvalidFeedUrl)', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/subscription/refresh')
 			.query({q: 'https://www.google.com/'})
 			.expect(200)
@@ -133,7 +119,7 @@ describe('Feeds API', function () {
 	});
 
 	it('Search for feed (ValidFeedUrl)', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/subscription/search')
 			.query({q: 'http://www.polygon.com/rss/index.xml'})
 			.expect(200)
@@ -141,7 +127,7 @@ describe('Feeds API', function () {
 	});
 
 	it('Refresh feed (ValidFeedUrl)', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/subscription/refresh')
 			.query({q: 'http://www.polygon.com/rss/index.xml'})
 			.expect(200)
@@ -149,14 +135,14 @@ describe('Feeds API', function () {
 	});
 
 	it('Route - Feed', function (done) {
-		rq(sr)
+		rq
 			.get('/feed/http%253A%252F%252Fwww.polygon.com%252Frss%252Findex.xml')
 			.expect(200)
 			.end(done);
 	});
 
 	it('Load feed stream', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/stream/contents')
 			.query({
 				type: 'feed',
@@ -171,14 +157,14 @@ describe('Feeds API', function () {
  */
 describe('Posts API', function () {
 	it('Retrieve most recent posts', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/posts')
 			.expect(200)
 			.end(done);
 	});
 
 	it('Retrieve post BY id', function (done) {
-		rq(sr)
+		rq
 			.get('/api/0/post')
 			.expect(400)
 			.end(done);

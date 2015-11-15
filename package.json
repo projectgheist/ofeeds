@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "agenda": "^0.7.2",
+    "body-parser": "^1.14.1",
     "express": "^4.13.3",
     "express-session": "^1.12.1",
     "feedparser": "^1.1.4",
