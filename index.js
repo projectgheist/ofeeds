@@ -27,5 +27,5 @@ require('./src/routes');
 require('./src/api/subscriptions');
 require('./src/api/posts');
 require('./src/api/streams');
-require('./src/api/tag');
+require('./src/api/tags');
 // app.use(require('./src/api/pref'))

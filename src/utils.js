@@ -3,6 +3,17 @@
 var mg = require('mongoose');
 var vd = require('validator');
 
+/** function isEmpty
+*/
+exports.isEmpty = function (obj) {
+	for (var key in obj) {
+		if (obj.hasOwnProperty(key)) {
+			return false;
+		}
+	}
+	return true;
+};
+
 /** function startsWith
  * Checks if a string starts with a certain char/string
  * @param val: char or string to search for in the input string
@@ -85,19 +96,13 @@ exports.isArray = function (val) {
 
 // returns a string that points to the database url
 exports.getDBConnectionURL = function (obj, noPrefix) {
-	var r = '';
-	if (process.env.OPENSHIFT_MONGODB_DB_URL) {
-		r = process.env.OPENSHIFT_MONGODB_DB_URL + obj.dbname;
-	} else if (obj.url) {
-		r = obj.url;
-	} else if (obj.username && obj.password) {
-		r = 'mongodb://' + obj.username + ':' + obj.password + '@' + obj.hostname + ':' + obj.port + '/' + obj.dbname;
-	} else {
-		r = 'mongodb://' + obj.hostname + ':' + obj.port + '/' + obj.dbname;
+	var r = process.env.OPENSHIFT_MONGODB_DB_URL ? [process.env.OPENSHIFT_MONGODB_DB_URL, obj.dbname].join('') : obj.url;
+	if (!r) {
+		r = (obj.username && obj.password) ? [obj.username, ':', obj.password, '@'].join('') : '';
+		r = [r, obj.hostname, ':', obj.port, '/', obj.dbname].join('');
 	}
-	if (r) {
-		r = r.substring(10, r.length);
-	}
+	// removes 'mongodb://' from string
+	r = r.replace(/mongodb:\/\//gi, '');
 	return r;
 };
 

@@ -369,5 +369,7 @@ exports.UpdateAllFeeds = function (done) {
 				return exports.FetchFeed(val);
 			}));
 		})
-		.then(done);
+		.then(function () {
+			done();
+		});
 };

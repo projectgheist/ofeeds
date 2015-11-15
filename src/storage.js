@@ -2,8 +2,8 @@
  */
 var mg = require('mongoose');
 var rs = require('rsvp');
-var cf = require('../config');
 var ut = require('./utils');
+var cf = require('../config');
 
 /** Needs to be done before promisifyAll
  * export the models
@@ -16,13 +16,8 @@ exports.Pref = require('./models/pref');
 
 // if database is already connected return
 if (!mg.connection || !mg.connection.db) {
-	// declare connection options
-	var options = {
-		server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
-		replset: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }
-	};
 	// try to connect to db
-	mg.connect(ut.getDBConnectionURL(cf.db()), options);
+	mg.connect(ut.getDBConnectionURL(cf.db()), {});
 	// declare connection variable
 	var db = mg.connection;
 	// Add promise support to Mongoose

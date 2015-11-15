@@ -7,6 +7,7 @@ var cf = require('../config');
 var sr = ap.listen(cf.Port(), cf.IpAddr());
 var pp = require('../src/auth');
 var db = require('../src/storage');
+var ut = require('../src/utils');
 require('../src/routes');
 require('../src/api/subscriptions');
 require('../src/api/streams');
@@ -17,6 +18,7 @@ var rq = require('supertest').agent(sr);
  */
 var Strategy = require('passport-local').Strategy;
 pp.use(
+	'local',
 	new Strategy(
 		function (username, password, done) {
 			return db
@@ -47,13 +49,19 @@ describe('Routing', function () {
 
 	it('Create mock strategy', function (done) {
 		ap.post('/login', function (req, res, next) {
-			pp.authenticate('local', function (err, user, info) {
-				if (err) { return next(err); }
-				req.login(user, function (ignore) {
+			if (!ut.isEmpty(req.query)) {
+				pp.authenticate('local', function (err, user, info) {
+					console.log(req.body);
+					console.log(err);
 					if (err) { return next(err); }
-					return res.redirect('/');
+					req.login(user, function (ignore) {
+						if (err) { return next(err); }
+						return res.redirect('/');
+					});
 				});
-			});
+			} else {
+				res.status(400).end();
+			}
 		});
 		done();
 	});
@@ -66,7 +74,7 @@ describe('Routing', function () {
 				username: 'test',
 				password: 'test'
 			})
-			.expect(302)
+			.expect(400)
 			.end(done);
 	});
 
@@ -103,6 +111,7 @@ describe('Feeds API', function () {
 	});
 
 	it('Search for feed (InvalidFeedUrl)', function (done) {
+		this.timeout(5000);
 		rq
 			.get('/api/0/subscription/search')
 			.query({q: 'https://www.google.com/'})
