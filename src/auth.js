@@ -68,3 +68,6 @@ pp.use(new Strategy({
 		});
 	}
 ));
+
+/** Export as module */
+module.exports = pp;

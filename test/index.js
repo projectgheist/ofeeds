@@ -1,14 +1,32 @@
-/* global describe, before, it */
+/* global describe, it */
 
 /** Includes
  */
 var ap = require('../src/app');
 var cf = require('../config');
 var sr = ap.listen(cf.Port(), cf.IpAddr());
-require('../src/storage');
-require('../src/auth');
+var pp = require('../src/auth');
+var db = require('../src/storage');
 require('../src/routes');
+require('../src/api/subscriptions');
+require('../src/api/streams');
+require('../src/api/posts');
 var rq = require('supertest');
+
+/** Create mock passportjs strategy
+ */
+var Strategy = require('passport-local').Strategy;
+pp.use(
+	new Strategy(
+		function (username, password, done) {
+			return db
+				.findOrCreate(db.User, { openID: 1, provider: 'local', name: 'test' })
+				.then(function (user) {
+					return done(null, user);
+				});
+		}
+	)
+);
 
 /** Make sure that the routing code compiles
  */
@@ -26,34 +44,57 @@ describe('Routing', function () {
 			.expect(200)
 			.end(done);
 	});
-/* @todo
-	it('Route - Login', function (done) {
-		rq([url,'/login'].join(''), function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done()
-			}
-		})
-	})
 
-	it('Route - Logout', function (done) {
-		rq([url,'/logout'].join(''), function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				done()
-			}
-		})
-	})
-*/
+	it('Create mock strategy', function (done) {
+		ap
+			.route('/login')
+			.post(function * (next) {
+				var ctx = this;
+				if (this.request.body) {
+					yield pp.authenticate('local', function * (ignore, user, info) {
+						if (user) {
+							yield ctx.login(user);
+							ctx.session.user = user;
+							ctx.body = { success: true };
+							ctx.status = 200;
+						} else {
+							ctx.body = { success: false };
+							ctx.status = 400;
+						}
+					})
+					.call(this, next);
+				} else {
+					ctx.body = { success: false };
+					ctx.status = 400;
+					yield next;
+				}
+			});
+		done();
+	});
+
+	it('Mock sign in', function (done) {
+		rq
+			.post('/login')
+			.send({
+				// !Required
+				username: 'test',
+				password: 'test'
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Mock sign out', function (done) {
+		rq
+			.get('/logout')
+			.expect(302)
+			.end(done);
+	});
 });
 
 /** Make sure that the routing code compiles
  */
 describe('Feeds API', function () {
-	before(function (done) {
-		require('../src/api/subscriptions');
-		require('../src/api/streams');
-		done();
-	});
-
 	it('Retrieve all feeds', function (done) {
 		rq(sr)
 			.get('/api/0/subscription/list')
@@ -129,11 +170,6 @@ describe('Feeds API', function () {
 /** Make sure that the routing code compiles
  */
 describe('Posts API', function () {
-	before(function (done) {
-		require('../src/api/posts');
-		done();
-	});
-
 	it('Retrieve most recent posts', function (done) {
 		rq(sr)
 			.get('/api/0/posts')
