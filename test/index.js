@@ -40,6 +40,41 @@ describe('Routing', function () {
 			.end(done);
 	});
 
+	it('Route - Login', function (done) {
+		rq
+			.get('/login')
+			.expect(302)
+			.end(done);
+	});
+
+	it('Route - Logout', function (done) {
+		rq
+			.get('/logout')
+			.expect(302)
+			.end(done);
+	});
+
+	it('Route - Post', function (done) {
+		rq
+			.get('/post/test')
+			.expect(200)
+			.end(done);
+	});
+
+	it('Route - View (No parameters)', function (done) {
+		rq
+			.get('/views/')
+			.expect(200)
+			.end(done);
+	});
+
+	it('Route - View (Parameters)', function (done) {
+		rq
+			.get('/views/pages/landing')
+			.expect(200)
+			.end(done);
+	});
+
 	it('Route - Manage', function (done) {
 		rq
 			.get('/manage')
@@ -106,6 +141,13 @@ describe('Feeds API', function () {
 	it('Refresh feed (noQuery)', function (done) {
 		rq
 			.get('/api/0/subscription/refresh')
+			.expect(400)
+			.end(done);
+	});
+
+	it('Quickadd', function (done) {
+		rq
+			.get('/api/0/subscription/quickadd')
 			.expect(400)
 			.end(done);
 	});
