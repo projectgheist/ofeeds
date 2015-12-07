@@ -63,7 +63,7 @@ ap.get('/post/*', function (req, res) {
 
 /** templates route */
 ap.get('/views/*', function (req, res) {
-	if (Object.keys(req.params).length) {
+	if (Object.keys(req.params).length && req.params[0].length) {
 		res.render(req.params[0], {
 			'config': cf.site,
 			'user': req.user

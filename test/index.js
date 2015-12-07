@@ -145,9 +145,9 @@ describe('Feeds API', function () {
 			.end(done);
 	});
 
-	it('Quickadd', function (done) {
+	it('Quickadd feed', function (done) {
 		rq
-			.get('/api/0/subscription/quickadd')
+			.post('/api/0/subscription/quickadd')
 			.expect(400)
 			.end(done);
 	});
