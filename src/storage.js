@@ -182,7 +182,7 @@ exports.getPosts = function (streams, options) {
 		});
 };
 
-//
+// formats posts in a format that can be read by the client
 exports.formatPosts = function (user, posts) {
 	return posts.map(function (post) {
 		var isRead = 0;

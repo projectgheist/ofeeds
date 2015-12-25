@@ -201,9 +201,9 @@
 			}
 		};
 
-		/** retrieve multiple posts
+		/** retrieve singular posts
 		*/
-		$scope.getpost = function(m) {
+		$scope.getpost = function (m) {
 			// make sure that it has a param value
 			if ($scope.params === undefined) {
 				$scope.rf = false;
@@ -218,7 +218,7 @@
 			// reset post data
 			$scope.post = undefined;
 			// execute external calls
-			panelService.getSingle().query($scope.params,function(data) {
+			panelService.getSingle().query($scope.params, function (data) {
 				// turn off refresh
 				$scope.rf = false;
 				// no data retrieved
@@ -329,7 +329,7 @@
 				$scope.params.xt = 'user/-/state/read';
 			}
 			// retrieve from database
-			panelService.getElements().query($scope.params,function(data) {
+			panelService.getElements().query($scope.params, function (data) {
 				// turn off refresh
 				$scope.rf = false;
 				// make sure variables exist
@@ -370,18 +370,22 @@
 						// append end of stream reached
 						$scope.eof = true;
 					}
-					// continue from last column?
-					var lastRow = $scope.groups[$scope.groups.length - 1];
-					for (var k = 0; k < lastRow.length; ++k) { // loop columns
-						prev.colnum += lastRow[k].size;
-					}
-					if (prev.colnum >= 12) {
-						prev.colnum = 0;
-					} else {
-						// set last row as current row
-						$scope.row = lastRow;
-						// remove last row from groups
-						$scope.groups.splice($scope.groups.length - 1, 1);
+					if (!$scope.eof) {
+						// continue from last column?
+						var lastRow = $scope.groups[$scope.groups.length - 1];
+						for (var k = 0; k < lastRow.length; ++k) { // loop columns
+							prev.colnum += lastRow[k].size;
+						}
+						// over column count?
+						if (prev.colnum >= 12) {
+							// start new row
+							prev.colnum = 0;
+						} else {
+							// set last row as current row
+							$scope.row = lastRow;
+							// remove last row from groups
+							$scope.groups.splice($scope.groups.length - 1, 1);
+						}
 					}
 				} else {
 					// copy retrieved articles to stream
@@ -399,7 +403,7 @@
 				$scope.templateID = 'tile';
 				
 				// loop all articles/items
-				for (var i = idx; i < $scope.stream.items.length; ++i) {
+				for (var i = idx; !$scope.eof && i < $scope.stream.items.length; ++i) {
 					// local reference to item
 					var ref = $scope.stream.items[i];
 										
@@ -606,6 +610,7 @@
 			}
 			// last post update time
 			var t = $scope.stream.items[$scope.stream.items.length-1].timestampUsec;
+			// set new fetch time if not the same and retrieve posts
 			if (t !== $scope.params.nt) {
 				// set new fetch time
 				$scope.params.nt = t;

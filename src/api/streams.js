@@ -80,9 +80,9 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 	db
 		.getPosts(streams, {
 			excludeTags: excludeTags,
-			minTime: req.query.ot || 0,
-			maxTime: req.query.nt || Date.now(),
-			sort: [['published', (req.query.r === 'o') ? 1 : -1], ['_id', 1]],
+			minTime: req.query.ot || 0, // old time
+			maxTime: req.query.nt || Date.now(), // new time
+			sort: [['published', (req.query.r === 'o') ? 1 /* Oldest */ : -1 /* Newest */], ['_id', 1]],
 			limit: +req.query.n || 20,
 			populate: ['feed', 'tags']
 		})
