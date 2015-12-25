@@ -1,34 +1,31 @@
 .container-fluid
 	.row
 		.col-md-12.col-lg-6
-			.well
-				.page-header
-					h1 
-						i.fa.fa-thumbs-up.fa-fw
-						| &nbsp;Recommended
-				div(ng-if="!pf")
-					include ../elements/loading
-				ul.list-unstyled(ng-repeat='feed in pf')
-					include ../elements/listfeedlink
+			.page-header
+				h1 
+					i.fa.fa-thumbs-up.fa-fw
+					| &nbsp;Recommended
+			div(ng-if="!pf")
+				include ../elements/loading
+			ul.list-unstyled(ng-repeat='feed in pf')
+				include ../elements/listfeedlink
 		.col-md-12.col-lg-6
-			.well
-				.page-header
-					h1 
-						i.fa.fa-line-chart.fa-fw
-						| &nbsp;Recently added
-				div(ng-if="!rf")
-					include ../elements/loading
-				ul.list-unstyled(ng-repeat='feed in rf')
-					include ../elements/listfeedlink
+			.page-header
+				h1 
+					i.fa.fa-line-chart.fa-fw
+					| &nbsp;Recently added
+			div(ng-if="!rf")
+				include ../elements/loading
+			ul.list-unstyled(ng-repeat='feed in rf')
+				include ../elements/listfeedlink
 	.row
 		.col-xs-12
-			.well
-				.page-header
-					h1
-						i.fa.fa-clock-o.fa-fw
-						| Most recent articles&nbsp;
-				div(ng-if="!rp")
-					include ../elements/loading
-				.row(ng-if="rp")
-					include ../elements/listgroup
-					mixin template('post in rp',"'views/templates/post-compact'")
+			.page-header
+				h1
+					i.fa.fa-clock-o.fa-fw
+					| Most recent articles&nbsp;
+			div(ng-if="!rp")
+				include ../elements/loading
+			.row(ng-if="rp")
+				include ../elements/listgroup
+				mixin template('post in rp',"'views/templates/post-compact'")

@@ -11,6 +11,7 @@ mixin PanelText()
 				| ·&nbsp;
 			| {{post.formatted}}
 
+//- Default post layout
 .panel-post(ng-if="!post.content.videos.length")
 	.panel.panel-default
 		.panel-label
@@ -18,11 +19,22 @@ mixin PanelText()
 				span.label.label-primary(ng-if="!post.read") Unread
 			else
 				span.label.label-primary(ng-if="!post.read") New
+		.panel-heading
+			h4
+				a(href='#')
+					i.fa.fa-tag
+					| &nbsp;{{post.origin.title}}
 		.panel-image
 			img(data-layzr="{{post.content.images.other[0].url}}",holderjs='')
 		mixin PanelText()
+//- Video/multimedia post layout
 .panel-post(ng-if="post.content.videos.length")
 	.panel.panel-default
+		.panel-heading
+			h4
+				a(href='#')
+					i.fa.fa-tag
+					| &nbsp;{{post.origin.title}}
 		.panel-label
 			if user
 				span.label.label-primary(ng-if="!post.read") Unread

@@ -1,9 +1,9 @@
 .row
 	.col-lg-2(ng-if="!stream || stream.showOrigin")
 		.textfit(ng-textfit='false')
-			a(href="{{post.origin.url}}",style="width:100%;height:32px")
+			a(href="{{post.origin.url}}")
 				.label.label-primary {{post.origin.title}}
-	.col-xs-9(ng-class="{'col-lg-7':(!stream || stream.showOrigin)}")
+	.col-xs-9(ng-class="{'col-lg-7':(!stream || stream.showOrigin)}", style="height:32px")
 		.textfit(ng-textfit='false')
 			a(href='/post/{{post.uid}}') {{post.title}}
 	.col-xs-3
