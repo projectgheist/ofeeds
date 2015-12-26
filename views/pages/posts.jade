@@ -36,11 +36,9 @@
 		.row(ng-if='!groups.length', ng-repeat='post in stream.items', ng-include='post.template')
 	.row(ng-if="stream.items.length <= 0")
 		.col-xs-12
-			.well
-				h1 Feed/stream doesn't contain any articles!
+			h1 Feed/stream doesn't contain any articles!
 	.row
 		.col-xs-12
-			.well(ng-if="eof")
-				h1 End of feed/stream reached!
-			.well(ng-if="!eof")
+			h1(ng-if="eof") End of feed/stream reached!
+			div(ng-if="!eof")
 				include ../elements/loading

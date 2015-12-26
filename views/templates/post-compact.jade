@@ -3,10 +3,10 @@
 		.textfit(ng-textfit='false')
 			a(href="{{post.origin.url}}")
 				.label.label-primary {{post.origin.title}}
-	.col-xs-9(ng-class="{'col-lg-7':(!stream || stream.showOrigin)}", style="height:32px")
+	.col-xs-11(ng-class="{'col-lg-7':(!stream || stream.showOrigin)}", style="height:32px")
 		.textfit(ng-textfit='false')
 			a(href='/post/{{post.uid}}') {{post.title}}
-	.col-xs-3
+	.col-xs-1
 		p.text-right {{post.formatted}}
 .row(ng-hide="$last")
 	hr

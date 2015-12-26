@@ -1,13 +1,15 @@
 .navbar.navbar-default.navbar-static-top
 	.container-fluid
 		.navbar-header
-			form.navbar-form
-				.form-group
-					input.form-control.typeahead#nrss(type="text",placeholder="Fetch a feed")
-			ul.nav.navbar-nav.navbar-left
+			ul.nav.navbar-nav
 				li
 					a(href="#", ng-click='nt()')
 						i.fa.fa-align-justify.fa-fw
+			a.navbar-brand(href='#') OFeeds
+		.navbar-collapse.collapse
+			form.navbar-form.navbar-left
+				.form-group
+					input.form-control.typeahead#nrss(type="text", placeholder="Fetch a feed")
 			ul.nav.navbar-right
 				li.dropdown
 					a.text-right.dropdown-toggle(href="#",role="button",data-toggle="dropdown")

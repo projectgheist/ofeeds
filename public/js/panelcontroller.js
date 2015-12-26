@@ -281,7 +281,7 @@
 			// has valid column to add?
 			if ($scope.column.items.length) {
 				// convert size to column class
-				$scope.column.class = ['col-xs-', $scope.column.size].join('');
+				$scope.column.class = ['col-lg-', $scope.column.size].join('');
 				// add to column to row
 				$scope.row.push($scope.column);
 				// reset column

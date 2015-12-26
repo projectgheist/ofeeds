@@ -22,7 +22,7 @@
 #menu {
 	height: 100%;
 	position: fixed;
-	top: 0;
+	top: 60px;
 	left: 0;
 }
 
@@ -361,10 +361,6 @@ hbinclude .bs-callout {
 
 /** Mobile changes to bootstrap
 */
-.navbar-header {
-	width: 100%;
-}
-
 .navbar-nav {
 	display: inline-block;
 	margin: 0;
@@ -388,13 +384,11 @@ hbinclude .bs-callout {
 	}
 }
 
-.navbar-header > form.navbar-form {
-	display: block;
-	width: 95%;
-	padding: 0 60px;
-	position: absolute;
-	top: 0;
-	left: 15px;
+form.navbar-form {
+	max-width: 720px;
+	width: 100%;
+	margin-left: 48px;
+    margin-right: 36px;
 }
 
 .navbar-header > .navbar-right {

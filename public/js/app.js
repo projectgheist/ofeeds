@@ -54,11 +54,17 @@
 		$('#menu').matchHeight({
 			target: $(window)
 		});
+		
+		// set the internal height of the sidebar
 		$.fn.matchHeight._afterUpdate = function(event, groups) {
-			var c = $('#menu').height(),
-				a = $('#sidebar-header').height() + 10,
+			// Reduce height by navbar height
+			var h = $('#menu').height() - 60;
+			$('#menu').height(h);
+			
+			// 
+			var a = $('#sidebar-header').height() + 10,
 				b = $('#sidebar-footer').height() + 10;
-			$('#sidebar-body').height(c - (a + b));
+			$('#sidebar-body').height(h - (a + b));
 		};
 	});
 
