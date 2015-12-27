@@ -99,7 +99,7 @@
 				if ($scope.stream.items[idx].uid === e) break;
 			}
 			if (idx > -1) {			
-			// notify modal to show
+				// notify modal to show
 				$rootScope.$broadcast('showModal', {idx: idx});
 			}
 		};
@@ -135,7 +135,7 @@
 		};
 		
 		// refresh the current subscription
-		$scope.rfrsh = function() {
+		$scope.rfrsh = function () {
 			// make sure that it has a param value
 			if ($scope.params === undefined) {
 				$scope.rf = false;
@@ -146,7 +146,7 @@
 				$scope.rf = true;
 			}
 			RefreshFeed.query({ 'q': $scope.params.value },
-				function(data) {
+				function (data) {
 					// clear array of posts
 					$scope.stream.items = [];
 					// reset times on params
@@ -156,32 +156,32 @@
 					// get new latest items
 					$scope.getPosts({
 						t:'success',
-						m:['<strong>Successfully</strong> refreshed feed (',$scope.stream.title,')'].join(' ')
+						m:['<strong>Successfully</strong> refreshed feed (', $scope.stream.title, ')'].join(' ')
 					});
 				},
-				function(err) {
+				function (err) {
 					// show error message
-					$scope.showAlert('danger',['An <strong>error</strong> occured when trying to refresh feed (',$scope.stream.title,')'].join(' '));
+					$scope.showAlert('danger',['An <strong>error</strong> occured when trying to refresh feed (', $scope.stream.title, ')'].join(' '));
 					// turn off spinner
 					scope.rf = false;
 			});
 		};
 		
-		$scope.delt = function() {
+		$scope.delt = function () {
 			
 		};
 		
-		$scope.sbmt = function() {
+		$scope.sbmt = function () {
 			// submit new feed URL to server
 			FeedSubmit.save({q: $scope.stream.feedURL},function(data) {
 				// show message
-				$scope.showAlert('success',['<strong>Successfully</strong> subscribed to feed (',$scope.stream.title,')'].join(' '));
+				$scope.showAlert('success',['<strong>Successfully</strong> subscribed to feed (', $scope.stream.title, ')'].join(' '));
 				// set stream as subscribed
 				$scope.stream.subscribed = true;
 				// notify sidebar to update
 				$rootScope.$broadcast('updateSubs');
-			}, function(err) {
-				$scope.showAlert('danger',['An <strong>error</strong> occured when trying to subscribe to',$scope.stream.title].join(' '));
+			}, function (err) {
+				$scope.showAlert('danger',['An <strong>error</strong> occured when trying to subscribe to', $scope.stream.title].join(' '));
 			});
 		};
 		
@@ -336,10 +336,11 @@
 				if (!data) {
 					return;
 				}
-				// make sure it has a title
+				
+				// clear the title from the search box
 				if (data.title && data.title.length > 0) {
-					// defocus search box and set value
-					$('.typeahead').blur().val(data.title);
+					// defocus search box and reset value
+					$('.typeahead').blur().val('');
 				}
 				
 				// reset end of file reached
@@ -455,7 +456,7 @@
 									ref.content.videos[j] = ['https://www.youtube.com/embed/',e[1]].join('');
 									// add video as thumbnail
 									ref.content.images.other.splice(0, 0, {
-										url: ['http://img.youtube.com/vi/', e[1], '/maxresdefault.jpg'].join('')
+										url: ['http://img.youtube.com/vi/', e[1], '/hqdefault.jpg'].join('')
 									});
 								}
 							}
@@ -782,7 +783,7 @@
 				
 		if (!$('.typeahead').parent().hasClass('twitter-typeahead')) {
 			var sb = new Bloodhound({
-				datumTokenizer: function(d) {
+				datumTokenizer: function (d) {
 					return Bloodhound.tokenizers.whitespace(d.title); 
 				},
 				queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -795,7 +796,7 @@
 						}
 						return q;
 					},
-					filter: function(a) {
+					filter: function (a) {
 						var ta = [],
 							m;
 						// loop through retrieved info
@@ -810,7 +811,8 @@
 								}
 								$scope.showAlert(a[i].alert, m);
 							}
-							// update sidebar?
+							// notify sidebar to update
+							$rootScope.$broadcast('updateSubs');
 						}
 						return ta; 
 					}
@@ -830,11 +832,11 @@
 					suggestion: Handlebars.compile('<p><i class="fa fa-bookmark-o fa-fw"></i>&nbsp;<strong>{{title}}</strong><br>{{description}}</p>')
 				}
 			})
-			.on('typeahead:asyncrequest', function() {
+			.on('typeahead:asyncrequest', function () {
 			})
-			.on('typeahead:asynccancel typeahead:asyncreceive', function(a) {
+			.on('typeahead:asynccancel typeahead:asyncreceive', function (a) {
 			})
-			.on('typeahead:selected', function(obj, datum) { // when option is selected from dropdown
+			.on('typeahead:selected', function (obj, datum) { // when option is selected from dropdown
 				// change the page
 				$scope.gotostream(datum);
 				// lose focus

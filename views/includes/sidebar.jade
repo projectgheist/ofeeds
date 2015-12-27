@@ -1,9 +1,4 @@
 .col-md-3#menu(ng-controller="navController")
-	ul#sidebar-header
-		li.withripple(ng-class="isActive('/') ? 'active' : ''",data-target="/")
-			a(href="/")
-				i.fa.fa-home.fa-fw(style="width:32px;margin-right:15px")
-				| Home
 	#sidebar-body(style="overflow:scroll;overflow-x:hidden;overflow-y:auto")
 		div(ng-if="!subs")
 			include ../elements/loading

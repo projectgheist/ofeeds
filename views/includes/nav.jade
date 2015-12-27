@@ -6,6 +6,9 @@
 					a(href="#", ng-click='nt()')
 						i.fa.fa-align-justify.fa-fw
 			a.navbar-brand(href='#') OFeeds
+			span(ng-if='stream.items.length')
+				i.fa.fa-angle-right.navbar-brand
+				a.navbar-brand(href='#') {{stream.title}}
 		.navbar-collapse.collapse
 			form.navbar-form.navbar-left
 				.form-group
