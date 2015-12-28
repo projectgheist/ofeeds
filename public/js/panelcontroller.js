@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	'use strict';
 
 	angular
@@ -51,13 +51,13 @@
 		 @param t: type of alert (eg. warning, danger)
 		 @param m: message to relay
 		*/
-		$scope.showAlert = function(t,m) {
+		$scope.showAlert = function (t,m) {
 			$rootScope.$apply(function () {
 				$scope.alertType = ['alert-',t].join('');
 				$scope.alertMessage = $sce.trustAsHtml(m);
 				var a = $("#alert");
 				a.removeClass('hidden');
-				a.fadeTo(5000, 500).slideUp(500, function() {
+				a.fadeTo(5000, 500).slideUp(500, function () {
 					a.alert('close');
 				});
 			});
@@ -65,35 +65,35 @@
 		
 		/** function isAlertVisible
 		*/
-		$scope.isAlertVisible = function() {
+		$scope.isAlertVisible = function () {
 			return $('#alert').is(':visible');
 		};
 		
 		/** function navToggle
 		 * toggle the slideout of the nav sidebar
 		 */
-		$scope.nt = function() {
+		$scope.nt = function () {
 			$('#menu').toggle();
 		};
 		
 		// is slideout open
-		$scope.isNavVisible = function() {
+		$scope.isNavVisible = function () {
 			return $('#menu').is(':visible');
 		};
 		
 		// go to a subscription
-		$scope.gotostream = function(obj) {
+		$scope.gotostream = function (obj) {
 			var url = ['/feed/',obj.value].join('');
 			if ($location.path() !== url) {
 				// go to subscription local url
-				$rootScope.$apply(function() {
+				$rootScope.$apply(function () {
 					$location.path(url);
 				});
 			}
 		};
 		
 		//
-		$scope.showModal = function(e) {
+		$scope.showModal = function (e) {
 			var idx = -1;
 			for (idx in $scope.stream.items) {
 				if ($scope.stream.items[idx].uid === e) break;
@@ -105,29 +105,29 @@
 		};
 		
 		// if scrolling is allowed
-		$scope.canScroll = function() {
+		$scope.canScroll = function () {
 			return $(document).scrollTop() > 10;
 		};
 		
 		// search for a subscription
 		/*
-		$scope.gotoFeed = function(r) {
+		$scope.gotoFeed = function (r) {
 			$http.get('/api/0/subscription/search',{ params:{ q: r } })
-			.success(function(data, status, headers, config) {
+			.success(function (data, status, headers, config) {
 				$scope.gotostream(data[0],false);
 			})
-			.error(function(data, status, headers, config) {
+			.error(function (data, status, headers, config) {
 			});
 		};
 		*/
 		
 		// scroll back to top
-		$scope.gotoTop = function() {
+		$scope.gotoTop = function () {
 		   $scope.scrollto('mah', 0);
 		};
 		
 		// scroll to a specific post
-		$scope.scrollto = function(id, po) {
+		$scope.scrollto = function (id, po) {
 			// clear scroll to array
 			$.scrollTo.window().queue([]).stop();
 			// scroll to next element
@@ -173,7 +173,7 @@
 		
 		$scope.sbmt = function () {
 			// submit new feed URL to server
-			FeedSubmit.save({q: $scope.stream.feedURL},function(data) {
+			FeedSubmit.save({q: $scope.stream.feedURL},function (data) {
 				// show message
 				$scope.showAlert('success',['<strong>Successfully</strong> subscribed to feed (', $scope.stream.title, ')'].join(' '));
 				// set stream as subscribed
@@ -312,7 +312,7 @@
 		
 		/** retrieve multiple posts
 		*/
-		$scope.getPosts = function(m) {
+		$scope.getPosts = function (m) {
 			// make sure that it has a param value
 			if ($scope.params === undefined) {
 				$scope.rf = false;
@@ -578,14 +578,14 @@
 				if (m) {
 					$scope.showAlert(m.t, m.m); // show message
 				}
-			}, function(err) {
+			}, function (err) {
 				$scope.rf = false;
 			});
 		};
 		
 		/** selects a different page layout
 		*/
-		$scope.updateStyle = function(n) {
+		$scope.updateStyle = function (n) {
 			// if the same template id is set
 			if ($scope.templateID === n) {
 				return;
@@ -603,7 +603,7 @@
 		
 		/** retrieve more posts
 		*/
-		$scope.loadMore = function() {
+		$scope.loadMore = function () {
 			// make sure that articles exist
 			if (!$scope.stream || !$scope.stream.items || $scope.stream.items.length <= 0 ||
 				$route.current.params.value !== $routeParams.value) {
@@ -622,7 +622,7 @@
 		
 		/** scroll to the next article in the stream
 		*/
-		$scope.next = function() {
+		$scope.next = function () {
 			if (!$scope.cp && $scope.stream !== undefined && $scope.stream.items.length > 0) {
 				$scope.expand($scope.stream.items[0]);
 			} else if ($scope.cp) {
@@ -637,7 +637,7 @@
 		
 		/** scroll to the previous article in the stream
 		*/
-		$scope.prev = function() {
+		$scope.prev = function () {
 			if (!$scope.cp && $scope.stream !== undefined && $scope.stream.items.length > 0) {
 				$scope.expand($scope.stream.items[0]);
 			} else if ($scope.cp) {
@@ -650,7 +650,7 @@
 		
 		/** Flag article as read/unread
 		*/
-		$scope.toggleRead = function(p) {
+		$scope.toggleRead = function (p) {
 			if (!p || p === undefined) {
 				return;
 			}
@@ -663,7 +663,7 @@
 		
 		/** Ignore read/unread flag when loading stream
 		*/
-		$scope.toggleIgnoreReadArticles = function() {
+		$scope.toggleIgnoreReadArticles = function () {
 			if ($scope.ignoreReadArticles) {
 				$scope.ignoreReadArticles = !$scope.ignoreReadArticles;
 			} else {
@@ -675,37 +675,37 @@
 		
 		/** Flag article as read
 		*/
-		$scope.markAsRead = function(p) {
+		$scope.markAsRead = function (p) {
 			if (!$('#m').length || (!p || p === undefined)) {
 				return;
 			}
-			SetTag.query({i:p.lid,a:'user/-/state/read'}, function(d) {
+			SetTag.query({i:p.lid,a:'user/-/state/read'}, function (d) {
 				// mark post as read
 				p.read = true;
 				// notify sidebar to update
 				$rootScope.$broadcast('updateSubs');
-			}, function(e) {
+			}, function (e) {
 			});
 		};
 		
 		/** Flag article as unread
 		*/
-		$scope.markAsUnread = function(p) {
+		$scope.markAsUnread = function (p) {
 			if (!$('#m').length || (!p || p === undefined)) {
 				return;
 			}
-			SetTag.query({i:p.lid,r:'user/-/state/read'}, function(d) {
+			SetTag.query({i:p.lid,r:'user/-/state/read'}, function (d) {
 				// mark post as unread
 				p.read = false;
 				// notify sidebar to update
 				$rootScope.$broadcast('updateSubs');
-			}, function(e) {
+			}, function (e) {
 			});
 		};
 		
 		/** Check if article is read
 		*/
-		$scope.isRead = function(p) {
+		$scope.isRead = function (p) {
 			if (!$('#m').length) {
 				return false;
 			}
@@ -714,18 +714,18 @@
 		
 		/** Flagged if something is loading
 		*/
-		$scope.isSpinning = function() {
+		$scope.isSpinning = function () {
 			return $scope.rf;
 		};
 		
 		/** Expand the current selected post
 		*/
-		$scope.expand = function(p) {
+		$scope.expand = function (p) {
 			// if template style doesn't have an expanded version, skip
 			if ($scope.templates[$scope.templateID].length <= 1) {
 				return;
 			}
-			$timeout(function() {
+			$timeout(function () {
 				// change the template of the post to the expanded version
 				p.template = $scope.templates[$scope.templateID][1];
 				// store post as the current post
@@ -737,7 +737,7 @@
 		
 		/** Toggle between expanding the current post and minimizing it
 		*/
-		$scope.toggle = function(p) {
+		$scope.toggle = function (p) {
 			// if template style doesn't have an expanded version, skip
 			if (!$scope.templates || !$scope.templates[$scope.templateID] || $scope.templates[$scope.templateID].length <= 1) {
 				return;
@@ -759,7 +759,7 @@
 		};
 		
 		/*// re-activate affix
-		$scope.setaffix = function() {
+		$scope.setaffix = function () {
 			$(window).off('.affix');
 			$('#ma').width($('body').width())
 		};
@@ -773,9 +773,9 @@
 			}
 		);
 		
-		$scope.$on('onRepeatLast', function(scope, element, attrs) {
+		$scope.$on('onRepeatLast', function (scope, element, attrs) {
 			// make all links open in a new tab
-			$(".article-content a").each(function() {
+			$(".article-content a").each(function () {
 				$(this).attr("target","_blank");
 			});
 			$scope.setaffix();
@@ -848,7 +848,7 @@
 		$('.typeahead').focus();
 		
 		// on URL change
-		$scope.$on('$routeChangeSuccess', function() {
+		$scope.$on('$routeChangeSuccess', function () {
 			// pre url change else post
 			if (Object.keys($routeParams).length <= 0) {
 				// reset the stream
@@ -880,26 +880,26 @@
 		// single keys
 		/** Move to article below (previous) in stream
 		 */
-		Mousetrap.bind('j', function() {
+		Mousetrap.bind('j', function () {
 			$scope.next();
 		});
 
 		/** Move to article above (next) in stream
 		 */
-		Mousetrap.bind('k', function() { 
+		Mousetrap.bind('k', function () { 
 			$scope.prev();
 		});
 
 		/** Open article in new tab/window from stream
 		 */
-		Mousetrap.bind('v', function() {
+		Mousetrap.bind('v', function () {
 			window.open($scope.cp.alternate.href, '_blank');
 			window.focus();
 		});
 
 		/** Toggle article read state
 		 */
-		Mousetrap.bind('m', function() {
+		Mousetrap.bind('m', function () {
 			$scope.toggleRead(s.cp);
 		});
 	}
