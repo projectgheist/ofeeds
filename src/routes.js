@@ -32,7 +32,7 @@ ap.get('/login', function (req, res) {
 });
 
 /** logout route */
-ap.get('/logout', ensureAuth, function (req, res) {
+ap.get('/logout', function (req, res) {
 	req.logout();
 	res.redirect('/');
 });

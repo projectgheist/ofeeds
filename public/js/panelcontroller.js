@@ -706,10 +706,7 @@
 		/** Check if article is read
 		*/
 		$scope.isRead = function (p) {
-			if (!$('#m').length) {
-				return false;
-			}
-			return (p.read > 0) ? true : false;
+			return $('#m').length && (p.read > 0);
 		};
 		
 		/** Flagged if something is loading
