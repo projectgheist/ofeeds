@@ -16,6 +16,7 @@
     "moment": "^2.10.6",
     "mongoomise": "0.0.8",
     "mongoose": "^4.2.4",
+    "opml-generator": "^1.1.1",
     "passport": "^0.3.0",
     "passport-google-oauth": "^0.2.0",
     "request": "^2.65.0",

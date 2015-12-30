@@ -81,6 +81,13 @@ describe('Routing', function () {
 			.expect(200)
 			.end(done);
 	});
+	
+	it('Retrieve OPML', function (done) {
+		rq
+			.get('/api/0/opml')
+			.expect(401)
+			.end(done);
+	});
 
 	it('Create mock strategy', function (done) {
 		ap.post('/login', function (req, res, next) {
