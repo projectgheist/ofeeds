@@ -9,12 +9,22 @@ var Strategy = require('passport-google-oauth').OAuth2Strategy;
 
 /** Load configurations
  */
+
+/** Sessions */
 ap.use(require('express-session')({
 	secret: 'ofeeds_secret_key',
 	resave: false,
     saveUninitialized: false
 }));
 
+/** Enable body parsing */
+var bp = require('body-parser');
+ap.use(bp.urlencoded({
+	extended: false
+}));
+ap.use(bp.json());
+
+/** Setup of Passport.js */
 ap.use(pp.initialize());
 ap.use(pp.session());
 
@@ -45,12 +55,15 @@ pp.deserializeUser(function (obj, done) {
 	done(null, obj);
 });
 
-pp.use(new Strategy({
+pp.use(
+	'google',
+	new Strategy({
 		clientID: process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID',
 		clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET',
 		callbackURL: cf.Url() + '/auth/google/callback'
 	},
 	function (token, tokenSecret, profile, done) {
+		console.log('google called');
 		// asynchronous verification, for effect...
 		process.nextTick(function () {
 			return db.findOrCreate(db.User, {openID: profile.id})

@@ -4,14 +4,15 @@
  */
 var ap = require('../src/app');
 var cf = require('../config');
-var sr = ap.listen(cf.Port(), cf.IpAddr());
 var pp = require('../src/auth');
+var sr = ap.listen(cf.Port(), cf.IpAddr());
 var db = require('../src/storage');
 var ut = require('../src/utils');
 require('../src/routes');
 require('../src/api/subscriptions');
 require('../src/api/streams');
 require('../src/api/posts');
+require('../src/api/opml');
 var rq = require('supertest').agent(sr);
 
 /** Create mock passportjs strategy
@@ -22,7 +23,7 @@ pp.use(
 	new Strategy(
 		function (username, password, done) {
 			return db
-				.findOrCreate(db.User, { openID: 1, provider: 'local', name: 'test' })
+				.findOrCreate(db.User, { openID: 1, provider: 'local', name: username })
 				.then(function (user) {
 					return done(null, user);
 				});
@@ -78,10 +79,10 @@ describe('Routing', function () {
 	it('Route - Manage', function (done) {
 		rq
 			.get('/manage')
-			.expect(200)
+			.expect(302)
 			.end(done);
 	});
-	
+
 	it('Retrieve OPML', function (done) {
 		rq
 			.get('/api/0/opml')
@@ -91,16 +92,14 @@ describe('Routing', function () {
 
 	it('Create mock strategy', function (done) {
 		ap.post('/login', function (req, res, next) {
-			if (!ut.isEmpty(req.query)) {
+			if (!ut.isEmpty(req.body)) {
 				pp.authenticate('local', function (err, user, info) {
-					console.log(req.body);
-					console.log(err);
 					if (err) { return next(err); }
 					req.login(user, function (ignore) {
 						if (err) { return next(err); }
-						return res.redirect('/');
+						res.status(200).end();
 					});
-				});
+				})(req, res); // !Required
 			} else {
 				res.status(400).end();
 			}
@@ -116,7 +115,7 @@ describe('Routing', function () {
 				username: 'test',
 				password: 'test'
 			})
-			.expect(400)
+			.expect(200)
 			.end(done);
 	});
 

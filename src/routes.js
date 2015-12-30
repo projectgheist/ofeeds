@@ -38,7 +38,7 @@ ap.get('/logout', function (req, res) {
 });
 
 /** manage route */
-ap.get('/manage', function (req, res) {
+ap.get('/manage', ensureAuth, function (req, res) {
 	res.render('pages/landing', {
 		'config': cf.site,
 		'user': req.user
