@@ -167,6 +167,7 @@ ap.get('/api/0/subscription/list', function (req, res) {
 		return db
 			.getTags(ut.parseTags('user/-/state/reading-list', req.user))
 			.then(function (tagsArray) {
+				// valid tag found?
 				if (tagsArray.length) {
 					// find all feeds that contain 'reading-list' tag & sort by alphabetical title
 					return rs.all([
@@ -177,6 +178,8 @@ ap.get('/api/0/subscription/list', function (req, res) {
 				return [];
 			})
 			.then(function (results) {
+				// no feeds to process, next
+				if (!results.length) return [];
 				// create array
 				var a = results[0].map(function (f) {
 					// find posts in feed WHERE 'read'-tag 'not in' array

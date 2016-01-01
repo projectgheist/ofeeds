@@ -254,6 +254,13 @@ describe('Routing (Authenticated)', function () {
 			.end(done);
 	});
 
+	it('All feeds (Return content)', function (done) {
+		rq
+			.get('/api/0/subscription/list')
+			.expect(200)
+			.end(done);
+	});
+
 	it('Retrieve OPML (Return content)', function (done) {
 		rq
 			.get('/api/0/opml')
