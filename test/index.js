@@ -134,14 +134,14 @@ describe('Feeds API', function () {
 			});
 	});
 
-	it('Route - Feed', function (done) {
+	it('Route feed', function (done) {
 		rq
 			.get('/feed/' + encodeURIComponent('http://www.polygon.com/rss/index.xml'))
 			.expect(200)
 			.end(done);
 	});
 
-	it('Load feed stream', function (done) {
+	it('Fetch stream', function (done) {
 		rq
 			.get('/api/0/stream/contents')
 			.query({
@@ -156,17 +156,44 @@ describe('Feeds API', function () {
 /** Make sure that the routing code compiles
  */
 describe('Posts API', function () {
+	var posts = [];
+
 	it('Retrieve most recent posts', function (done) {
 		rq
 			.get('/api/0/posts')
 			.expect(200)
-			.end(done);
+			.end(function (ignore, res) {
+				if (res.body.length) {
+					posts = res.body;
+					done();
+				}
+			});
 	});
 
 	it('Retrieve post BY id (No params)', function (done) {
 		rq
 			.get('/api/0/post')
 			.expect(400)
+			.end(done);
+	});
+
+	it('Retrieve post BY id (Invalid params)', function (done) {
+		rq
+			.get('/api/0/post')
+			.query({
+				value: 'invalid'
+			})
+			.expect(400)
+			.end(done);
+	});
+
+	it('Retrieve post BY id (Valid params)', function (done) {
+		rq
+			.get('/api/0/post')
+			.query({
+				value: posts[0].uid
+			})
+			.expect(200)
 			.end(done);
 	});
 });
@@ -246,6 +273,20 @@ describe('Routing (Authenticated)', function () {
 			})
 			.expect(200)
 			.end(done);
+	});
+
+	it('Quickadd feed (Invalid params)', function (done) {
+		rq
+			.post('/api/0/subscription/quickadd')
+			.send({
+				q: encodeURIComponent('http://feeds.gawker.com/lifehacker/full')
+			})
+			.expect(200)
+			.end(function (ignore, res) {
+				if (!res.body.numResults) {
+					done();
+				}
+			});
 	});
 
 	it('Quickadd feed (Valid params)', function (done) {

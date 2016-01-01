@@ -52,10 +52,6 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 		return res.status(400).send('InvalidStream');
 	}
 
-	// auth is not required for public streams (e.g. feeds)
-	/* if (hasTagStreams(streams) && !utils.checkAuth(req, res))
-	    return;
-	*/
 	if (req.query.n && !/^[0-9]+$/.test(req.query.n)) {
 		return res.status(400).send('InvalidCount');
 	}

@@ -290,10 +290,11 @@ ap.post('/api/0/subscription/quickadd', function (req, res) {
 		actions
 			.subscribe(req, req.body.q)
 			.then(function (feed) {
+				var isValid = !ut.isEmpty(feed);
 				res.json({
 					query: decodeURIComponent(req.body.q),
-					numResults: feed ? 1 : 0,
-					streamId: feed ? feed.stringID : ''
+					numResults: isValid ? 1 : 0,
+					streamId: isValid ? feed.stringID : ''
 				});
 			});
 	}

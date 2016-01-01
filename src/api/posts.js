@@ -35,8 +35,12 @@ ap.get('/api/0/post*', function (req, res) {
 			})
 			.populate('feed') // replacing the specified paths in the document with document(s) from other collection(s)
 			.then(function (post) {
-				var fp = db.formatPosts({}, post);// formatted posts
-				return res.status(200).json(fp.length && ut.isArray(fp) ? fp[0] : {});
+				if (post.length) {
+					var fp = db.formatPosts({}, post);// formatted posts
+					return res.status(200).json(fp.length && ut.isArray(fp) ? fp[0] : {});
+				} else {
+					return res.status(400).end();
+				}
 			});
 	}
 });
