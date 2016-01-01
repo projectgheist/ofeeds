@@ -18,7 +18,7 @@ var actions = {
 			.find({ $or: [{ title: { $regex: new RegExp('.*' + actualURL + '.*', 'i') } }, { feedURL: { $regex: url } }] })
 			.limit(6)
 			.then(function (results) {
-				// feeds found that match the search expression
+				// feeds found that match the search expression (used by typeahead)
 				if (results.length > 0) {
 					return results;
 				}

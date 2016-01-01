@@ -112,19 +112,45 @@ describe('Feeds API', function () {
 	});
 
 	it('Search feed (Invalid params)', function (done) {
-		this.timeout(5000);
 		rq
 			.get('/api/0/subscription/search')
-			.query({q: 'https://www.google.com/'})
+			.query({
+				q: encodeURIComponent('google')
+			})
 			.expect(200)
 			.end(done);
 	});
 
-	it('Search feed (Valid params)', function (done) {
+	it('Search feed (Invalid params)', function (done) {
+		this.timeout(5000);
+		rq
+			.get('/api/0/subscription/search')
+			.query({
+				q: encodeURIComponent('http://www.google.com/')
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Search feed BY url (Valid params)', function (done) {
 		rq
 			.get('/api/0/subscription/search')
 			.query({
 				q: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+			})
+			.expect(200)
+			.end(function (ignore, res) {
+				if (res.body.length) {
+					done();
+				}
+			});
+	});
+
+	it('Search feed BY title (Valid params)', function (done) {
+		rq
+			.get('/api/0/subscription/search')
+			.query({
+				q: encodeURIComponent('polygon')
 			})
 			.expect(200)
 			.end(function (ignore, res) {
