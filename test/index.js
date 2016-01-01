@@ -219,12 +219,33 @@ describe('Routing (Authenticated)', function () {
 			.end(done);
 	});
 
+	it('All feeds (No content)', function (done) {
+		rq
+			.post('/api/0/subscription/list')
+			.expect(400)
+			.end(done);
+	});
+
+	it('Retrieve OPML (No content)', function (done) {
+		rq
+			.get('/api/0/opml')
+			.expect(204)
+			.end(done);
+	});
+
 	it('Quickadd feed (Valid params)', function (done) {
 		rq
 			.post('/api/0/subscription/quickadd')
 			.send({
 				q: encodeURIComponent('http://feeds.gawker.com/lifehacker/full')
 			})
+			.expect(200)
+			.end(done);
+	});
+	
+	it('Retrieve OPML (Return content)', function (done) {
+		rq
+			.get('/api/0/opml')
 			.expect(200)
 			.end(done);
 	});
