@@ -35,7 +35,7 @@ var Feed = mg.Schema({
 });
 
 Feed.virtual('stringID').get(function () {
-	return 'feed/' + this.feedURL;
+	return ['feed', this.feedURL].join('/');
 });
 
 // Gets the tags for a user, assuming they have already been populated

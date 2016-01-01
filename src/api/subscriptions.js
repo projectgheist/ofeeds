@@ -45,46 +45,35 @@ var actions = {
 			});
 	},
 	/** function refresh
-	 * @param url: un-encoded
+	 * @param url: encoded
 	 */
 	refresh: function (ctx, url) {
 		// Find feed for this URL in the database
 		return db.Feed
-			.findOne({ feedURL: url })
+			.find({ feedURL: url })
 			.then(function (feed) {
-				return (feed ? cr.FetchFeed(feed) : false);
+				return feed.length ? cr.FetchFeed(ut.arrayToObject(feed)) : false;
 			});
 	},
 	/** function subscribe
-	 * @param url: un-encoded
+	 * @param url: encoded
 	 */
 	subscribe: function (ctx, url) {
 		// Find or create feed for this URL in the database
-		var feed = db.findOrCreate(db.Feed, { feedURL: url });
+		var feed = db.Feed.find({ feedURL: url });
 		// Find or create a tag to add this feed to the users reading-list
 		var tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/reading-list', ctx.user)[0]);
 		// wait for all results to return before continuing
 		return rs
 			.all([feed, tag])
 			.then(function (results) {
-				// local ref to feed
-				var f = results[0];
-				// if this feed doesn't have any subscribers, fetch the feed
-				if (f.numSubscribers === 0) {
-					return cr.FetchFeed(f)
-						.then(function (n) {
-							return [n, results[1]];
-						});
-				}
-				return results;
-			})
-			.then(function (results) {
-				if (results.length <= 0) {
+				// local ref to feed and tag variable
+				var f = ut.arrayToObject(results[0]);
+				var t = results[1];
+				// Invalid feed or tag
+				if (!f || !t) {
 					return {};
 				}
-				// local ref to feed and tag variable
-				var f = results[0];
-				var t = results[1];
 				// Subscribe to the feed if the tag was not found
 				if (!~f.tags.indexOf(t.id)) {
 					// add tag to feed's tag list
@@ -175,7 +164,8 @@ ap.get('/api/0/subscription/list', function (req, res) {
 	} else {
 		// get tags
 		var tags = ut.parseTags(['user/-/state/reading-list', 'user/-/state/read'], req.user);
-		var tuc = 0; // total post unread count
+		// total post unread count
+		var tuc = 0;
 		return db
 			.getTags(tags[0])
 			.then(function (rl) {
@@ -235,7 +225,7 @@ ap.get('/api/0/subscription/list', function (req, res) {
 
 // search for feeds and preview them before adding them to their account
 ap.get('/api/0/subscription/search', function (req, res) {
-	if (req.query.q === undefined) {
+	if (!req.query.q) {
 		res.status(400).end();
 	} else {
 		// create or find URL in db

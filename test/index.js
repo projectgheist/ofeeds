@@ -111,7 +111,7 @@ describe('Feeds API', function () {
 			.end(done);
 	});
 
-	it('Search for feed (InvalidFeedUrl)', function (done) {
+	it('Search feed (Invalid params)', function (done) {
 		this.timeout(5000);
 		rq
 			.get('/api/0/subscription/search')
@@ -120,17 +120,19 @@ describe('Feeds API', function () {
 			.end(done);
 	});
 
-	it('Search for feed (ValidFeedUrl)', function (done) {
+	it('Search feed (Valid params)', function (done) {
 		rq
 			.get('/api/0/subscription/search')
-			.query({q: 'http://www.polygon.com/rss/index.xml'})
+			.query({
+				q: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+			})
 			.expect(200)
 			.end(done);
 	});
 
 	it('Route - Feed', function (done) {
 		rq
-			.get('/feed/http%253A%252F%252Fwww.polygon.com%252Frss%252Findex.xml')
+			.get('/feed/' + encodeURIComponent('http://www.polygon.com/rss/index.xml'))
 			.expect(200)
 			.end(done);
 	});
@@ -140,7 +142,7 @@ describe('Feeds API', function () {
 			.get('/api/0/stream/contents')
 			.query({
 				type: 'feed',
-				value: 'http%253A%252F%252Fwww.polygon.com%252Frss%252Findex.xml'
+				value: encodeURIComponent('http://www.polygon.com/rss/index.xml')
 			})
 			.expect(200)
 			.end(done);
@@ -203,12 +205,12 @@ describe('Routing (Authenticated)', function () {
 			.end(done);
 	});
 
-	it('All feeds (No content)', function (done) {
+	/* it('All feeds (No content)', function (done) {
 		rq
 			.get('/api/0/subscription/list')
 			.expect(200)
 			.end(done);
-	});
+	}); */
 
 	it('Retrieve OPML (No content)', function (done) {
 		rq
@@ -248,7 +250,7 @@ describe('Routing (Authenticated)', function () {
 		rq
 			.post('/api/0/subscription/quickadd')
 			.send({
-				q: encodeURIComponent('http://feeds.gawker.com/lifehacker/full')
+				q: encodeURIComponent('http://www.polygon.com/rss/index.xml')
 			})
 			.expect(200)
 			.end(done);

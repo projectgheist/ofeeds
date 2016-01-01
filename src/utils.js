@@ -94,6 +94,11 @@ exports.isArray = function (val) {
 	return Array.isArray(val);
 };
 
+// converts an array to an object by returning its first element
+exports.arrayToObject = function (val) {
+	return exports.isArray(val) ? val[0] : val;
+};
+
 // returns a string that points to the database url
 exports.getDBConnectionURL = function (obj, noPrefix) {
 	var r = process.env.OPENSHIFT_MONGODB_DB_URL ? [process.env.OPENSHIFT_MONGODB_DB_URL, obj.dbname].join('') : obj.url;
@@ -205,11 +210,13 @@ exports.parseTags = function (tags, user) {
 	if (!exports.isArray(tags)) {
 		tags = [tags];
 	}
+	// loop all tags
 	for (var i = 0; i < tags.length; i++) {
-		// match 'user/<userId>/state/foo' and also 'user/-/state/foo'
+		// match 'user/<userId>/state/foo' AND 'user/-/state/foo'
 		var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tags[i]);
-		if (!match || (match[1] !== user.id && match[1] !== '-')) {
-			return null;
+		// no regex matches found OR mismatched user ID
+		if (!match || (match[1] !== '-' && match[1] !== user._id)) {
+			continue;
 		}
 		tags[i] = {
 			'user': user._id, // reference to user db object

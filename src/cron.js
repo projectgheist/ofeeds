@@ -152,7 +152,7 @@ exports.UpdateFeed = function (feed, posts) {
 /** function AllowFetch
 	 if feed is valid AND if it was updated more then 2 minutes ago
  */
-exports.AllowFetch = function (feed, debug) {
+exports.AllowFetch = function (feed) {
 	return feed && (!feed.successfulCrawlTime || (feed.successfulCrawlTime && mm().diff(feed.successfulCrawlTime, 'minutes') > 2));
 };
 

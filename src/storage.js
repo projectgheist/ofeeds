@@ -70,22 +70,26 @@ exports.editTags = function (record, addTags, removeTags) {
 	removeTags || (removeTags = []);
 
 	var add = addTags.map(function (tag) {
-		return exports.findOrCreate(exports.Tag, tag)
+		return exports
+			.findOrCreate(exports.Tag, tag)
 			.then(function (t) {
 				record.tags.addToSet(t);
 			});
 	});
 	var remove = removeTags.map(function (tag) {
-		return exports.Tag.findOne(tag)
+		return exports.Tag
+			.findOne(tag)
 			.then(function (t) {
 				record.tags.remove(t);
 			});
 	});
 	var all = add.concat(remove);
 	// returns a promise
-	return rs.all(all).then(function () {
-		return record;
-	});
+	return rs
+		.all(all)
+		.then(function () {
+			return record;
+		});
 };
 
 /** function getTags

@@ -7,7 +7,7 @@ var sh = require('shortid');
 var Tag = mg.Schema({
 	user: ut.ref('User'),
 	type: String, // state or label
-	name: String, // encoded url or ...
+	name: String, // encoded unique url or ...
 	shortID: { type: String, default: sh.generate }
 });
 
