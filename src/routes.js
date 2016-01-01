@@ -11,19 +11,25 @@ var ap = require('./app');
 function ensureAuth (req, res, next) {
 	if (req.isAuthenticated()) {
 		return next();
+	} else {
+		res.redirect('/');
 	}
-	res.redirect('/');
 }
 
 /** home route */
 ap.get('/', function (req, res) {
-	if (req.isAuthenticated()) {
-		res.redirect('/subscription/user/reading-list');
-	} else {
-		res.render('pages/landing', {
-			'config': cf.site
-		});
-	}
+	res.render('pages/landing', {
+		'config': cf.site,
+		'user': req.user
+	});
+});
+
+/** home route */
+ap.get('/dashboard', ensureAuth, function (req, res) {
+	res.render('pages/landing', {
+		'config': cf.site,
+		'user': req.user
+	});
 });
 
 /** login route */

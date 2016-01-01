@@ -12,7 +12,7 @@ var actions = {
 	 * @param url: un-encoded
 	 */
 	search: function (ctx, url) {
-		// console.log("Search (A):" + url);
+		// console.log('Search (A): ' + url);
 		// Find or create feed for this URL in the database
 		return db.Feed
 			.find({ $or: [{title: {$regex: new RegExp('.*' + url + '.*', 'i')}}, {feedURL: {$regex: url}}] })
@@ -32,6 +32,7 @@ var actions = {
 					return db
 						.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)})
 						.then(function (feed) {
+							// retrieve all posts of the feed
 							return cr.FetchFeed(feed);
 						})
 						.then(function (f) {
@@ -48,49 +49,52 @@ var actions = {
 	 */
 	refresh: function (ctx, url) {
 		// Find feed for this URL in the database
-		return db.Feed.findOne({feedURL: url})
-		.then(function (feed) {
-			return (feed ? cr.FetchFeed(feed) : false);
-		});
+		return db.Feed
+			.findOne({ feedURL: url })
+			.then(function (feed) {
+				return (feed ? cr.FetchFeed(feed) : false);
+			});
 	},
 	/** function subscribe
 	 * @param url: un-encoded
 	 */
 	subscribe: function (ctx, url) {
 		// Find or create feed for this URL in the database
-		var feed = db.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)});
+		var feed = db.findOrCreate(db.Feed, { feedURL: url });
 		// Find or create a tag to add this feed to the users reading-list
 		var tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/reading-list', ctx.user)[0]);
 		// wait for all results to return before continuing
-		return rs.all([feed, tag]).then(function (results) {
-			// local ref to feed
-			var f = results[0];
-			// if this feed doesn't have any subscribers, fetch the feed
-			if (f.numSubscribers === 0) {
-				return cr.FetchFeed(f)
-					.then(function (n) {
-						return [n, results[1]];
-					});
-			}
-			return results;
-		})
-		.then(function (results) {
-			if (results.length <= 0) {
-				return {};
-			}
-			// local ref to feed and tag variable
-			var f = results[0];
-			var t = results[1];
-			// Subscribe to the feed if the tag was not found
-			if (!~f.tags.indexOf(t.id)) {
-				// add tag to feed's tag list
-				f.tags.addToSet(t);
-				// increment subscriber count
-				f.numSubscribers++;
-			}
-			// update db and return feed
-			return f.save();
-		});
+		return rs
+			.all([feed, tag])
+			.then(function (results) {
+				// local ref to feed
+				var f = results[0];
+				// if this feed doesn't have any subscribers, fetch the feed
+				if (f.numSubscribers === 0) {
+					return cr.FetchFeed(f)
+						.then(function (n) {
+							return [n, results[1]];
+						});
+				}
+				return results;
+			})
+			.then(function (results) {
+				if (results.length <= 0) {
+					return {};
+				}
+				// local ref to feed and tag variable
+				var f = results[0];
+				var t = results[1];
+				// Subscribe to the feed if the tag was not found
+				if (!~f.tags.indexOf(t.id)) {
+					// add tag to feed's tag list
+					f.tags.addToSet(t);
+					// increment subscriber count
+					f.numSubscribers++;
+				}
+				// update db and return feed
+				return f.save();
+			});
 	}
 };
 
@@ -281,18 +285,22 @@ ap.get('/api/0/subscription/refresh', function (req, res) {
 	}
 });
 
-// subscribe to feed
+/** subscribe to feed
+	@params q = encoded RSS URL
+*/
 ap.post('/api/0/subscription/quickadd', function (req, res) {
 	// is user logged in?
 	if (!req.isAuthenticated()) {
+		res.status(401).end();
+	} else if (!req.body.q) {
 		res.status(400).end();
 	} else {
 		// creat or find URL in db
 		actions
-			.subscribe(req, req.query.q)
+			.subscribe(req, req.body.q)
 			.then(function (feed) {
 				res.json({
-					query: decodeURIComponent(req.query.q),
+					query: decodeURIComponent(req.body.q),
 					numResults: feed ? 1 : 0,
 					streamId: feed ? feed.stringID : ''
 				});

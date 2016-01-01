@@ -19,7 +19,7 @@ require('./src/storage');
 
 /** GET / POST Pages
  */
-require('./src/auth');
+require('./src/strategies/google');
 require('./src/routes');
 
 /** Include routes

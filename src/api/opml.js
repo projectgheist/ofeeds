@@ -48,7 +48,8 @@ ap.get('/api/0/opml', function (req, res) {
 						title: e.title, // @todo: use users defined title
 						type: 'rss',
 						xmlUrl: decodeURIComponent(e.feedURL),
-						htmlUrl: e.siteURL
+						htmlUrl: e.siteURL,
+						text: e.description
 					};
 				});
 				// return results

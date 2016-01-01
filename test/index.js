@@ -4,64 +4,21 @@
  */
 var ap = require('../src/app');
 var cf = require('../config');
-var pp = require('../src/auth');
+// Include mock authentication
+require('../src/strategies/local');
+// Start server
 var sr = ap.listen(cf.Port(), cf.IpAddr());
-var db = require('../src/storage');
-var ut = require('../src/utils');
 require('../src/routes');
+// Include API
 require('../src/api/subscriptions');
 require('../src/api/streams');
 require('../src/api/posts');
 require('../src/api/opml');
 var rq = require('supertest').agent(sr);
 
-/** Create mock passportjs strategy
- */
-var Strategy = require('passport-local').Strategy;
-pp.use(
-	'local',
-	new Strategy(
-		function (username, password, done) {
-			return db
-				.findOrCreate(db.User, { openID: 1, provider: 'local', name: username })
-				.then(function (user) {
-					return done(null, user);
-				});
-		}
-	)
-);
-
 /** Make sure that the routing code compiles
  */
-describe('Routing', function () {
-	it('Route - Home', function (done) {
-		rq
-			.get('/')
-			.expect(200)
-			.end(done);
-	});
-
-	it('Route - Login', function (done) {
-		rq
-			.get('/login')
-			.expect(302)
-			.end(done);
-	});
-
-	it('Route - Logout', function (done) {
-		rq
-			.get('/logout')
-			.expect(302)
-			.end(done);
-	});
-
-	it('Route - Post', function (done) {
-		rq
-			.get('/post/test')
-			.expect(200)
-			.end(done);
-	});
-
+describe('Routing (Public)', function () {
 	it('Route - View (No parameters)', function (done) {
 		rq
 			.get('/views/')
@@ -76,10 +33,49 @@ describe('Routing', function () {
 			.end(done);
 	});
 
-	it('Route - Manage', function (done) {
+	it('Landing', function (done) {
+		rq
+			.get('/')
+			.expect(200)
+			.end(done);
+	});
+
+	it('Login', function (done) {
+		rq
+			.get('/login')
+			.expect(302)
+			.end(done);
+	});
+
+	it('Logout', function (done) {
+		rq
+			.get('/logout')
+			.expect(302)
+			.end(done);
+	});
+
+	it('Post', function (done) {
+		rq
+			.get('/post/test')
+			.expect(200)
+			.end(done);
+	});
+});
+
+/** Make sure that the routing code compiles
+ */
+describe('Routing (No user)', function () {
+	it('Management', function (done) {
 		rq
 			.get('/manage')
 			.expect(302)
+			.end(done);
+	});
+
+	it('Quickadd feed', function (done) {
+		rq
+			.post('/api/0/subscription/quickadd')
+			.expect(401)
 			.end(done);
 	});
 
@@ -87,42 +83,6 @@ describe('Routing', function () {
 		rq
 			.get('/api/0/opml')
 			.expect(401)
-			.end(done);
-	});
-
-	it('Create mock strategy', function (done) {
-		ap.post('/login', function (req, res, next) {
-			if (!ut.isEmpty(req.body)) {
-				pp.authenticate('local', function (err, user, info) {
-					if (err) { return next(err); }
-					req.login(user, function (ignore) {
-						if (err) { return next(err); }
-						res.status(200).end();
-					});
-				})(req, res); // !Required
-			} else {
-				res.status(400).end();
-			}
-		});
-		done();
-	});
-
-	it('Mock sign in', function (done) {
-		rq
-			.post('/login')
-			.send({
-				// !Required
-				username: 'test',
-				password: 'test'
-			})
-			.expect(200)
-			.end(done);
-	});
-
-	it('Mock sign out', function (done) {
-		rq
-			.get('/logout')
-			.expect(302)
 			.end(done);
 	});
 });
@@ -147,13 +107,6 @@ describe('Feeds API', function () {
 	it('Refresh feed (noQuery)', function (done) {
 		rq
 			.get('/api/0/subscription/refresh')
-			.expect(400)
-			.end(done);
-	});
-
-	it('Quickadd feed', function (done) {
-		rq
-			.post('/api/0/subscription/quickadd')
 			.expect(400)
 			.end(done);
 	});
@@ -220,10 +173,66 @@ describe('Posts API', function () {
 			.end(done);
 	});
 
-	it('Retrieve post BY id', function (done) {
+	it('Retrieve post BY id (No params)', function (done) {
 		rq
 			.get('/api/0/post')
 			.expect(400)
+			.end(done);
+	});
+});
+
+/** Make sure that the routing code compiles
+ */
+describe('Routing (Authenticated)', function () {
+	it('Mock sign in', function (done) {
+		rq
+			.post('/login')
+			.send({
+				// !Required
+				username: 'test',
+				password: 'test'
+			})
+			.expect(200)
+			.end(function (ignore, res) {
+				done();
+			});
+	});
+
+	it('Dashboard', function (done) {
+		rq
+			.get('/dashboard')
+			.expect(200)
+			.end(done);
+	});
+
+	it('Management', function (done) {
+		rq
+			.get('/manage')
+			.expect(200)
+			.end(done);
+	});
+
+	it('Quickadd feed (No params)', function (done) {
+		rq
+			.post('/api/0/subscription/quickadd')
+			.expect(400)
+			.end(done);
+	});
+
+	it('Quickadd feed (Valid params)', function (done) {
+		rq
+			.post('/api/0/subscription/quickadd')
+			.send({
+				q: encodeURIComponent('http://feeds.gawker.com/lifehacker/full')
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Mock sign out', function (done) {
+		rq
+			.get('/logout')
+			.expect(302)
 			.end(done);
 	});
 });
