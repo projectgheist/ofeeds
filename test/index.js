@@ -107,7 +107,7 @@ describe('Feeds API', function () {
 	it('Refresh feed (noQuery)', function (done) {
 		rq
 			.get('/api/0/subscription/refresh')
-			.expect(400)
+			.expect(401)
 			.end(done);
 	});
 
@@ -120,25 +120,9 @@ describe('Feeds API', function () {
 			.end(done);
 	});
 
-	it('Refresh feed (InvalidFeedUrl)', function (done) {
-		rq
-			.get('/api/0/subscription/refresh')
-			.query({q: 'https://www.google.com/'})
-			.expect(200)
-			.end(done);
-	});
-
 	it('Search for feed (ValidFeedUrl)', function (done) {
 		rq
 			.get('/api/0/subscription/search')
-			.query({q: 'http://www.polygon.com/rss/index.xml'})
-			.expect(200)
-			.end(done);
-	});
-
-	it('Refresh feed (ValidFeedUrl)', function (done) {
-		rq
-			.get('/api/0/subscription/refresh')
 			.query({q: 'http://www.polygon.com/rss/index.xml'})
 			.expect(200)
 			.end(done);
@@ -221,15 +205,42 @@ describe('Routing (Authenticated)', function () {
 
 	it('All feeds (No content)', function (done) {
 		rq
-			.post('/api/0/subscription/list')
-			.expect(400)
+			.get('/api/0/subscription/list')
+			.expect(200)
 			.end(done);
 	});
 
 	it('Retrieve OPML (No content)', function (done) {
 		rq
 			.get('/api/0/opml')
-			.expect(204)
+			.expect(200)
+			.end(done);
+	});
+
+	it('Refresh feed (No params)', function (done) {
+		rq
+			.get('/api/0/subscription/refresh')
+			.expect(400)
+			.end(done);
+	});
+
+	it('Refresh feed (Invalid params)', function (done) {
+		rq
+			.get('/api/0/subscription/refresh')
+			.query({
+				q: encodeURIComponent('https://www.google.com/')
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Refresh feed (Valid params)', function (done) {
+		rq
+			.get('/api/0/subscription/refresh')
+			.query({
+				q: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+			})
+			.expect(200)
 			.end(done);
 	});
 
@@ -242,7 +253,7 @@ describe('Routing (Authenticated)', function () {
 			.expect(200)
 			.end(done);
 	});
-	
+
 	it('Retrieve OPML (Return content)', function (done) {
 		rq
 			.get('/api/0/opml')

@@ -269,7 +269,10 @@ ap.get('/api/0/subscription/search', function (req, res) {
 
 // fetch a feed
 ap.get('/api/0/subscription/refresh', function (req, res) {
-	if (req.query.q === undefined) {
+	// is user logged in?
+	if (!req.isAuthenticated()) {
+		res.status(401).end();
+	} else if (!req.query.q) {
 		res.status(400).end();
 	} else {
 		// create or find URL in db
