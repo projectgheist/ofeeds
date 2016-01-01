@@ -9,13 +9,13 @@ var ag = require('../wait');
 // @todo: functions need to be merged
 var actions = {
 	/** function search
-	 * @param url: un-encoded
+	 * @param url: encoded
 	 */
 	search: function (ctx, url) {
-		// console.log('Search (A): ' + url);
+		var actualURL = decodeURIComponent(url);
 		// Find or create feed for this URL in the database
 		return db.Feed
-			.find({ $or: [{title: {$regex: new RegExp('.*' + url + '.*', 'i')}}, {feedURL: {$regex: url}}] })
+			.find({ $or: [{ title: { $regex: new RegExp('.*' + actualURL + '.*', 'i') } }, { feedURL: { $regex: url } }] })
 			.limit(6)
 			.then(function (results) {
 				// feeds found that match the search expression
@@ -23,14 +23,14 @@ var actions = {
 					return results;
 				}
 				// make sure it starts with a certain prefix (isn't necessary for find)
-				if (!ut.startsWith(url, ['http://', 'https://'])) {
+				if (!ut.startsWith(actualURL, ['http://', 'https://'])) {
 					// add prefix to the front of the string
-					url = 'http://' + url;
+					actualURL = 'http://' + actualURL;
 				}
 				// is valid url?
-				if (ut.isUrl(url)) {
+				if (ut.isUrl(actualURL)) {
 					return db
-						.findOrCreate(db.Feed, {feedURL: encodeURIComponent(url)})
+						.findOrCreate(db.Feed, { feedURL: encodeURIComponent(actualURL) })
 						.then(function (feed) {
 							// retrieve all posts of the feed
 							return cr.FetchFeed(feed);

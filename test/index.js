@@ -127,7 +127,11 @@ describe('Feeds API', function () {
 				q: encodeURIComponent('http://www.polygon.com/rss/index.xml')
 			})
 			.expect(200)
-			.end(done);
+			.end(function (ignore, res) {
+				if (res.body.length) {
+					done();
+				}
+			});
 	});
 
 	it('Route - Feed', function (done) {
