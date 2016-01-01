@@ -162,31 +162,26 @@ ap.get('/api/0/subscription/list', function (req, res) {
 	if (!req.isAuthenticated()) {
 		return AllFeeds(req, res);
 	} else {
-		// get tags
-		var tags = ut.parseTags(['user/-/state/reading-list', 'user/-/state/read'], req.user);
 		// total post unread count
 		var tuc = 0;
 		return db
-			.getTags(tags[0])
-			.then(function (rl) {
-				// no feeds returned
-				if (!rl) {
-					return [];
-				} else {
+			.getTags(ut.parseTags('user/-/state/reading-list', req.user))
+			.then(function (tagsArray) {
+				if (tagsArray.length) {
 					// find all feeds that contain 'reading-list' tag & sort by alphabetical title
-					return rs
-						.all([
-							db.Feed.find({ tags: rl }).sort({ 'title': 1 }),
-							db.getTags(tags[1])
-						]);
+					return rs.all([
+						db.Feed.find({ tags: tagsArray[0] }).sort({ 'title': 1 }),
+						db.getTags(ut.parseTags('user/-/state/read', req.user))
+					]);
 				}
+				return [];
 			})
 			.then(function (results) {
 				// create array
 				var a = results[0].map(function (f) {
 					// find posts in feed WHERE 'read'-tag 'not in' array
 					return db.Post
-						.find({ _id: {$in: f.posts}, tags: {$nin: results[1]} })
+						.find({ _id: { $in: f.posts }, tags: { $nin: results[1] } })
 						.then(function (c) {
 							// increment total unread count
 							tuc += c.length;

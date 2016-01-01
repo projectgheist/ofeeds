@@ -179,9 +179,7 @@ describe('Routing (Authenticated)', function () {
 				password: 'test'
 			})
 			.expect(200)
-			.end(function (ignore, res) {
-				done();
-			});
+			.end(done);
 	});
 
 	it('Dashboard', function (done) {
@@ -205,12 +203,12 @@ describe('Routing (Authenticated)', function () {
 			.end(done);
 	});
 
-	/* it('All feeds (No content)', function (done) {
+	it('All feeds (No content)', function (done) {
 		rq
 			.get('/api/0/subscription/list')
 			.expect(200)
 			.end(done);
-	}); */
+	});
 
 	it('Retrieve OPML (No content)', function (done) {
 		rq
