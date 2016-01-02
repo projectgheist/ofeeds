@@ -41,16 +41,16 @@ Feed.virtual('stringID').get(function () {
 // Gets the tags for a user, assuming they have already been populated
 Feed.methods.tagsForUser = function (user) {
 	return this.tags.filter(function (tag) {
-		return (tag.user === user.id) && (tag.type === 'label');
+		return (tag.user === user._id) && (tag.type === 'label');
 	});
 };
 
 Feed.methods.titleForUser = function (user) {
-	return this.userTitles[user.id] || this.title || '(title unknown)';
+	return this.userTitles[user._id] || this.title || '(title unknown)';
 };
 
 Feed.methods.setTitleForUser = function (title, user) {
-	this.userTitles[user.id] = title;
+	this.userTitles[user._id] = title;
 	this.markModified('userTitles');
 	return this;
 };

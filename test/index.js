@@ -19,6 +19,10 @@ var rq = require('supertest').agent(sr);
 /** Make sure that the routing code compiles
  */
 describe('Routing (Public)', function () {
+	it('Started server: ' + cf.Url(), function (done) {
+		done();
+	});
+
 	it('Route - View (No parameters)', function (done) {
 		rq
 			.get('/views/')
@@ -44,6 +48,13 @@ describe('Routing (Public)', function () {
 		rq
 			.get('/login')
 			.expect(302)
+			.end(done);
+	});
+
+	it('Sign in (Invalid params)', function (done) {
+		rq
+			.post('/login')
+			.expect(400)
 			.end(done);
 	});
 
@@ -101,6 +112,13 @@ describe('Feeds API', function () {
 		rq
 			.get('/api/0/subscription/search')
 			.expect(400)
+			.end(done);
+	});
+
+	it('Rename feed', function (done) {
+		rq
+			.post('/api/0/feed/title')
+			.expect(401)
 			.end(done);
 	});
 
@@ -320,6 +338,24 @@ describe('Routing (Authenticated)', function () {
 			.post('/api/0/subscription/quickadd')
 			.send({
 				q: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Rename feed (Invalid params)', function (done) {
+		rq
+			.post('/api/0/feed/title')
+			.expect(400)
+			.end(done);
+	});
+
+	it('Rename feed (Valid params)', function (done) {
+		rq
+			.post('/api/0/feed/title')
+			.send({
+				q: encodeURIComponent('http://www.polygon.com/rss/index.xml'),
+				n: 'Polygon'
 			})
 			.expect(200)
 			.end(done);

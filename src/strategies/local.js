@@ -25,17 +25,11 @@ ap.post('/login', function (req, res, next) {
 	// make sure that it has params
 	if (!ut.isEmpty(req.body)) {
 		pp.authenticate('local', function (err, user, info) {
-			if (err || !user) {
-				res.status(400).end();
-			} else {
-				req.login(user, function (ignore) {
-					if (err) {
-						res.status(400).end();
-					} else {
-						res.status(200).end();
-					}
-				});
-			}
+			if (err || !user) return res.status(400).end();
+			req.login(user, function (ignore) {
+				if (err) return res.status(400).end();
+				res.status(200).end();
+			});
 		})(req, res); // !Required
 	} else {
 		res.status(400).end();

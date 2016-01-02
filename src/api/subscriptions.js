@@ -156,6 +156,30 @@ function AllFeeds (req, res) {
 // lists all of the feeds in the database
 ap.get('/api/0/feeds/list', AllFeeds);
 
+// lists all of the feeds in the database
+ap.post('/api/0/feed/title', function (req, res) {
+	// is user logged in?
+	if (!req.isAuthenticated()) {
+		res.status(401).end();
+	} else if (!req.body.q || !req.body.n) {
+		res.status(400).end();
+	} else {
+		db
+			.getTags(ut.parseTags('user/-/state/reading-list', req.user))
+			.then(function (c) {
+				return db.Feed.find({ tags: { $in: c }, feedURL: req.body.q });
+			})
+			.then(function (a) {
+				if (!a.length) return false;
+				var ref = ut.arrayToObject(a);
+				return ref.setTitleForUser(req.body.n, req.user).save();
+			})
+			.then(function (b) {
+				res.status(200).end();
+			});
+	}
+});
+
 // lists all of the feeds a user is subscribed to
 ap.get('/api/0/subscription/list', function (req, res) {
 	// is user logged in?
