@@ -1,6 +1,7 @@
 var ap = require('../app');
 var db = require('../storage');
 var ut = require('../utils');
+var mm = require('moment');
 
 /** function formatPosts
  * @param posts: Array of posts to format
@@ -36,45 +37,23 @@ function formatPosts (user, feed, posts, tags, obj) {
 /** function retrieveStream
  */
 ap.get('/api/0/stream/contents*', function (req, res) {
-	var streams = [];
-	// validate input
-	if (req.query) {
-		if (Array.isArray(req.query)) {
-			for (var i in req.query) {
-				streams.push(req.query[i]);
-			}
-		} else {
-			streams.push(req.query);
+	if (ut.isEmpty(req.query) ||
+		(req.query.n && !/^[0-9]+$/.test(req.query.n)) || // invalid count
+		(req.query.ot && !mm(req.query.ot).isValid()) || // invalid time
+		(req.query.nt && !mm(req.query.nt).isValid())) { // invalid time
+		return res.status(400).end();
+	}
+
+	if (req.isAuthenticated() && req.query.xt) {
+		var excludeTags = ut.parseTags(req.query.xt, req.user);
+		if (!excludeTags) {
+			return res.status(400).send('InvalidTag');
 		}
 	}
-
-	if (!streams) {
-		return res.status(400).send('InvalidStream');
-	}
-
-	if (req.query.n && !/^[0-9]+$/.test(req.query.n)) {
-		return res.status(400).send('InvalidCount');
-	}
-
-	if (req.query.ot && !/^[0-9]+$/.test(req.query.ot)) {
-		return res.status(400).send('InvalidTime');
-	}
-
-	if (req.query.nt && !/^[0-9]+$/.test(req.query.nt)) {
-		return res.status(400).send('InvalidTime');
-	}
-
-	if (req.query.r && !/^[no]$/.test(req.query.r)) {
-		return res.status(400).send('InvalidRank');
-	}
-
-	var excludeTags = ut.parseTags(req.query.xt, req.user);
-	if (req.query.xt && !excludeTags) {
-		return res.status(400).send('InvalidTag');
-	}
+	var stream = req.query;
 	// load posts
 	db
-		.getPosts(streams, {
+		.getPosts(stream, {
 			excludeTags: excludeTags,
 			minTime: req.query.ot || 0, // old time
 			maxTime: req.query.nt || Date.now(), // new time
@@ -86,11 +65,14 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 			item.query
 				.then(function (posts) {
 					// console.log('stream/contents (B)')
-					var isFeed = (streams[0].type === 'feed'); // boolean: TRUE if feed
-					var value = streams[0].value; // string: site URL
+					var isFeed = (stream.type === 'feed'); // boolean: TRUE if feed
+					var value = stream.value; // string: site URL
 					var hasPosts = (posts.length > 0 && posts[0]); // boolean: TRUE if feed object
 					var feed = !ut.isArray(item.feeds) ? item.feeds : item.feeds[0]; // reference to feed db obj
-					var obj = feed ? {
+					if (!feed) {
+						return res.status(400).end();
+					}
+					var obj = {
 						id: encodeURIComponent(isFeed ? feed.stringID : ''),
 						feedURL: decodeURIComponent(isFeed ? feed.feedURL : value),
 						title: isFeed ? feed.title : value,
@@ -103,31 +85,29 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 						subscribed: 0,
 						showOrigin: false,
 						continuation: 'TODO'
-					} : {};
+					};
 					if (hasPosts === undefined) {
-						// console.log('stream/contents (N)')
-						var feedURL = ut.isArray(streams) && (streams.length > 0) ? streams[0].value : undefined;
 						// Google Reader returns 404 response, we need a valid json response for infinite scrolling
-						res.json({
-							feedURL: feedURL,
+						return res.json({
+							feedURL: value,
 							updated: '',
-							title: 'Unknown (' + feedURL + ')',
+							title: 'Unknown (' + value + ')',
 							items: []
 						});
 					} else {
 						// console.log('stream/contents (Y)')
 						if (req.user) {
-							return db.Tag
-								.find(ut.parseTags('user/-/state/reading-list', req.user)[0])
+							return db
+								.getTags(ut.parseTags('user/-/state/reading-list', req.user))
 								.then(function (tags) {
-									res.json(formatPosts(req.user, feed, posts, tags, obj));
+									return res.json(formatPosts(req.user, feed, posts, tags, obj));
 								});
 						} else {
-							res.json(formatPosts({}, feed, posts, [], obj));
+							return res.json(formatPosts({}, feed, posts, [], obj));
 						}
 					}
-				}, function (err) {
-					return res.status(500).send(err);
+				}, function (ignore) {
+					return res.status(500).end();
 				});
 		});
 });

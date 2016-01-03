@@ -203,7 +203,7 @@
 
 		/** retrieve singular posts
 		*/
-		$scope.getpost = function (m) {
+		$scope.getPost = function (m) {
 			// make sure that it has a param value
 			if ($scope.params === undefined) {
 				$scope.rf = false;
@@ -679,7 +679,10 @@
 			if (!$('#m').length || (!p || p === undefined)) {
 				return;
 			}
-			SetTag.query({i:p.lid,a:'user/-/state/read'}, function (d) {
+			SetTag.query({ 
+				i: p.lid, 
+				a: 'user/-/state/read' 
+			}, function (d) {
 				// mark post as read
 				p.read = true;
 				// notify sidebar to update
@@ -694,7 +697,10 @@
 			if (!$('#m').length || (!p || p === undefined)) {
 				return;
 			}
-			SetTag.query({i:p.lid,r:'user/-/state/read'}, function (d) {
+			SetTag.query({ 
+				i: p.lid, 
+				r: 'user/-/state/read' 
+			}, function (d) {
 				// mark post as unread
 				p.read = false;
 				// notify sidebar to update
@@ -868,7 +874,7 @@
 					if ($scope.params.type === 'feed') {
 						$scope.getPosts();
 					} else {
-						$scope.getpost();
+						$scope.getPost();
 					}
 				}
 			}
