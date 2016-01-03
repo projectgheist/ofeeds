@@ -175,7 +175,7 @@ ap.post('/api/0/feed/title', function (req, res) {
 				return ref.setTitleForUser(req.body.n, req.user).save();
 			})
 			.then(function (b) {
-				res.status(200).end();
+				res.json(b);
 			});
 	}
 });

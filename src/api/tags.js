@@ -7,28 +7,32 @@ var ap = require('../app');
 ap.post('/api/0/tags/edit', function (req, res) {
 	// is user logged in?
 	if (!req.isAuthenticated()) {
-		return;
+		return res.status(401).end();
+	} else if (ut.isEmpty(req.body)) {
+		return res.status(400).end();
+	} else {
+		var p = req.body;
+		var items = ut.parseItems(p['i'] || 0);
+		if (!items) {
+			return res.status(400).end(); // Invalid item
+		}
+		var at = ut.parseTags(p['a'] || 0, req.user); // tags to add to the item
+		var rt = ut.parseTags(p['r'] || 0, req.user); // tags to remove from the item
+		// TODO: use streams to filter
+		db.Post
+			.where('_id').in(items)
+			.then(function (posts) {
+				return rs.all(posts.map(function (post) {
+					return db.editTags(post, at, rt)
+						.then(function (data) {
+							return data.save();
+						});
+				}));
+			})
+			.then(function (data) {
+				res.status(200).end();
+			});
 	}
-	var p = (req.query || req.body);
-	var items = ut.parseItems(p['i'] || 0);
-	if (!items) {
-		return res.statuc(400); // Invalid item
-	}
-	var at = ut.parseTags(p['a'] || 0, req.user); // tags to add to the item
-	var rt = ut.parseTags(p['r'] || 0, req.user); // tags to remove from the item
-	// TODO: use streams to filter
-	db.Post.where('_id').in(items)
-		.then(function (posts) {
-			return rs.all(posts.map(function (post) {
-				return db.editTags(post, at, rt).then(function (data) {
-					return data.save();
-				});
-			}));
-		}).then(function (data) {
-		res.send('OK');
-	}, function (err) {
-		res.status(500).send(err);
-	});
 });
 
 // rename a stream folder

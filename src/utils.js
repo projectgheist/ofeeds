@@ -21,10 +21,6 @@ exports.isEmpty = function (obj) {
  * @param out: string value that starts with the defined val
 */
 exports.startsWith = function (val, str, out) {
-	// check if already an array, else make it an array
-	if (!exports.isArray(str)) {
-		str = [str];
-	}
 	// loop array of strings
 	for (var i in str) {
 		if (val.indexOf(str[i].toLowerCase()) === 0) {
@@ -44,11 +40,9 @@ exports.stringInsert = function (o, i, p) {
 	return [o.slice(0, p), i, o.slice(p)].join('');
 };
 
+/** function stringReplace
+*/
 exports.stringReplace = function (val, str) {
-	// check if already an array, else make it an array
-	if (!exports.isArray(str)) {
-		str = [str];
-	}
 	var re;
 	for (var i in str) {
 		re = new RegExp('(' + str[i] + ')(?:.*?)', 'i');
@@ -111,45 +105,11 @@ exports.getDBConnectionURL = function (obj, noPrefix) {
 	return r;
 };
 
-exports.parseParameters = function (obj, user) {
-	// if empty variable, return
-	if (!obj) {
-		return false;
-	}
-
-	// remove '/' from start of string
-	if (typeof obj === 'string' && obj.match('^\/')) {
-		obj = obj.substring(1, obj.length);
-	}
-
-	// check if already an array, else make it an array
-	if (!exports.isArray(obj)) {
-		obj = [obj];
-	}
-
-	for (var i = 0; i < obj.length; i++) {
-		var urls = exports.parseFeeds(obj[i]);
-		if (urls) {
-			obj[i] = {
-				type: 'feed',
-			value: urls[0]};
-		} else {
-			var tags = exports.parseTags(obj[i], user);
-			if (!tags) {
-				return null;
-			}
-			obj[i] = {
-				type: 'tag',
-			value: tags[0]};
-		}
-	}
-	return obj;
-};
-
 /** function parseHtmlEntities
 */
 exports.parseHtmlEntities = function (str) {
-	if (!str) {
+	// early out
+	if (!str || !str.length) {
 		return '';
 	}
 	return str
@@ -158,28 +118,6 @@ exports.parseHtmlEntities = function (str) {
 			return String.fromCharCode(num);
 		})
 		.trim();
-};
-
-/** function parseFeeds
-*/
-exports.parseFeeds = function (feeds) {
-	if (!feeds) {
-		return null;
-	}
-	if (!exports.isArray(feeds)) {
-		feeds = [feeds];
-	}
-	for (var i = 0; i < feeds.length; i++) {
-		if (!/^feed\//.test(feeds[i])) {
-			return null;
-		}
-		var url = feeds[i].slice(5);
-		if (!exports.isUrl(url)) {
-			return null;
-		}
-		feeds[i] = url;
-	}
-	return feeds;
 };
 
 exports.parseItems = function (items) {
@@ -202,7 +140,7 @@ exports.parseItems = function (items) {
 };
 
 exports.parseTags = function (tags, user) {
-	// if empty variable, return
+	// if empty variable, early out
 	if (!tags) {
 		return null;
 	}
