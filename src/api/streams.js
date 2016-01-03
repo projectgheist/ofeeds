@@ -46,8 +46,8 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 
 	if (req.isAuthenticated() && req.query.xt) {
 		var excludeTags = ut.parseTags(req.query.xt, req.user);
-		if (!excludeTags) {
-			return res.status(400).send('InvalidTag');
+		if (!excludeTags.length) {
+			return res.status(400).end();
 		}
 	}
 	var stream = req.query;

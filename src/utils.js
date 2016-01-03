@@ -129,6 +129,8 @@ exports.parseTags = function (tags, user) {
 	if (!exports.isArray(tags)) {
 		tags = [tags];
 	}
+	// declare return object
+	var results = [];
 	// loop all tags
 	for (var i = 0; i < tags.length; i++) {
 		// match 'user/<userId>/state/foo' AND 'user/-/state/foo'
@@ -137,11 +139,11 @@ exports.parseTags = function (tags, user) {
 		if (!match || (match[1] !== '-' && match[1] !== user._id)) {
 			continue;
 		}
-		tags[i] = {
+		results.push({
 			'user': user._id, // reference to user db object
 			type: match[2],	// string: state or label
 			name: match[3] // string: url
-		};
+		});
 	}
-	return tags;
+	return results;
 };

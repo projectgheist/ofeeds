@@ -97,6 +97,13 @@ describe('Routing (No user)', function () {
 			.expect(401)
 			.end(done);
 	});
+	
+	it('Tag post', function (done) {
+		rq
+			.post('/api/0/tags/edit')
+			.expect(401)
+			.end(done);
+	});
 });
 
 /** Make sure that the routing code compiles
@@ -185,8 +192,15 @@ describe('Feeds API', function () {
 			.expect(200)
 			.end(done);
 	});
+	
+	it('Fetch stream (Invalid params)', function (done) {
+		rq
+			.get('/api/0/stream/contents')
+			.expect(400)
+			.end(done);
+	});
 
-	it('Fetch stream', function (done) {
+	it('Fetch stream (Valid params)', function (done) {
 		rq
 			.get('/api/0/stream/contents')
 			.query({
@@ -381,6 +395,22 @@ describe('Routes', function () {
 
 /** Make sure that the routing code compiles
  */
+describe('Stream API', function () {
+	it('Fetch stream (Valid params)', function (done) {
+		rq
+			.get('/api/0/stream/contents')
+			.query({
+				type: 'feed',
+				value: encodeURIComponent('http://www.polygon.com/rss/index.xml'),
+				xt: 'InvalidTag'
+			})
+			.expect(400)
+			.end(done);
+	});
+});
+
+/** Make sure that the routing code compiles
+ */
 describe('Tags API', function () {
 	it('Tag post AS read (No params)', function (done) {
 		rq
@@ -394,6 +424,16 @@ describe('Tags API', function () {
 			.post('/api/0/tags/edit')
 			.send({
 				a: 'user/-/state/read'
+			})
+			.expect(400)
+			.end(done);
+	});
+
+	it('Tag post AS read (Invalid params)', function (done) {
+		rq
+			.post('/api/0/tags/edit')
+			.send({
+				i: posts[0].uid
 			})
 			.expect(400)
 			.end(done);
