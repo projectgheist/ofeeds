@@ -53,7 +53,7 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 	var stream = req.query;
 	// load posts
 	db
-		.getPosts(stream, {
+		.getPosts([stream], {
 			excludeTags: excludeTags,
 			minTime: req.query.ot || 0, // old time
 			maxTime: req.query.nt || Date.now(), // new time

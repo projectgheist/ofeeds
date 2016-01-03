@@ -120,25 +120,6 @@ exports.parseHtmlEntities = function (str) {
 		.trim();
 };
 
-exports.parseItems = function (items) {
-	if (!items) {
-		return null;
-	}
-	if (!exports.isArray(items)) {
-		items = [items];
-	}
-	for (var i = 0; i < items.length; i++) {
-		// the long version has a prefix and the id in hex
-		var match = /^tag:reader\/item\/([0-9a-f]+)$/.exec(items[i]);
-		if (!match) {
-			return null;
-		}
-		// store post mongoDB ID
-		items[i] = match[1];
-	}
-	return items;
-};
-
 exports.parseTags = function (tags, user) {
 	// if empty variable, early out
 	if (!tags) {

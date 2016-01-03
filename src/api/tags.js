@@ -15,7 +15,6 @@ ap.post('/api/0/tags/edit', function (req, res) {
 		if (!arg['i']) {
 			return res.status(400).end(); // Invalid item
 		}
-		var items = ut.parseItems(arg['i']);
 		var at = ut.parseTags(arg['a'] || 0, req.user); // tags to add to the item
 		var rt = ut.parseTags(arg['r'] || 0, req.user); // tags to remove from the item
 		if (!at && !rt) {
@@ -23,7 +22,7 @@ ap.post('/api/0/tags/edit', function (req, res) {
 		}
 		// TODO: use streams to filter
 		db.Post
-			.where('_id').in(items)
+			.where('shortid').in([arg['i']])
 			.then(function (posts) {
 				return rs.all(posts.map(function (post) {
 					return db.editTags(post, at, rt)

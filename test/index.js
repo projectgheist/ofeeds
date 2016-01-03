@@ -13,6 +13,7 @@ require('../src/routes');
 require('../src/api/subscriptions');
 require('../src/api/streams');
 require('../src/api/posts');
+require('../src/api/tags');
 require('../src/api/opml');
 var rq = require('supertest').agent(sr);
 
@@ -108,7 +109,7 @@ describe('Feeds API', function () {
 			.end(done);
 	});
 
-	it('Search for feed (noQuery)', function (done) {
+	it('Search for feed (No params)', function (done) {
 		rq
 			.get('/api/0/subscription/search')
 			.expect(400)
@@ -122,7 +123,7 @@ describe('Feeds API', function () {
 			.end(done);
 	});
 
-	it('Refresh feed (noQuery)', function (done) {
+	it('Refresh feed (No params)', function (done) {
 		rq
 			.get('/api/0/subscription/refresh')
 			.expect(401)
@@ -197,11 +198,11 @@ describe('Feeds API', function () {
 	});
 });
 
+var posts = [];
+
 /** Make sure that the routing code compiles
  */
 describe('Posts API', function () {
-	var posts = [];
-
 	it('Retrieve most recent posts', function (done) {
 		rq
 			.get('/api/0/posts')
@@ -244,7 +245,7 @@ describe('Posts API', function () {
 
 /** Make sure that the routing code compiles
  */
-describe('Routing (Authenticated)', function () {
+describe('Begin authentication', function () {
 	it('Mock sign in', function (done) {
 		rq
 			.post('/login')
@@ -256,7 +257,9 @@ describe('Routing (Authenticated)', function () {
 			.expect(200)
 			.end(done);
 	});
+});
 
+describe('Routes', function () {
 	it('Dashboard', function (done) {
 		rq
 			.get('/dashboard')
@@ -374,7 +377,54 @@ describe('Routing (Authenticated)', function () {
 			.expect(200)
 			.end(done);
 	});
+});
 
+/** Make sure that the routing code compiles
+ */
+describe('Tags API', function () {
+	it('Tag post AS read (No params)', function (done) {
+		rq
+			.post('/api/0/tags/edit')
+			.expect(400)
+			.end(done);
+	});
+
+	it('Tag post AS read (Invalid params)', function (done) {
+		rq
+			.post('/api/0/tags/edit')
+			.send({
+				a: 'user/-/state/read'
+			})
+			.expect(400)
+			.end(done);
+	});
+
+	it('Tag post AS read (Valid params)', function (done) {
+		rq
+			.post('/api/0/tags/edit')
+			.send({
+				i: posts[0].uid,
+				a: 'user/-/state/read'
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Tag post AS unread (Valid params)', function (done) {
+		rq
+			.post('/api/0/tags/edit')
+			.send({
+				i: posts[0].uid,
+				r: 'user/-/state/read'
+			})
+			.expect(200)
+			.end(done);
+	});
+});
+
+/** Make sure that the routing code compiles
+ */
+describe('End authentication', function () {
 	it('Mock sign out', function (done) {
 		rq
 			.get('/logout')
