@@ -109,13 +109,6 @@ describe('Routing (No user)', function () {
 /** Make sure that the routing code compiles
  */
 describe('Feeds API', function () {
-	it('Retrieve all feeds', function (done) {
-		rq
-			.get('/api/0/subscription/list')
-			.expect(200)
-			.end(done);
-	});
-
 	it('Search for feed (No params)', function (done) {
 		rq
 			.get('/api/0/subscription/search')
@@ -206,6 +199,63 @@ describe('Feeds API', function () {
 			.query({
 				type: 'feed',
 				value: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+			})
+			.expect(200)
+			.end(done);
+	});
+	
+	it('Retrieve all feeds', function (done) {
+		rq
+			.get('/api/0/subscription/list')
+			.expect(200)
+			.end(done);
+	});
+
+	it('Retrieve all feeds (newest)', function (done) {
+		rq
+			.get('/api/0/subscription/list')
+			.query({
+				r: 'n'
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Retrieve all feeds (oldest)', function (done) {
+		rq
+			.get('/api/0/subscription/list')
+			.query({
+				r: 'o'
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Retrieve all feeds (subscribers)', function (done) {
+		rq
+			.get('/api/0/subscription/list')
+			.query({
+				r: 'o'
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Retrieve all feeds (addition)', function (done) {
+		rq
+			.get('/api/0/subscription/list')
+			.query({
+				r: 'a'
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Retrieve all feeds (unknown)', function (done) {
+		rq
+			.get('/api/0/subscription/list')
+			.query({
+				r: 'u'
 			})
 			.expect(200)
 			.end(done);

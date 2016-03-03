@@ -7,28 +7,28 @@
     "test": "test"
   },
   "dependencies": {
-    "agenda": "^0.7.2",
+    "agenda": "^0.8.0",
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
     "express-session": "^1.12.1",
     "feedparser": "^1.1.4",
     "jade": "^1.11.0",
-    "moment": "^2.10.6",
+    "moment": "^2.11.2",
     "mongoomise": "0.0.8",
     "mongoose": "^4.2.4",
     "opml-generator": "^1.1.1",
     "passport": "^0.3.0",
-    "passport-google-oauth": "^0.2.0",
+    "passport-google-oauth": "^1.0.0",
     "request": "^2.65.0",
     "rsvp": "^3.1.0",
     "shortid": "^2.2.4",
-    "validator": "^4.2.1"
+    "validator": "^5.1.0"
   },
   "devDependencies": {
     "codecov.io": "^0.1.6",
     "coveralls": "^2.11.4",
     "grunt": "^0.4.5",
-    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-concat": "^1.0.0",
     "grunt-contrib-copy": "^0.8.2",
     "grunt-contrib-cssmin": "^0.14.0",
     "grunt-contrib-uglify": "^0.11.0",
