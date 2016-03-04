@@ -104,6 +104,20 @@ describe('Routing (No user)', function () {
 			.expect(401)
 			.end(done);
 	});
+	
+	it('Tag rename', function (done) {
+		rq
+			.post('/api/0/tags/rename')
+			.expect(401)
+			.end(done);
+	});
+
+	it('Mark all as read', function (done) {
+		rq
+			.post('/api/0/tag/mark-all-as-read')
+			.expect(401)
+			.end(done);
+	});
 });
 
 /** Make sure that the routing code compiles
@@ -235,7 +249,7 @@ describe('Feeds API', function () {
 		rq
 			.get('/api/0/subscription/list')
 			.query({
-				r: 'o'
+				r: 's'
 			})
 			.expect(200)
 			.end(done);
