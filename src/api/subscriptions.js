@@ -95,24 +95,24 @@ function AllFeeds (req, res) {
 		s = {title: 1}; // alphabetical
 	} else {
 		switch (req.query.r) {
-			case 'n':
-				s = {lastModified: 1}; // newest first
-				break;
-			case 'o':
-				s = {lastModified: -1}; // oldest first
-				break;
-			case 's': // number of subscribers
-				s = [
-					['numSubscribers', -1], // highest number first
-					['title', 1] // alphabetical
-				];
-				break;
-			case 'a': // creation time
-				s = {creationTime: -1}; // newest feed first
-				break;
-			default:
-				s = {lastModified: 1}; // newest first
-				break;
+		case 'n':
+			s = {lastModified: 1}; // newest first
+			break;
+		case 'o':
+			s = {lastModified: -1}; // oldest first
+			break;
+		case 's': // number of subscribers
+			s = [
+				['numSubscribers', -1], // highest number first
+				['title', 1] // alphabetical
+			];
+			break;
+		case 'a': // creation time
+			s = {creationTime: -1}; // newest feed first
+			break;
+		default:
+			s = {lastModified: 1}; // newest first
+			break;
 		}
 	}
 	// retrieve all feeds

@@ -226,39 +226,39 @@ function StorePosts (stream, feed, posts, guids) {
 			pr.onopentag = function (tag) {
 				// NOTE: tag names and attributes are all in CAPS
 				switch (tag.name) {
-					case 'IMG':
-						// ignoreImages OR width and height are 1 OR isn't a valid image extension
-						if (ignoreImages ||
-							parseInt(tag.attributes.WIDTH, 0) <= 1 ||
-							parseInt(tag.attributes.HEIGHT, 0) <= 1 ||
-							!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(tag.attributes.SRC)) {
-							break;
-						}
-						// create new image object
-						var obj = {
-							'url': tag.attributes.SRC,
-							'width': tag.attributes.WIDTH || 0,
-							'height': tag.attributes.HEIGHT || 0
-						};
-						var found = false;
-						// check if image already exists in list
-						for (var i in images.other) {
-							// url comparison
-							if (images.other[i].url === obj.url) {
-								found = true;
-								break; // stop for-loop
-							}
-						}
-						// image has not been added already?
-						if (!found) {
-							// add to images array
-							images.other.push(obj);
-						}
+				case 'IMG':
+					// ignoreImages OR width and height are 1 OR isn't a valid image extension
+					if (ignoreImages ||
+						parseInt(tag.attributes.WIDTH, 0) <= 1 ||
+						parseInt(tag.attributes.HEIGHT, 0) <= 1 ||
+						!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(tag.attributes.SRC)) {
 						break;
-					case 'IFRAME':
-						// add video url to array
-						videos.push(tag.attributes.SRC);
-						break;
+					}
+					// create new image object
+					var obj = {
+						'url': tag.attributes.SRC,
+						'width': tag.attributes.WIDTH || 0,
+						'height': tag.attributes.HEIGHT || 0
+					};
+					var found = false;
+					// check if image already exists in list
+					for (var i in images.other) {
+						// url comparison
+						if (images.other[i].url === obj.url) {
+							found = true;
+							break; // stop for-loop
+						}
+					}
+					// image has not been added already?
+					if (!found) {
+						// add to images array
+						images.other.push(obj);
+					}
+					break;
+				case 'IFRAME':
+					// add video url to array
+					videos.push(tag.attributes.SRC);
+					break;
 				}
 			};
 			// Parse the post description for image/video tags

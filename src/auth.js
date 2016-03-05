@@ -10,7 +10,7 @@ var ap = require('./app');
 ap.use(require('express-session')({
 	secret: 'ofeeds_secret_key',
 	resave: false,
-    saveUninitialized: false
+	saveUninitialized: false
 }));
 
 /** Enable body parsing */

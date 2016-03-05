@@ -120,6 +120,8 @@ exports.parseHtmlEntities = function (str) {
 		.trim();
 };
 
+/** function parseTags
+*/
 exports.parseTags = function (tags, user) {
 	// if empty variable, early out
 	if (!tags) {

@@ -142,8 +142,8 @@ exports.getPosts = function (streams, options) {
 			// find feeds given directly and by tag
 			return exports.Feed.find({
 				$or: [
-					{ feedURL: { $in: feeds }},
-					{ tags: { $in: includeTags, $nin: excludeTags }}
+					{ feedURL: { $in: feeds } },
+					{ tags: { $in: includeTags, $nin: excludeTags } }
 				]
 			});
 		})
@@ -151,8 +151,8 @@ exports.getPosts = function (streams, options) {
 			// find posts by feed and tags, and filter by date
 			var query = exports.Post.find({
 				$or: [
-					{ feed: { $in: rfeeds }},
-					{ tags: { $in: includeTags }}
+					{ feed: { $in: rfeeds } },
+					{ tags: { $in: includeTags } }
 				],
 				tags: { $nin: excludeTags },
 				updated: {
@@ -191,12 +191,12 @@ exports.formatPosts = function (user, posts) {
 	return posts.map(function (post) {
 		var isRead = 0;
 		var pts = (post.tags.length > 0) ? post.tags.map(function (t) {
-				var r = t.stringID;
-				if (!isRead && r && ut.isRead(user, r)) {
-					isRead = 1;
-				}
-				return r;
-			}) : [];
+			var r = t.stringID;
+			if (!isRead && r && ut.isRead(user, r)) {
+				isRead = 1;
+			}
+			return r;
+		}) : [];
 		return {
 			uid: post.shortid.toString(),
 			title: post.title,
