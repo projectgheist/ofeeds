@@ -97,14 +97,14 @@ describe('Routing (No user)', function () {
 			.expect(401)
 			.end(done);
 	});
-	
+
 	it('Tag post', function (done) {
 		rq
 			.post('/api/0/tags/edit')
 			.expect(401)
 			.end(done);
 	});
-	
+
 	it('Tag rename', function (done) {
 		rq
 			.post('/api/0/tags/rename')
@@ -199,7 +199,7 @@ describe('Feeds API', function () {
 			.expect(200)
 			.end(done);
 	});
-	
+
 	it('Fetch stream (Invalid params)', function (done) {
 		rq
 			.get('/api/0/stream/contents')
@@ -217,7 +217,7 @@ describe('Feeds API', function () {
 			.expect(200)
 			.end(done);
 	});
-	
+
 	it('Retrieve all feeds', function (done) {
 		rq
 			.get('/api/0/subscription/list')
@@ -483,6 +483,20 @@ describe('Tags API', function () {
 			.end(done);
 	});
 
+	it('Tag rename (No params)', function (done) {
+		rq
+			.post('/api/0/tags/rename')
+			.expect(400)
+			.end(done);
+	});
+
+	it('Mark all as read (No params)', function (done) {
+		rq
+			.post('/api/0/tag/mark-all-as-read')
+			.expect(400)
+			.end(done);
+	});
+
 	it('Tag post AS read (Invalid params)', function (done) {
 		rq
 			.post('/api/0/tags/edit')
@@ -498,6 +512,26 @@ describe('Tags API', function () {
 			.post('/api/0/tags/edit')
 			.send({
 				i: posts[0].uid
+			})
+			.expect(400)
+			.end(done);
+	});
+
+	it('Tag rename (Invalid params)', function (done) {
+		rq
+			.post('/api/0/tags/rename')
+			.send({
+				s: ''
+			})
+			.expect(400)
+			.end(done);
+	});
+
+	it('Mark all as read (Invalid params)', function (done) {
+		rq
+			.post('/api/0/tag/mark-all-as-read')
+			.send({
+				s: ''
 			})
 			.expect(400)
 			.end(done);

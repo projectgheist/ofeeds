@@ -73,7 +73,9 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 			return res.status(400).end();
 		}
 
+		// Declare options
 		var options = {};
+
 		// Check if the timestamp parameter is set.
 		if (req.body.ts) {
 			options.maxTime = req.body.ts;

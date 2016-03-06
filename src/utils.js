@@ -147,5 +147,23 @@ exports.parseTags = function (tags, user) {
 			name: match[3] // string: url
 		});
 	}
+	// return results
+	return results;
+};
+
+/** function parseStreams
+*/
+exports.parseStreams = function (streams, user) {
+	// if empty variable, early out
+	if (!streams) {
+		return null;
+	}
+	// check if already an array, else make it an array
+	if (!exports.isArray(streams)) {
+		streams = [streams];
+	}
+	// declare return object
+	var results = [];
+	// return results
 	return results;
 };

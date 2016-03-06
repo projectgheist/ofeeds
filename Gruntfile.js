@@ -26,7 +26,7 @@ module.exports = function(grunt) {
 					'./bower_components/moment/moment.js',
 					'./bower_components/typeahead.js/dist/bloodhound.js',
 					'./bower_components/typeahead.js/dist/typeahead.jquery.js',
-					'./bower_components/layzr.js/dist/layzr.js',
+					'./bower_components/layzr.js/dist/layzr.min.js',
 					'./bower_components/matchHeight/jquery.matchHeight.js',
 					'./bower_components/ngInfiniteScroll/build/ng-infinite-scroll.js',
 					'./bower_components/Flowtype.js/flowtype.js',

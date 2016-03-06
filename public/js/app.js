@@ -160,7 +160,6 @@
 							element.css('width', '');
 							element.css('height', '');
 							// force image lazy loading update
-							g_Layzr.updateSelector();
 							g_Layzr.update();
 						} else {
 							element.removeAttr('data-layzr');

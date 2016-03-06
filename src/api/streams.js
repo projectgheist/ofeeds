@@ -44,13 +44,16 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 		return res.status(400).end();
 	}
 
+	// exclude tags?
 	if (req.isAuthenticated() && req.query.xt) {
 		var excludeTags = ut.parseTags(req.query.xt, req.user);
 		if (!excludeTags.length) {
 			return res.status(400).end();
 		}
 	}
+
 	var stream = req.query;
+
 	// load posts
 	db
 		.getPosts([stream], {
