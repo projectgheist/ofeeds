@@ -37,39 +37,38 @@ function formatPosts (user, feed, posts, tags, obj) {
 /** function retrieveStream
  */
 ap.get('/api/0/stream/contents*', function (req, res) {
-	if (ut.isEmpty(req.query) ||
-		(req.query.n && !/^[0-9]+$/.test(req.query.n)) || // invalid count
-		(req.query.ot && !mm(req.query.ot).isValid()) || // invalid time
-		(req.query.nt && !mm(req.query.nt).isValid())) { // invalid time
+	var params = req.query || {};
+	if (ut.isEmpty(params) ||
+		(params.n && !/^[0-9]+$/.test(parseInt(params.n, 0))) || // invalid count
+		(params.ot && !mm(parseInt(params.ot, 0)).isValid()) || // invalid time
+		(params.nt && !mm(parseInt(params.nt, 0)).isValid())) { // invalid time
 		return res.status(400).end();
 	}
 
 	// exclude tags?
-	if (req.isAuthenticated() && req.query.xt) {
-		var excludeTags = ut.parseTags(req.query.xt, req.user);
+	if (req.isAuthenticated() && params.xt) {
+		var excludeTags = ut.parseTags(params.xt, req.user);
 		if (!excludeTags.length) {
 			return res.status(400).end();
 		}
 	}
 
-	var stream = req.query;
-
 	// load posts
 	db
-		.getPosts([stream], {
+		.getPosts([params], {
 			excludeTags: excludeTags,
-			minTime: req.query.ot || 0, // old time
-			maxTime: req.query.nt || Date.now(), // new time
-			sort: [['published', (req.query.r === 'o') ? 1 : -1], ['_id', 1]], // -1 = Newest, 1 = oldest
-			limit: +req.query.n || 20,
+			minTime: parseInt(params.ot, 0) || 0, // old time
+			maxTime: parseInt(params.nt, 0) || Date.now(), // new time
+			sort: [['published', (params.r === 'o') ? 1 : -1], ['_id', 1]], // -1 = Newest, 1 = oldest
+			limit: +parseInt(params.n, 0) || 20,
 			populate: ['feed', 'tags']
 		})
 		.then(function (item) {
 			item.query
 				.then(function (posts) {
 					// console.log('stream/contents (B)')
-					var isFeed = (stream.type === 'feed'); // boolean: TRUE if feed
-					var value = stream.value; // string: site URL
+					var isFeed = (params.type === 'feed'); // boolean: TRUE if feed
+					var value = params.value; // string: site URL
 					var hasPosts = (posts.length > 0 && posts[0]); // boolean: TRUE if feed object
 					var feed = !ut.isArray(item.feeds) ? item.feeds : item.feeds[0]; // reference to feed db obj
 					if (!feed) {
