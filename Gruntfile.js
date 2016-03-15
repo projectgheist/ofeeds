@@ -21,6 +21,7 @@ module.exports = function(grunt) {
 					'./bower_components/bootstrap/dist/js/bootstrap.js',
 					'./bower_components/bootstrap-material-design/dist/js/ripples.js',
 					'./bower_components/bootstrap-material-design/dist/js/material.js',
+					'./bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
 					'./bower_components/handlebars/handlebars.js',
 					'./bower_components/holderjs/holder.js',
 					'./bower_components/moment/moment.js',
@@ -51,6 +52,7 @@ module.exports = function(grunt) {
 					'./bower_components/bootstrap-material-design/dist/css/roboto.css',
 					'./bower_components/bootstrap-material-design/dist/css/material.css',
 					'./bower_components/bootstrap-material-design/dist/css/ripples.css',
+					'./bower_components/angular-bootstrap/ui-bootstrap-csp.css',
 				],
 				dest: './public/css/<%= pkg.name %>.min.css'
 			}
