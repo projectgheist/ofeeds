@@ -349,12 +349,15 @@
 				// old last index (don't want to re-iterate over old values)
 				var idx = 0;
 
+				// default template
+				$scope.templateID = 'list';
+				
 				// information about previous post's
 				var prev = {
 					// how much space we have used on the row
 					colnum: 0,
 					// kind of article to render
-					type: 'none'
+					type: $scope.templateID || 'none'
 				};
 				
 				// what to do with the retrieved data
@@ -400,9 +403,6 @@
 				// how often a list should appear
 				var listfreq = 6;
 
-				// default template
-				$scope.templateID = 'tile';
-				
 				// loop all articles/items
 				for (var i = idx; !$scope.eof && i < $scope.stream.items.length; ++i) {
 					// local reference to item

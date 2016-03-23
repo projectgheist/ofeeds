@@ -2,11 +2,12 @@
 	.col-lg-2(ng-if="!stream || stream.showOrigin")
 		.textfit(ng-textfit='false')
 			a(href="{{post.origin.url}}")
-				.label.label-primary {{post.origin.title}}
-	.col-xs-11(ng-class="{'col-lg-7':(!stream || stream.showOrigin)}", style="height:32px")
+				span.label.label-primary {{post.origin.title}}
+	.col-xs-10(ng-class="{'col-lg-8':(!stream || stream.showOrigin)}")
 		.textfit(ng-textfit='false')
 			a(href='/post/{{post.uid}}') {{post.title}}
-	.col-xs-1
-		p.text-right {{post.formatted}}
-.row(ng-hide="$last")
-	hr
+	.col-xs-2
+		span.label.pull-right {{post.formatted}}
+.row
+	.col-xs-12
+		hr(ng-hide="$last", style='margin:5px 0 5px 0')
