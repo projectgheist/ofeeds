@@ -560,6 +560,26 @@ describe('Tags API', function () {
 	});
 });
 
+describe('Routes WITH tags', function () {
+	it('All feeds (Return content)', function (done) {
+		rq
+			.get('/api/0/subscription/list')
+			.expect(200)
+			.end(done);
+	});
+	
+	it('Fetch stream (Valid params)', function (done) {
+		rq
+			.get('/api/0/stream/contents')
+			.query({
+				type: 'feed',
+				value: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+			})
+			.expect(200)
+			.end(done);
+	});
+});
+
 /** Make sure that the routing code compiles
  */
 describe('End authentication', function () {
