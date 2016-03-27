@@ -40,17 +40,6 @@ exports.stringInsert = function (o, i, p) {
 	return [o.slice(0, p), i, o.slice(p)].join('');
 };
 
-/** function stringReplace
-*/
-exports.stringReplace = function (val, str) {
-	var re;
-	for (var i in str) {
-		re = new RegExp('(' + str[i] + ')(?:.*?)', 'i');
-		val = val.replace(re, parseInt(i, 0) + 1);
-	}
-	return val;
-};
-
 exports.clamp = function (val, min, max) {
 	return Math.min(Math.max(val, min), max);
 };

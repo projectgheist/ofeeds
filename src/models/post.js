@@ -35,7 +35,7 @@ var Post = mg.Schema({
 	commentsURL: String,
 	categories: [String],
 	// array of tags that are attached to this post
-	tags: [ut.ref('Tag')]
+	tags: { type: [ut.ref('Tag')], default: [] }
 });
 
 /** Make sure that posts have unique indices

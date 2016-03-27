@@ -190,13 +190,13 @@ exports.getPosts = function (streams, options) {
 exports.formatPosts = function (user, posts) {
 	return posts.map(function (post) {
 		var isRead = 0;
-		var pts = (post.tags.length > 0) ? post.tags.map(function (t) {
+		var pts = post.tags.map(function (t) {
 			var r = t.stringID;
 			if (!isRead && r && ut.isRead(user, r)) {
 				isRead = 1;
 			}
 			return r;
-		}) : [];
+		});
 		return {
 			uid: post.shortid.toString(),
 			title: post.title,
