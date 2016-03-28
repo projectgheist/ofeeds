@@ -80,21 +80,21 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 		if (req.body.ts) {
 			options.maxTime = req.body.ts;
 		}
-		// Find or create the read state tag
+
+		// Find or create the read state tag query
 		var tag = db.getTags(ut.parseTags('user/-/state/read', req.user));
 
 		// Get all of the posts in the stream
 		// Google Reader appears to only accept a single stream
-		var posts = db.postsForStreams(streams, options);
+		var posts = db.getPosts(streams, options);
 
-		rs.all([tag, posts])
+		rs.all([tag, posts.query])
 			.then(function (results) {
-				var tag = results[0];
-				var posts = results[1];
-
+				// local reference
+				var tags = results[0];
 				// Add the tag to each of them
-				return rs.all(posts.map(function (post) {
-					post.tags.addToSet(tag);
+				return rs.all(results[1].map(function (post) {
+					post.tags.addToSet(tags);
 					return post.save();
 				}));
 			})
