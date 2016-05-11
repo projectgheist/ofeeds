@@ -10,46 +10,51 @@ var mm = require('moment');
 function formatPosts (user, feed, posts, tags, obj) {
 	// creates a new array with the posts
 	var items = db.formatPosts(user, posts);
-	//
-	if (!feed && tags && tags.length > 0) {
-		obj.title = tags[0].name;
-		obj.id = 'user/' + obj.title;
-		obj.showOrigin = true;
-		// can't subscribe to this feed
-		obj.subscribed = -1;
-	}
-	// url to current api fetch call
-	obj.self = {href: (feed ? feed.self : '')};
-	obj.alternate = (feed && feed.siteURL) ? [{ href: feed.siteURL, type: 'text/html' }] : '';
-	obj.items = items;
-	// console.log('formatPosts (E)')
-	if (feed) {
+	if (!feed) {
+		if (tags && tags.length > 0) {
+			obj.title = tags[0].name;
+			obj.id = 'user/' + obj.title;
+			obj.showOrigin = true;
+			// can't subscribe to this feed
+			obj.subscribed = -1;
+		}
+	} else {
 		for (var i in tags) {
 			obj.subscribed = (feed.tags.indexOf(tags[i].id) > -1) ? 1 : 0;
+			// If subscribed is flagged, break
 			if (obj.subscribed) {
 				break;
 			}
 		}
 	}
+	// url to current api fetch call
+	obj.self = {href: (feed ? feed.self : '')};
+	obj.alternate = (feed && feed.siteURL) ? [{ href: feed.siteURL, type: 'text/html' }] : '';
+	obj.items = items;
 	return obj;
 }
 
 /** function retrieveStream
  */
 ap.get('/api/0/stream/contents*', function (req, res) {
+	// Local reference to args
 	var params = req.query || {};
+	
+	// Check for errors
 	if (ut.isEmpty(params) ||
 		(params.n && !/^[0-9]+$/.test(parseInt(params.n, 0))) || // invalid count
 		(params.ot && !mm(parseInt(params.ot, 0)).isValid()) || // invalid time
 		(params.nt && !mm(parseInt(params.nt, 0)).isValid())) { // invalid time
-		return res.status(400).end();
+		return res.status(400).send('Invalid parameters provided!');
 	}
 
 	// exclude tags?
+	var excludeTags = [];
 	if (req.isAuthenticated() && params.xt) {
-		var excludeTags = ut.parseTags(params.xt, req.user);
+		excludeTags = ut.parseTags(params.xt, req.user);
+		// No exclusion tags detected, but requested
 		if (!excludeTags.length) {
-			return res.status(400).end();
+			return res.status(400).send('No exclusion tags provided!');;
 		}
 	}
 
@@ -72,7 +77,7 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 					var hasPosts = (posts.length > 0 && posts[0]); // boolean: TRUE if feed object
 					var feed = !ut.isArray(item.feeds) ? item.feeds : item.feeds[0]; // reference to feed db obj
 					if (!feed) {
-						return res.status(400).end();
+						return res.status(400).send('No feed retrieved!');
 					}
 					var obj = {
 						id: encodeURIComponent(isFeed ? feed.stringID : ''),

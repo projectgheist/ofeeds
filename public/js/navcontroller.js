@@ -1,31 +1,13 @@
-(function() {
+(function () {
 	'use strict';
 
-	angular
-        .module('webapp')
-        .controller('navController', navController)
-        .service('navService', navService);
-
-    navController.$inject = ['$scope', '$http', '$location', '$interval', 'navService'];
-	navService.$inject = ['$resource'];
-	
-	function navService($resource) {
-		return {
-			getElements: getElements
-		};
-		
-		function getElements() {
-			return $resource('/api/0/subscription/list', {}, { query:{ method: 'GET', isArray: false } });
-		}
-	};
-	
-	function navController($scope, $http, $location, $interval, navService) {
-		$scope.$on("updateSubs", function(event, args) {
+	function navController($scope, $http, $location, $interval, services) {
+		$scope.$on("updateSubs", function (event, args) {
 			$scope.gtsubs();
 		});
 
-		$scope.gtsubs = function() {
-			navService.getElements().query(function(data) {
+		$scope.gtsubs = function () {
+			services.getSubscriptions().query(function (data) {
 				// loop subscription array
 				for (var i = 0; i < data.feeds.length; ++i) {
 					// retrieved crawl time
@@ -65,7 +47,7 @@
 				$scope.nextRunIn = data.nextRunIn;
 				// if no next run time
 				/*if (!$scope.nrt) {
-					$interval(function() {
+					$interval(function () {
 						var d = moment($scope.nextRunIn).diff(moment(), 'milliseconds');
 						// do string conversion from date
 						$scope.nrt = moment(d).format('mm:ss');
@@ -76,15 +58,15 @@
 				}*/
 				// update subscriptions
 				$scope.subs = data.feeds;
-			}, function(err) {
+			}, function (err) {
 			});
 		}	
 
-		$scope.gotostream = function(obj) {
+		$scope.gotostream = function (obj) {
 			$scope.gotosub({ 'value': decodeURIComponent(obj.id) });
 		}
 
-		$scope.isActive = function(str) {
+		$scope.isActive = function (str) {
 			// !special case for the main page
 			if (str === '/') {
 				return $location.path() === str;
@@ -96,21 +78,33 @@
 			return a.test($location.path());
 		}
 
-		$scope.rfrsh = function(idx) {
+		$scope.rfrsh = function (idx) {
 			RefreshFeed.query({ 'q': idx },
-				function(data) {
+				function (data) {
 					$scope.gtsubs();
 				},
-				function(err) {
+				function (err) {
 			});
 		}
 
-		$scope.gotosub = function(obj) {
-			$timeout(function() {
+		$scope.gotosub = function (obj) {
+			$timeout(function () {
 				$location.path(['/subscription/feed/',obj.value,'/'].join(''));
 			});
 		}
 
 		$scope.gtsubs();
-	}	
+	}
+
+	navController.$inject = [
+		'$scope',
+		'$http',
+		'$location',
+		'$interval',
+		'services'
+	];
+
+	angular
+        .module('webapp')
+        .controller('navController', navController);
 })();

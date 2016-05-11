@@ -121,7 +121,7 @@ function AllFeeds (req, res) {
 			// sort argument for the retrieved feeds
 			sort: s,
 			// limit the amount of output feeds
-			limit: req.query.n || false
+			limit: parseInt(req.query.n) || false
 		})
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function (feeds) {
@@ -145,10 +145,11 @@ function AllFeeds (req, res) {
 			ag
 				.getAllJobs()
 				.then(function (jobs) {
-					return res.json({
+					var obj = {
 						'nextRunIn': ((jobs.length > 0) ? jobs[0].attrs.nextRunAt : ''),
 						'feeds': a
-					});
+					};
+					return res.json(obj);
 				});
 		});
 }
@@ -156,7 +157,10 @@ function AllFeeds (req, res) {
 // lists all of the feeds in the database
 ap.get('/api/0/feeds/list', AllFeeds);
 
-// lists all of the feeds in the database
+/**
+ * lists all of the feeds in the database
+ * @returns {object}
+ */
 ap.post('/api/0/feed/title', function (req, res) {
 	// is user logged in?
 	if (!req.isAuthenticated()) {
@@ -167,11 +171,19 @@ ap.post('/api/0/feed/title', function (req, res) {
 		db
 			.getTags(ut.parseTags('user/-/state/reading-list', req.user))
 			.then(function (c) {
-				return db.Feed.find({ tags: { $in: c }, feedURL: req.body.q });
+				return db.Feed.find({
+					tags: { $in: c },
+					feedURL: req.body.q
+				});
 			})
 			.then(function (a) {
-				if (!a.length) return false;
+				// check for valid find
+				if (!a.length) {
+					return {};
+				}
+				// local reference
 				var ref = ut.arrayToObject(a);
+				// set name and store in database
 				return ref.setTitleForUser(req.body.n, req.user).save();
 			})
 			.then(function (b) {
@@ -191,55 +203,60 @@ ap.get('/api/0/subscription/list', function (req, res) {
 		return db
 			.getTags(ut.parseTags('user/-/state/reading-list', req.user))
 			.then(function (tagsArray) {
-				// valid tag found?
+				// valid tags found?
 				if (tagsArray.length) {
 					// find all feeds that contain 'reading-list' tag & sort by alphabetical title
 					return rs.all([
-						db.Feed.find({ tags: tagsArray[0] }).sort({ 'title': 1 }),
+						db.Feed.find({ tags: ut.arrayToObject(tagsArray) }).sort({ 'title': 1 }),
 						db.getTags(ut.parseTags('user/-/state/read', req.user))
 					]);
 				}
+				// no tags found, return empty array
 				return [];
 			})
 			.then(function (results) {
 				// no feeds to process, next
-				if (!results.length) return [];
-				// create array
-				var a = results[0].map(function (f) {
+				if (!results.length) {
+					return [];
+				}
+				// variables for reading list and read tag
+				var readingList = results[0];
+				var readTag = results[1];
+				// create array of promises
+				var a = readingList.map(function (feed) {
 					// find posts in feed WHERE 'read'-tag 'not in' array
 					return db.Post
-						.find({ _id: { $in: f.posts }, tags: { $nin: results[1] } })
+						.find({
+							_id: { $in: f.posts },
+							tags: { $nin: readTag }
+						})
 						.then(function (c) {
 							// increment total unread count
 							tuc += c.length;
 							// create object
 							return {
-								favicon: f.favicon,
-								id: encodeURIComponent(['feed/', f.feedURL].join('')),
-								title: f.titleForUser(req.user),
+								favicon: feed.favicon,
+								id: encodeURIComponent(['feed/', feed.feedURL].join('')),
+								title: feed.titleForUser(req.user),
 								unreadcount: c.length,
-								shortid: f.shortID,
-								// create array of users tags for this feed
-								categories: f.tagsForUser(req.user).map(function (tag) {
-									return tag.name;
-								}),
-								crawlTime: f.successfulCrawlTime,
-								updated: f.lastModified,
-								creation: f.creationTime
+								shortid: feed.shortID,
+								crawlTime: feed.successfulCrawlTime,
+								updated: feed.lastModified,
+								creation: feed.creationTime
 							};
 						});
 				});
 				return rs.all(a);
 			})
-			.then(function (s) {
+			.then(function (formattedFeeds) {
 				// add separate reading-list element
-				s.push({
+				formattedFeeds.push({
 					id: encodeURIComponent('label/reading-list'),
 					unreadcount: tuc
 				});
 				// return json value
 				return res.json({
-					'feeds': s
+					'feeds': formattedFeeds
 				});
 			});
 	}

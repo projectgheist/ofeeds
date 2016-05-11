@@ -8,14 +8,14 @@ ap.get('/api/0/posts', function (req, res) {
 	// make options variable
 	var opts = {
 		sort: { published: (!req.query.r || req.query.r !== 'o') ? -1 : 1 }, // newest first
-		limit: req.query.n || 5 // limit the amount of output feeds
+		limit: parseInt(req.query.n) || 5 // limit the amount of output feeds
 	};
 
 	db
 		.all(db.Post, opts) // retrieve all feeds
 		.populate('feed') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function (posts) {
-			var fp = db.formatPosts({}, posts);// formatted posts
+			var fp = db.formatPosts({}, posts); // formatted posts
 			return res.json(fp);
 		});
 });

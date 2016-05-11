@@ -558,6 +558,17 @@ describe('Tags API', function () {
 			.expect(200)
 			.end(done);
 	});
+
+	it('Mark all as read (Valid params)', function (done) {
+		rq
+			.post('/api/0/tag/mark-all-as-read')
+			.send({
+				s: '',
+				ts: ''
+			})
+			.expect(200)
+			.end(done);
+	});
 });
 
 describe('Routes WITH tags', function () {

@@ -1,44 +1,11 @@
-(function() {
+(function () {
 	'use strict';
 
-	angular
-        .module('webapp')
-        .controller('dashboardController', dashboardController)
-        .service('dashboardService', dashboardService);
-
-	dashboardService.$inject = [
-		'$resource'
-	];
-
-	function dashboardService($resource) {
-		return {
-			recentFeeds: recentFeeds,
-			recentPosts: recentPosts,
-			popularFeeds: popularFeeds,
-		};
-		
-		function recentFeeds() {
-			return $resource('/api/0/feeds/list', {n:5, r:'a'}, { query:{ method: 'GET', isArray: false } });
-		}
-
-		function popularFeeds() {
-			return $resource('/api/0/feeds/list', {n:5, r:'s'}, { query:{ method: 'GET', isArray: false } });
-		}
-		
-		function recentPosts() {
-			return $resource('/api/0/posts', {n:5, r:'n'}, { query:{ method: 'GET', isArray: true } });
-		}
-	};
-
-    dashboardController.$inject = [
-		'$scope', 
-		'dashboardService',
-		'$sce', 
-		'$interval', 
-	];
-
-	function dashboardController($scope, dashboardService, $sce, $interval) {
-		dashboardService.recentFeeds().query(function(data) {
+	/** Declare controller */
+	function dashboardController ($scope, $sce, $interval, services) {
+		services.recentFeeds().query(function (data) {
+			// strip properties with leading $$ characters
+			data = JSON.parse(angular.toJson(data));
 			if (data && data.feeds && data.feeds.length > 0) {
 				$scope.rf = data.feeds;
 				for (var i in $scope.rf) {
@@ -47,7 +14,9 @@
 			}
 		});
 
-		dashboardService.popularFeeds().query(function(data) {
+		services.popularFeeds().query(function (data) {
+			// strip properties with leading $$ characters
+			data = JSON.parse(angular.toJson(data));
 			if (data && data.feeds && data.feeds.length > 0) {
 				$scope.pf = data.feeds;
 				for (var i in $scope.pf) {
@@ -56,18 +25,24 @@
 			}
 		});
 		
-		$scope.recentPosts = function() {
-			dashboardService.recentPosts().query(function(data) {
+		$scope.recentPosts = function () {
+			services.recentPosts().query(function (data) {
+				// strip properties with leading $$ characters
 				data = JSON.parse(angular.toJson(data));
 				if (data.length > 0) {
 					// local reference to item
 					$scope.rp = data;
+					// loop recent posts
 					for (var i in $scope.rp) {
+						// local reference
 						var ref = $scope.rp[i];
+						// check for author
 						if (ref.author) {
 							// shorten the author name
 							var author = /(by\s)(\w*\s\w*)/i.exec(ref.author);
+							// valid author string?
 							if (author) {
+								// replace string with shortend version
 								ref.author = author[2];
 							}
 						}
@@ -83,7 +58,21 @@
 		
 		// retrieve recent posts
 		$scope.recentPosts();
+		
 		// define interval to refresh recent posts
 		$interval($scope.recentPosts, 2 * 1000 * 60, false);
 	}
+	
+	/** Declare modules to be included in the controller */
+    dashboardController.$inject = [
+		'$scope',
+		'$sce',
+		'$interval',
+		'services'
+	];
+	
+	/** Declare controller */
+	angular
+        .module('webapp')
+        .controller('dashboardController', dashboardController);
 })();

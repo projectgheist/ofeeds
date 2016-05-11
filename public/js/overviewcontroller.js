@@ -1,61 +1,59 @@
-(function() {
+(function () {
 	'use strict';
 
-	angular
-        .module('webapp')
-        .controller('overviewController', overviewController)
-        .service('overviewService', overviewService);
-
-	overviewService.$inject = [
-		'$resource',
-	];
-
-	function overviewService($resource) {
-		return {
-			getElements: getElements
-		};
-		
-		function getElements() {
-			return $resource('/api/0/feeds/list', {}, { query:{ method: 'GET', isArray: false } });
-		}
-	};
-
     overviewController.$inject = [
-		'$scope', 
-		'overviewService',
+		'$scope',
 		'$timeout',
 		'$interval',
 	];
 
-	function overviewController($scope, overviewService, $timeout, $interval) {
-		$scope.fetch = function() {
-			overviewService.getElements().query(function(data) {
+	angular
+        .module('webapp')
+        .controller('overviewController', overviewController);
+
+	function overviewController($scope, $timeout, $interval) {
+		/** function fetch
+		 * Retrieve all feeds
+		 */
+		$scope.fetch = function () {
+			overviewService.getElements().query(function (data) {
+				// store retrieved data
+				$scope.subs = data.feeds;
+				// store retrieved next cron runtime
 				$scope.cron = data.nextRunIn;
 				// diff in time
 				var d = moment($scope.cron).diff(moment(),'milliseconds');
+				// repeatitive fetch of information every n-time
 				$timeout($scope.fetch, (d + 5000));
-				$scope.subs = data.feeds;
+				// loop feeds
 				for (var i in $scope.subs) {
+					// local reference
 					var ref = $scope.subs[i];
+					//
 					ref.url = ['/feed/',encodeURIComponent(ref.id)].join('');
+					// formatted retrieved time
 					ref.crawlTime = moment(ref.crawlTime).fromNow();
+					// formatted feed modification time
 					ref.updated = moment(ref.updated).format();
 				}
 			});
 		};
-		
-		$scope.rfrsh = function(v) {
+
+		/** function fetch */
+		$scope.rfrsh = function (v) {
 		};
 	
 		// defocus search box and set value
 		$('.typeahead').blur().val('');
-	
+
+		// execute the fetch on load
 		$scope.fetch();
-		
-		$interval(function() {
+
+		// declare repetition
+		$interval(function () {
 			if ($scope.cron) {
 				// diff in time
-				var d = moment($scope.cron).diff(moment(),'milliseconds');
+				var d = moment($scope.cron).diff(moment(), 'milliseconds');
 				// do string conversion from date
 				$scope.diff = moment(d).format('mm:ss');
 			}

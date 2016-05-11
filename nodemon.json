@@ -1,0 +1,17 @@
+{
+	"restartable": "rs",
+	"ignore": [
+		".git/*",
+		"node_modules/*",
+		"public/*",
+		"private/*",
+		"views/*",
+		"test/*",
+		"./README.md",
+		"*.css",
+		"*.ini",
+		"*.json",
+		"*.gitignore",
+		"Gruntfile.js"
+	]
+}

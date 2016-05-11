@@ -7,6 +7,7 @@ var db = require('./storage');
 var mm = require('moment');
 var ut = require('./utils');
 
+/** Declare a class */
 var FeedParser = require('feedparser');
 
 /** function FindOrCreatePost

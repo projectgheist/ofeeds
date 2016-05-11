@@ -45,14 +45,19 @@ ap.post('/api/0/tags/rename', function (req, res) {
 	} else if (ut.isEmpty(req.body)) {
 		return res.status(400).end();
 	} else {
-		var orig = ut.parseTags(req.body.s, req.user);
-		var dest = ut.parseTags(req.body.dest, req.user);
-		if (!orig || !dest) {
-			return res.status(400).end();
+		// find names
+		var tags = ut.parseTags([req.body.s, req.body.dest], req.user);
+		// early out?
+		if (!tags.length || tags.length < 2) {
+			return res.status(400).send('Invalid tag names!');
 		}
+		// original tag name
+		var orig = tags[0];
+		// new tag name
+		var dest = tags[1];
 		// @todo: if dest is another existing tag, the tags need to be merged
-		db.Tag
-			.update(orig[0], dest[0])
+		db
+			.renameTag(orig, dest)
 			.then(function () {
 				res.status(200).end();
 			}, function (ignore) {

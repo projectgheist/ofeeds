@@ -83,6 +83,7 @@ exports.editTags = function (record, addTags, removeTags) {
 				record.tags.remove(t);
 			});
 	});
+	// create one array with both the add and remove promises
 	var all = add.concat(remove);
 	// returns a promise
 	return rs
@@ -98,13 +99,47 @@ exports.getTags = function (tags) {
 	if (tags) {
 		if (!Array.isArray(tags)) {
 			tags = [tags];
+		} else if (!tags.length) {
+			return [];
 		}
-		// make sure it has elements inside the array
-		if (tags.length > 0) {
-			return exports.Tag.find({ $or: tags });
-		}
+		return exports.Tag.find({ $or: tags });
 	}
 	return [];
+};
+
+/** function renameTag
+ * Used to rename folders
+ */
+exports.renameTag = function (oldTag, newTag) {
+	// find old and new tag names
+	return exports.Tag
+		.find({ $or: [oldTag, newTag] })
+		.then(function (tags) {
+			// any tags exist?
+			if (tags.length) {
+				// old or new tag found?
+				if (tags.length == 1) {
+					// rename the old tag
+					if (tags[0] == oldTag) {
+						tags[0].rename(newTag).save();
+					}
+					// no need to rename tag or we renamed the old tag
+					return true;
+				}
+				// merge old and new tags together, find old tag references, point to new tag and delete old tag
+				return exports.Feed
+					.update({ tags: tags[0] }, { $addToSet: tags[1] })
+					.then(function () {
+						return exports.Feed.update({ tags: tags[0] }, { $pullAll: tags[0] });
+					})
+					.then(function () {
+						// otherwise it returns a promise
+						return true;
+					})
+			} else {
+				return false;
+			}
+		});
 };
 
 // Returns a list of posts for a list of streams (feeds and tags) as parsed
@@ -131,10 +166,14 @@ exports.getPosts = function (streams, options) {
 		}
 	}
 	// load the tags to include and exclude
-	var includeTags, excludeTags;
-	//
+	var includeTags;
+	var excludeTags;
+	// returns a promise
 	return rs
-		.all([exports.getTags(tags), exports.getTags(options.excludeTags)])
+		.all([
+			exports.getTags(tags),
+			exports.getTags(options.excludeTags)
+		])
 		.then(function (multipleTags) {
 			// store for later use
 			includeTags = multipleTags[0];
@@ -186,12 +225,14 @@ exports.getPosts = function (streams, options) {
 		});
 };
 
-// formats posts in a format that can be read by the client
+// formats posts in a format that can be read on the clientside
 exports.formatPosts = function (user, posts) {
 	return posts.map(function (post) {
+		// Flag to indicate if post has been marked as read
 		var isRead = 0;
-		var pts = post.tags.map(function (t) {
-			var r = t.stringID;
+		var pts = post.tags.map(function (ref) {
+			var r = ref.stringID;
+			// Not already flagged as read (optimization), do read tag check
 			if (!isRead && r && ut.isRead(user, r)) {
 				isRead = 1;
 			}

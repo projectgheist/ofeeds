@@ -4,7 +4,9 @@ var mg = require('mongoose');
 var vd = require('validator');
 
 /** function isEmpty
-*/
+ * Checks to see if an object has any variables/functions
+ * @returns true if nothing is detected, else false
+ */
 exports.isEmpty = function (obj) {
 	for (var key in obj) {
 		if (obj.hasOwnProperty(key)) {
@@ -32,20 +34,21 @@ exports.startsWith = function (val, str, out) {
 };
 
 /** function stringInsert
-@param o: original string
-@param i: string to insert
-@param p: insert position
+ * @param o: original string
+ * @param i: string to insert
+ * @param p: insert position
 */
 exports.stringInsert = function (o, i, p) {
 	return [o.slice(0, p), i, o.slice(p)].join('');
 };
 
+// Mathematical clamp function
 exports.clamp = function (val, min, max) {
 	return Math.min(Math.max(val, min), max);
 };
 
 exports.fullURL = function (req) {
-	return req.protocol + '://' + req.headers.host + req.url;
+	return [req.protocol, '://', req.headers.host, req.url].join('');
 };
 
 exports.ref = function (type) {
@@ -60,12 +63,15 @@ exports.isUrl = function (url) {
 	return vd.isURL(url);
 };
 
-// check if the string is a url
+// check if a tag is the the 'read' one
 exports.isRead = function (user, tag) {
+	// can only be marked as read if a user is present
 	if (!user || Object.keys(user).length === 0) {
 		return false;
 	}
+	// do regex for label
 	var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tag);
+	// match found and it is the 'read' tag
 	if (match && match[1] === user._id && match[3] === 'read') {
 		return true;
 	}
@@ -78,8 +84,8 @@ exports.isArray = function (val) {
 };
 
 // converts an array to an object by returning its first element
-exports.arrayToObject = function (val) {
-	return exports.isArray(val) ? val[0] : val;
+exports.arrayToObject = function (val, offset) {
+	return exports.isArray(val) ? val[(offset || 0)] : val;
 };
 
 // returns a string that points to the database url
@@ -114,7 +120,7 @@ exports.parseHtmlEntities = function (str) {
 exports.parseTags = function (tags, user) {
 	// if empty variable, early out
 	if (!tags) {
-		return null;
+		return [];
 	}
 	// check if already an array, else make it an array
 	if (!exports.isArray(tags)) {
@@ -145,7 +151,7 @@ exports.parseTags = function (tags, user) {
 exports.parseStreams = function (streams, user) {
 	// if empty variable, early out
 	if (!streams) {
-		return null;
+		return [];
 	}
 	// check if already an array, else make it an array
 	if (!exports.isArray(streams)) {

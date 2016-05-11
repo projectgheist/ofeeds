@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	'use strict';
 
 	/**
@@ -9,14 +9,15 @@
 	/**
 	 * On page load ready, only load images that are currently visible in the view area
 	 */
-	jQuery(document).ready(function($) {
+	jQuery(document).ready(function ($) {
+		/** Create instance of lazy image loading */
 		g_Layzr = new Layzr({ 
 			attr: 'data-layzr',
 			threshold: 50,
-			callback: function(node) {
+			callback: function (node) {
 				var self = $(this);
 				// wait for the image to finish loading
-				self.bind('load', function() {	
+				self.bind('load', function () {	
 					// remove holderjs attributes
 					self.removeAttr('data-src');
 					self.removeAttr('data-holder-rendered');
@@ -56,7 +57,7 @@
 		});
 		
 		// set the internal height of the sidebar
-		$.fn.matchHeight._afterUpdate = function(event, groups) {
+		$.fn.matchHeight._afterUpdate = function (event, groups) {
 			// Reduce height by navbar height
 			var h = $('#menu').height() - 60;
 			$('#menu').height(h);
@@ -71,7 +72,7 @@
 	// single keys
 	/** Set focus on text input field
 	 */
-	Mousetrap.bind('/', function() {
+	Mousetrap.bind('/', function () {
 		// set focus on search box
 		$("#nrss").focus();
 		// prevent default browser behavior
@@ -91,34 +92,27 @@
 			'ngResource',
 			'infinite-scroll',
 			'ngFlowtype',
-			'AppService'
 		])
 		.config(appConfig)
 		// directive names are only allowed to have one capitalized letter in them
 		.directive('holderjs', holderjs)
 		.directive('withripple', ['$rootScope','$window','$location',withripple])
-		.directive('ngRipple', ngRipple)
 		.directive('ngTextfit', ngTextfit)
-		//.directive('ngTextoverflow', ngTextoverflow);
-		//.directive('onLastRepeat', onLastRepeat)
-		//.directive('onResize', onResize)
 		.directive('ngInclude', ['$compile',ngInclude]);
-		//.directive('ngImgLoaded', ngImgLoaded)
 
-	/*
-	 *
+	/** function appConfig
 	 */
 	function appConfig($routeProvider, $locationProvider) {
 		$locationProvider.html5Mode(true);
 		$routeProvider
 		.when('/manage', {
-			templateUrl: function(urlattr) {
+			templateUrl: function (urlattr) {
 				return 'views/pages/manage';
 			},
 			controller: 'overviewController'
 		})
 		.when('/:type/:value', {
-			templateUrl: function(urlattr) {
+			templateUrl: function (urlattr) {
 				if (urlattr.type === 'feed') {
 					return 'views/pages/posts';
 				} else if (urlattr.type === 'post') {
@@ -129,7 +123,7 @@
 			}
 		})
 		.otherwise({
-			templateUrl: function(urlattr) {
+			templateUrl: function (urlattr) {
 				return 'views/pages/dashboard';
 			},
 			controller: 'dashboardController'
@@ -144,8 +138,8 @@
 			link: function (scope, element, attrs) {
 				scope.$watch(function () {
 					return scope.isNavVisible();
-				}, function() {
-					setTimeout(function() { // requires a 1ms delay for some reason
+				}, function () {
+					setTimeout(function () { // requires a 1ms delay for some reason
 						element.height('0'); // ignore current image height
 						var img = element.parent(), //eg. panel-image
 							panel = img.parent();
@@ -173,8 +167,8 @@
 	function ngTextoverflow() {
 		return {
 			restrict: 'E', // class
-			link: function(scope, element, attrs) {
-				setTimeout(function() {
+			link: function (scope, element, attrs) {
+				setTimeout(function () {
 				}, 1);
 			}
 		};
@@ -185,11 +179,11 @@
 	function withripple(rootScope, window, location) {
 		return {
 			restrict: 'C', // class
-			link: function(scope, element, attrs) {
-				element.bind('click', function() {
+			link: function (scope, element, attrs) {
+				element.bind('click', function () {
 					if (location.path() !== element.attr('data-target')) {
 						if (element.attr('data-target').indexOf('https://') !== 0) {
-							rootScope.$apply(function() {
+							rootScope.$apply(function () {
 								location.path(element.attr('data-target'));
 							});
 						} else {
@@ -204,42 +198,25 @@
 	/**
 	*/
 	function onLastRepeat() {
-		return function(scope, element, attrs) {
+		return function (scope, element, attrs) {
 			if (scope.$last) {
-				setTimeout(function() {
+				setTimeout(function () {
 					scope.$emit('onRepeatLast', element, attrs);
 				}, 1);
 			}
 		}
 	};
-
-	/**
-	*/
-	function ngRipple() {
-		return {
-			restrict: 'A', // attribute
-			link: function(scope, element, attrs) {
-				// Trigger when number of children changes, including by directives like ng-repeat
-				scope.$watch(function() {
-					return element.children().length === parseInt(attrs['ngRipple']);
-				}, function() {
-					// initialize material ripple
-					$.material.init();
-				});
-			}
-		};
-	}
 	
 	/**
 	*/
 	function ngTextfit() {
 		return {
 			restrict: 'A', // attribute
-			link: function(scope, element, attrs) {
+			link: function (scope, element, attrs) {
 				scope.$watch(function () {
 					return scope.isNavVisible();
-				}, function() {
-					setTimeout(function() { // requires a 1ms delay for some reason
+				}, function () {
+					setTimeout(function () { // requires a 1ms delay for some reason
 						var b = ((attrs.ngTextfit.length === 0) || (attrs.ngTextfit === 'true'));
 						element.textTailor({
 							fit: b, // fit the text to the parent's height and width
@@ -256,8 +233,8 @@
 	function ngImgLoaded() {
 		return {
 			restrict: 'A', // attribute
-			link: function(scope, element, attrs) {
-				element.bind('load', function() {
+			link: function (scope, element, attrs) {
+				element.bind('load', function () {
 					fit(element[0], element.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
 				});
 			}
@@ -267,15 +244,15 @@
 	function ngInclude($compile) {
 		return {
 			restrict: 'A', // attribute
-			link: function(scope, element, attrs) {
+			link: function (scope, element, attrs) {
 				/*var s = scope.$parent.$parent, // scope
 					p = scope.$parent.post; // post info
 				// Trigger when number of children changes, including by directives like ng-repeat
-				scope.$watch(function() {
+				scope.$watch(function () {
 					return element.children().length;
-				}, function() {
+				}, function () {
 					// Wait for templates to finish rendering
-					scope.$evalAsync(function() {
+					scope.$evalAsync(function () {
 						// set item id (can't do this in the template as it won't show up correctly in the document)
 						element.attr('id',p.uid);
 						// if a current element has been expanded
@@ -290,7 +267,7 @@
 								s.scrollto(s.cp.uid, -80);
 							}
 							// make all links open in a new tab
-							element.find('.article-content').find('a').each(function(e) {
+							element.find('.article-content').find('a').each(function (e) {
 								// if tumblr site
 								var u = $(this).attr("href"),
 									r = new RegExp("(?:http:\/\/)?(?:www\.+)?([A-Za-z0-9\-]*)(\.tumblr\.com\/)"),
@@ -304,12 +281,12 @@
 									trigger: 'hover', 
 										delay:{hide: 3000}, 
 										html: true, 
-										'content': function() { return $compile(['<a ng-click="gotoFeed(\'',a[0].trim(),'rss\')">',a[1],'</a>'].join(''))(scope); }
+										'content': function () { return $compile(['<a ng-click="gotoFeed(\'',a[0].trim(),'rss\')">',a[1],'</a>'].join(''))(scope); }
 									});
 								}
 							});
 							// don't have iframes that are larger then the article width
-							element.find('iframe').each(function(e) {
+							element.find('iframe').each(function (e) {
 								if ($(this).width() > element.width()) {
 									$(this).width('100%');
 								}
@@ -322,7 +299,7 @@
 	};
 
 	function onResize($window) {
-		return function(scope, element, attr) {
+		return function (scope, element, attr) {
 			var w = angular.element($window);
 			scope.$watch(function () {
 				return {'h': w.height(), 'w': w.width()};
@@ -341,42 +318,4 @@
 			});
 		}
 	};
-
-	/**
-	 * Other
-	 */
-	var AppService = angular.module('AppService', []);
-	AppService.factory('GetSubs', ['$resource',
-		function($resource) {
-			return $resource('/api/0/subscription/list', {}, {query:{method:'GET',isArray: true}});
-		}
-	]);
-
-	AppService.factory('GetFeeds', ['$resource',
-		function($resource) {
-			return $resource('/api/0/feeds/list', {}, {query:{method:'GET',isArray: false}});
-		}
-	]);
-
-	AppService.factory('RefreshFeed', ['$resource',
-		function($resource) {
-			return $resource('/api/0/subscription/refresh', {q:'@q'}, {query:{method:'GET',isArray:false}});
-		}
-	]);
-
-	AppService.factory('FeedSubmit', ['$resource',
-		function($resource) {
-			return $resource('/api/0/subscription/quickadd', {q:'@q'}, {query:{method:'POST'}});
-		}
-	]);
-
-	AppService.factory('SetTag', ['$resource',
-		function($resource) {
-			return $resource('/api/0/tag/edit', {i:'@i',s:'@s',a:'@a',r:'@r'}, {query:{method:'POST'}});
-		}
-	]);
-
-	/**
-	 * App configuration
-	 */
 })();

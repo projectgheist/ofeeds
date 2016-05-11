@@ -1,30 +1,7 @@
 (function () {
 	'use strict';
-
-	angular
-        .module('webapp')
-        .controller('panelController', panelController)
-        .service('panelService', panelService);
 	
-	panelService.$inject = [
-		'$resource'
-	];
-
-	function panelService($resource) {
-		return {
-			getElements: getElements,
-			getSingle: getSingle,
-		};
-		
-		function getElements() {
-			return $resource('/api/0/stream/contents/', {type:'@type', params:'@params'}, { query:{ method: 'GET', isArray: false } });
-		}
-		
-		function getSingle() {
-			return $resource('/api/0/post/', {params:'@params'}, { query:{ method: 'GET', isArray: false } });
-		}
-	};
-
+	/** Declare modules to be included in the controller */
     panelController.$inject = [
 		'$rootScope', 
 		'$scope', 
@@ -35,12 +12,16 @@
 		'$anchorScroll', 
 		'$sce', 
 		'$timeout', 
-		'$window', 
-		'panelService'
+		'$window',
+		'services',
 	];
 
-	function panelController($rootScope, $scope, $http, $location, $route, $routeParams, $anchorScroll, $sce, $timeout, $window, panelService) {
+	/** Declare controller */
+	function panelController($rootScope, $scope, $http, $location, $route, $routeParams, $anchorScroll, $sce, $timeout, $window, services) {
+		/** Type of template to use */
 		$scope.templateID = '';
+		
+		/** Declare templates */
 		$scope.templates = {
 			'list': ['views/templates/post-compact','views/templates/post-expand'],
 			'tile': ['views/templates/post-tile'], 
@@ -53,10 +34,15 @@
 		*/
 		$scope.showAlert = function (t,m) {
 			$rootScope.$apply(function () {
+				// set alert type
 				$scope.alertType = ['alert-',t].join('');
+				// set alert message
 				$scope.alertMessage = $sce.trustAsHtml(m);
+				// find all alert objects
 				var a = $("#alert");
+				// remove the hidden class
 				a.removeClass('hidden');
+				// 
 				a.fadeTo(5000, 500).slideUp(500, function () {
 					a.alert('close');
 				});
@@ -64,7 +50,8 @@
 		};
 		
 		/** function isAlertVisible
-		*/
+		 * @returns Flag true if alert is visible, else false
+		 */
 		$scope.isAlertVisible = function () {
 			return $('#alert').is(':visible');
 		};
@@ -76,7 +63,9 @@
 			$('#menu').toggle();
 		};
 		
-		// is slideout open
+		/** function isNavVisible
+		 * @returns Flag true if the menu sidebar is extended, else false
+		 */
 		$scope.isNavVisible = function () {
 			return $('#menu').is(':visible');
 		};
@@ -218,7 +207,7 @@
 			// reset post data
 			$scope.post = undefined;
 			// execute external calls
-			panelService.getSingle().query($scope.params, function (data) {
+			services.getPost().query($scope.params, function (data) {
 				// turn off refresh
 				$scope.rf = false;
 				// no data retrieved
@@ -329,7 +318,7 @@
 				$scope.params.xt = 'user/-/state/read';
 			}
 			// retrieve from database
-			panelService.getElements().query($scope.params, function (data) {
+			services.getElements().query($scope.params, function (data) {
 				// turn off refresh
 				$scope.rf = false;
 				// make sure variables exist
@@ -634,7 +623,7 @@
 				}
 			}
 		};
-		
+
 		/** scroll to the previous article in the stream
 		*/
 		$scope.prev = function () {
@@ -647,7 +636,7 @@
 				}
 			}
 		};
-		
+
 		/** Flag article as read/unread
 		*/
 		$scope.toggleRead = function (p) {
@@ -660,7 +649,7 @@
 				$scope.markAsRead(p);
 			}
 		};
-		
+
 		/** Ignore read/unread flag when loading stream
 		*/
 		$scope.toggleIgnoreReadArticles = function () {
@@ -672,7 +661,7 @@
 			// refresh stream to indicate new value
 			$scope.rfrsh();
 		};
-		
+
 		/** Flag article as read
 		*/
 		$scope.markAsRead = function (p) {
@@ -690,7 +679,7 @@
 			}, function (e) {
 			});
 		};
-		
+
 		/** Flag article as unread
 		*/
 		$scope.markAsUnread = function (p) {
@@ -906,4 +895,8 @@
 			$scope.toggleRead(s.cp);
 		});
 	}
+
+	angular
+        .module('webapp')
+        .controller('panelController', panelController);
 })();

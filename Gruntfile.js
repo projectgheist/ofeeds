@@ -18,9 +18,8 @@ module.exports = function(grunt) {
 					'./bower_components/angular-route/angular-route.js',
 					'./bower_components/angular-sanitize/angular-sanitize.js',
 					'./bower_components/angular-resource/angular-resource.js',
+					'./bower_components/tether/dist/js/tether.js', // needs to be included before bootstrap
 					'./bower_components/bootstrap/dist/js/bootstrap.js',
-					'./bower_components/bootstrap-material-design/dist/js/ripples.js',
-					'./bower_components/bootstrap-material-design/dist/js/material.js',
 					'./bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
 					'./bower_components/handlebars/handlebars.js',
 					'./bower_components/holderjs/holder.js',
@@ -49,10 +48,8 @@ module.exports = function(grunt) {
 				src: [
 					'./bower_components/font-awesome/css/font-awesome.css',
 					'./bower_components/bootstrap/dist/css/bootstrap.css',
-					'./bower_components/bootstrap-material-design/dist/css/roboto.css',
-					'./bower_components/bootstrap-material-design/dist/css/material.css',
-					'./bower_components/bootstrap-material-design/dist/css/ripples.css',
 					'./bower_components/angular-bootstrap/ui-bootstrap-csp.css',
+					'./bower_components/tether/dist/css/tether.css'
 				],
 				dest: './public/css/<%= pkg.name %>.min.css'
 			}
@@ -70,7 +67,10 @@ module.exports = function(grunt) {
 		watch: {
 			//...
 			scripts: {
-				files: ['public/js/*.js', 'public/css/*.css'],
+				files: [
+					'./public/js/*.js',
+					'./public/css/*.css'
+				],
 				tasks: ['default'],
 				options: {
 				},

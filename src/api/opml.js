@@ -38,7 +38,9 @@ ap.get('/api/0/opml', function (req, res) {
 	db
 		.getTags(ut.parseTags('user/-/state/reading-list', req.user))
 		.then(function (tagArray) {
-			return db.Feed.find({ tags: tagArray });
+			return db.Feed.find({
+				tags: tagArray
+			});
 		})
 		.then(function (a) {
 			// create opml meta header

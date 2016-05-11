@@ -24,7 +24,7 @@ ap.get('/', function (req, res) {
 	});
 });
 
-/** home route */
+/** home route when authenticated */
 ap.get('/dashboard', ensureAuth, function (req, res) {
 	res.render('pages/landing', {
 		'config': cf.site,
