@@ -39,12 +39,12 @@ function formatPosts (user, feed, posts, tags, obj) {
 ap.get('/api/0/stream/contents*', function (req, res) {
 	// Local reference to args
 	var params = req.query || {};
-	
+
 	// Check for errors
 	if (ut.isEmpty(params) ||
-		(params.n && !/^[0-9]+$/.test(parseInt(params.n, 0))) || // invalid count
-		(params.ot && !mm(parseInt(params.ot, 0)).isValid()) || // invalid time
-		(params.nt && !mm(parseInt(params.nt, 0)).isValid())) { // invalid time
+		(params.n && !/^[0-9]+$/.test(parseInt(params.n, 10))) || // invalid count
+		(params.ot && !mm(parseInt(params.ot, 10)).isValid()) || // invalid time
+		(params.nt && !mm(parseInt(params.nt, 10)).isValid())) { // invalid time
 		return res.status(400).send('Invalid parameters provided!');
 	}
 
@@ -54,18 +54,18 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 		excludeTags = ut.parseTags(params.xt, req.user);
 		// No exclusion tags detected, but requested
 		if (!excludeTags.length) {
-			return res.status(400).send('No exclusion tags provided!');;
+			return res.status(400).send('No exclusion tags provided!');
 		}
 	}
 
 	// load posts
 	db
-		.getPosts([params], {
+		.getPosts([params.value], {
 			excludeTags: excludeTags,
-			minTime: parseInt(params.ot, 0) || 0, // old time
-			maxTime: parseInt(params.nt, 0) || Date.now(), // new time
+			minTime: parseInt(params.ot, 10) || 0, // old time
+			maxTime: parseInt(params.nt, 10) || Date.now(), // new time
 			sort: [['published', (params.r === 'o') ? 1 : -1], ['_id', 1]], // -1 = Newest, 1 = oldest
-			limit: +parseInt(params.n, 0) || 20,
+			limit: +parseInt(params.n, 10) || 20,
 			populate: ['feed', 'tags']
 		})
 		.then(function (item) {

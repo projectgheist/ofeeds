@@ -563,7 +563,7 @@ describe('Tags API', function () {
 		rq
 			.post('/api/0/tag/mark-all-as-read')
 			.send({
-				s: '',
+				s: [encodeURIComponent('http://www.polygon.com/rss/index.xml')],
 				ts: ''
 			})
 			.expect(200)
@@ -578,7 +578,7 @@ describe('Routes WITH tags', function () {
 			.expect(200)
 			.end(done);
 	});
-	
+
 	it('Fetch stream (Valid params)', function (done) {
 		rq
 			.get('/api/0/stream/contents')

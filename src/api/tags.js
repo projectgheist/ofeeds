@@ -12,12 +12,16 @@ ap.post('/api/0/tags/edit', function (req, res) {
 		return res.status(400).end();
 	} else {
 		var arg = req.body;
+		// Valid post index?
 		if (!arg['i']) {
 			return res.status(400).end(); // Invalid item
 		}
-		var at = ut.parseTags(arg['a'] || 0, req.user); // tags to add to the item
-		var rt = ut.parseTags(arg['r'] || 0, req.user); // tags to remove from the item
-		if (!at && !rt) {
+		// tags to add to the item
+		var at = ut.parseTags(arg['a'] || 0, req.user);
+		// tags to remove from the item
+		var rt = ut.parseTags(arg['r'] || 0, req.user);
+		// check for validity
+		if (!at.length && !rt.length) {
 			return res.status(400).end(); // Invalid tags
 		}
 		// TODO: use streams to filter
@@ -74,7 +78,7 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 		return res.status(400).end();
 	} else {
 		var streams = ut.parseStreams(req.body.s, req.user);
-		if (!streams) {
+		if (!streams.length) {
 			return res.status(400).end();
 		}
 
@@ -86,27 +90,37 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 			options.maxTime = req.body.ts;
 		}
 
-		// Find or create the read state tag query
-		var tag = db.getTags(ut.parseTags('user/-/state/read', req.user));
+		// Declare read-tag
+		var readTag;
 
 		// Get all of the posts in the stream
 		// Google Reader appears to only accept a single stream
-		var posts = db.getPosts(streams, options);
-
-		rs.all([tag, posts.query])
-			.then(function (results) {
-				// local reference
-				var tags = results[0];
-				// Add the tag to each of them
-				return rs.all(results[1].map(function (post) {
-					post.tags.addToSet(tags);
-					return post.save();
-				}));
+		return 	db
+			.getTags(ut.parseTags(['user/-/state/reading-list', 'user/-/state/read'], req.user))
+			.then(function (tagArray) {
+				options.includeTags = [tagArray[0]];
+				readTag = tagArray[1];
+				return db.getPosts(streams, options);
 			})
-			.then(function () {
-				res.status(200).end();
-			}, function (ignore) {
-				res.status(500).end();
+			.then(function (posts) {
+				return posts.query
+					.then(function (results) {
+						console.log(results.length);
+						if (results.length) {
+							// Add the tag to each of them
+							return rs.all(results.map(function (post) {
+								post.tags.addToSet(readTag);
+								return post.save();
+							}));
+						}
+						return [];
+					})
+					.then(function (posts) {
+						console.log(posts.length);
+						res.status(200).end();
+					}, function (ignore) {
+						res.status(500).send(ignore);
+					});
 			});
 	}
 });

@@ -157,8 +157,6 @@ exports.parseStreams = function (streams, user) {
 	if (!exports.isArray(streams)) {
 		streams = [streams];
 	}
-	// declare return object
-	var results = [];
 	// return results
-	return results;
+	return streams;
 };

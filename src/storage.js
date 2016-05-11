@@ -30,6 +30,16 @@ if (!mg.connection || !mg.connection.db) {
 	});
 }
 
+/** function emptyPromise
+ * @param val : default value to return
+ */
+exports.emptyPromise = function (val) {
+	// return a new promise
+	return new rs.Promise(function (resolve, reject) {
+		resolve(val);
+	});
+};
+
 /** function all
  */
 exports.all = function (model, options) {
@@ -99,10 +109,10 @@ exports.getTags = function (tags) {
 	if (tags) {
 		if (!Array.isArray(tags)) {
 			tags = [tags];
-		} else if (!tags.length) {
-			return [];
 		}
-		return exports.Tag.find({ $or: tags });
+		if (tags.length) {
+			return exports.Tag.find({ $or: tags });
+		}
 	}
 	return [];
 };
@@ -118,9 +128,9 @@ exports.renameTag = function (oldTag, newTag) {
 			// any tags exist?
 			if (tags.length) {
 				// old or new tag found?
-				if (tags.length == 1) {
+				if (tags.length === 1) {
 					// rename the old tag
-					if (tags[0] == oldTag) {
+					if (tags[0] === oldTag) {
 						tags[0].rename(newTag).save();
 					}
 					// no need to rename tag or we renamed the old tag
@@ -135,7 +145,7 @@ exports.renameTag = function (oldTag, newTag) {
 					.then(function () {
 						// otherwise it returns a promise
 						return true;
-					})
+					});
 			} else {
 				return false;
 			}
@@ -154,75 +164,60 @@ exports.renameTag = function (oldTag, newTag) {
 exports.getPosts = function (streams, options) {
 	// use parameter OR create empty object
 	options || (options = {});
-	// separate streams by type
-	var feeds = [];
-	var tags = [];
-	// loop all items in stream
-	for (var i in streams) {
-		if (streams[i].type === 'feed') {
-			feeds.push(streams[i].value);
-		} else {
-			tags.push(streams[i].value);
-		}
-	}
-	// load the tags to include and exclude
-	var includeTags;
-	var excludeTags;
+
+	// default array creation
+	options.includeTags || (options.includeTags = []);
+	options.excludeTags || (options.excludeTags = []);
+
 	// returns a promise
-	return rs
-		.all([
-			exports.getTags(tags),
-			exports.getTags(options.excludeTags)
-		])
-		.then(function (multipleTags) {
-			// store for later use
-			includeTags = multipleTags[0];
-			excludeTags = multipleTags[1];
-			// find feeds given directly and by tag
-			return exports.Feed.find({
-				$or: [
-					{ feedURL: { $in: feeds } },
-					{ tags: { $in: includeTags, $nin: excludeTags } }
-				]
-			});
-		})
-		.then(function (rfeeds) {
-			// find posts by feed and tags, and filter by date
-			var query = exports.Post.find({
-				$or: [
-					{ feed: { $in: rfeeds } },
-					{ tags: { $in: includeTags } }
-				],
-				tags: { $nin: excludeTags },
-				updated: {
-					$gte: new Date(parseInt(options.minTime, 0)),
-					$lt: new Date(parseInt(options.maxTime, Number.MAX_VALUE))
-				}
-			});
-
-			// limit return query amount
-			if (options.limit) {
-				query.limit(options.limit);
+	return exports.Feed.find({
+		$or: [
+			{ feedURL: { $in: streams } },
+			{ tags: { $in: options.includeTags, $nin: options.excludeTags } }
+		]
+	})
+	.then(function (rfeeds) {
+		var maxTime = parseFloat(options.maxTime);
+		// find posts by feed and tags, and filter by date
+		var query = exports.Post.find({
+			$or: [
+				{ feed: { $in: rfeeds } },
+				{ tags: { $in: options.includeTags } }
+			],
+			tags: { $nin: options.excludeTags },
+			updated: {
+				$gte: new Date(parseFloat(options.minTime) || 0),
+				$lt: !maxTime ? Date.now() : new Date(maxTime)
 			}
-
-			// sort return query
-			if (options.sort) {
-				query.sort(options.sort);
-			}
-
-			// populate the referenced model variables of the return model
-			if (options.populate) {
-				// check if already an array, else make it an array
-				if (!Array.isArray(options.populate)) {
-					options.populate = [options.populate];
-				}
-				// loop items to populate in the query
-				for (var i in options.populate) {
-					query.populate(options.populate[i]);
-				}
-			}
-			return { 'query': query, 'feeds': rfeeds };
 		});
+
+		// limit return query amount
+		if (options.limit) {
+			query.limit(options.limit);
+		}
+
+		// sort return query
+		if (options.sort) {
+			query.sort(options.sort);
+		}
+
+		// populate the referenced model variables of the return model
+		if (options.populate) {
+			// check if already an array, else make it an array
+			if (!Array.isArray(options.populate)) {
+				options.populate = [options.populate];
+			}
+			// loop items to populate in the query
+			for (var i in options.populate) {
+				query.populate(options.populate[i]);
+			}
+		}
+
+		return {
+			'query': query,
+			'feeds': rfeeds
+		};
+	});
 };
 
 // formats posts in a format that can be read on the clientside

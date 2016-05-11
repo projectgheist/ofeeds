@@ -121,7 +121,7 @@ function AllFeeds (req, res) {
 			// sort argument for the retrieved feeds
 			sort: s,
 			// limit the amount of output feeds
-			limit: parseInt(req.query.n) || false
+			limit: parseInt(req.query.n, 10) || false
 		})
 		.populate('posts') // replacing the specified paths in the document with document(s) from other collection(s)
 		.then(function (feeds) {
@@ -227,7 +227,7 @@ ap.get('/api/0/subscription/list', function (req, res) {
 					// find posts in feed WHERE 'read'-tag 'not in' array
 					return db.Post
 						.find({
-							_id: { $in: f.posts },
+							_id: { $in: feed.posts },
 							tags: { $nin: readTag }
 						})
 						.then(function (c) {

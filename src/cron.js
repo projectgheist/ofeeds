@@ -230,16 +230,16 @@ function StorePosts (stream, feed, posts, guids) {
 				case 'IMG':
 					// ignoreImages OR width and height are 1 OR isn't a valid image extension
 					if (ignoreImages ||
-						parseInt(tag.attributes.WIDTH, 0) <= 1 ||
-						parseInt(tag.attributes.HEIGHT, 0) <= 1 ||
+						parseInt(tag.attributes.WIDTH, 10) <= 1 ||
+						parseInt(tag.attributes.HEIGHT, 10) <= 1 ||
 						!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(tag.attributes.SRC)) {
 						break;
 					}
 					// create new image object
 					var obj = {
 						'url': tag.attributes.SRC,
-						'width': tag.attributes.WIDTH || 0,
-						'height': tag.attributes.HEIGHT || 0
+						'width': parseInt(tag.attributes.WIDTH, 10) || 0,
+						'height': parseInt(tag.attributes.HEIGHT, 10) || 0
 					};
 					var found = false;
 					// check if image already exists in list

@@ -8,7 +8,7 @@ ap.get('/api/0/posts', function (req, res) {
 	// make options variable
 	var opts = {
 		sort: { published: (!req.query.r || req.query.r !== 'o') ? -1 : 1 }, // newest first
-		limit: parseInt(req.query.n) || 5 // limit the amount of output feeds
+		limit: parseInt(req.query.n, 10) || 5 // limit the amount of output feeds
 	};
 
 	db
