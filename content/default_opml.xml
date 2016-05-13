@@ -1,0 +1,10 @@
+<opml version="1.0">
+	<head>
+		<title>Default OPML file</title>
+	</head>
+	<body>
+		<outline title="Polygon" text="" type="rss" xmlUrl="http://www.polygon.com/rss/index.xml" htmlUrl="http://www.polygon.com/"/>
+		<outline title="Kotaku" text="The Gamer's Guide" type="rss" xmlUrl="http://feeds.gawker.com/kotaku/full" htmlUrl="http://kotaku.com"/>
+		<outline title="Imgur: The most awesome images on the Internet" text="Imgur is the best place to share and enjoy the most awesome images on the Internet. Every day, millions of people use Imgur to be entertained and inspired by funny, heartwarming and helpful images and stories from all around the world." type="rss" xmlUrl="http://feeds.feedburner.com/ImgurGallery?format=xml" htmlUrl="http://imgur.com/"/>
+	</body>
+</opml>

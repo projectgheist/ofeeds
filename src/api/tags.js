@@ -105,7 +105,6 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 			.then(function (posts) {
 				return posts.query
 					.then(function (results) {
-						console.log(results.length);
 						if (results.length) {
 							// Add the tag to each of them
 							return rs.all(results.map(function (post) {
@@ -116,7 +115,6 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 						return [];
 					})
 					.then(function (posts) {
-						console.log(posts.length);
 						res.status(200).end();
 					}, function (ignore) {
 						res.status(500).send(ignore);

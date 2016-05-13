@@ -7,25 +7,46 @@ var db = require('../storage');
 var ut = require('../utils');
 var cf = require('../../config');
 var mm = require('moment');
+var fs = require('fs');
+var Parser = require('opmlparser');
 
 /** Import an OPML file
 */
-/* exports.import = function (data) {
-	var pr = new Parser(); // create parser
+exports.import = function (fileName, done) {
+	var stream = fs.createReadStream(fileName);
+
+	// create parser
+	var pr = new Parser();
+	// count of feeds included in the data
 	var counter = 0;
+	// return data
+	var data = [];
+
+	stream.on('open', function () {
+		var self = this;
+		self.pipe(pr);
+	});
 
 	pr.on('readable', function () {
-		var stream;
+		var self = this;
 		var outline;
-		while ((outline = stream.read()) !== undefined) {
-			console.log(outline);
+		while ((outline = self.read()) !== null) {
+			data.push(outline);
+			// increment counter
+			++counter;
 		}
 	});
 
-	pr.on('end', function () {
-		console.log('All done. Found %s feeds.', counter);
+	pr.on('error', function (ignore) {
+		// always handle errors
+		done(ignore, null);
 	});
-}; */
+
+	pr.on('end', function () {
+		console.log('All done. Found %d feeds.', counter);
+		done(null, data);
+	});
+};
 
 /** function retrieveStream
  */

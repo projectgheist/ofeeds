@@ -17,6 +17,7 @@
     "mongoomise": "0.0.8",
     "mongoose": "^4.4.15",
     "opml-generator": "^1.1.1",
+    "opmlparser": "^0.8.0",
     "passport": "^0.3.2",
     "passport-google-oauth": "^1.0.0",
     "request": "^2.72.0",

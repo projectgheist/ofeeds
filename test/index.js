@@ -14,7 +14,7 @@ require('../src/api/subscriptions');
 require('../src/api/streams');
 require('../src/api/posts');
 require('../src/api/tags');
-require('../src/api/opml');
+var op = require('../src/api/opml');
 var rq = require('supertest').agent(sr);
 
 /** Make sure that the routing code compiles
@@ -71,6 +71,19 @@ describe('Routing (Public)', function () {
 			.get('/post/test')
 			.expect(200)
 			.end(done);
+	});
+});
+
+/** Make sure that the routing code compiles
+ */
+describe('Import OPML', function () {
+	it('Default feeds', function (done) {
+		// load file from content
+		op.import('./content/default_opml.xml', function (ignore, data) {
+			if (data.length) {
+				done();
+			}
+		});
 	});
 });
 
