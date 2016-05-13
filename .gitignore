@@ -54,3 +54,4 @@ Temporary Items
 
 # ignore specific other file
 manifest.yml
+*.log
