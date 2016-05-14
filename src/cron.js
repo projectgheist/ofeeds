@@ -19,26 +19,26 @@ exports.FindOrCreatePost = function (feed, guid, data) {
 			.findOrCreate(db.Post, {'feed': feed, 'url': guid})
 			.then(function (post) {
 				var ref = post;
-					var m = data['media:group'];
-					ref.title = (data.title ? ut.parseHtmlEntities(data.title) : 'No title');
-					ref.body = data.description ? data.description : ((m && m['media:description'] && m['media:description']['#']) ? m['media:description']['#'] : '');
-					ref.body = CleanupDescription(ref.body || '', data.images);
-					ref.summary = CleanupSummary(ref.body);
-					ref.images = data.images;
-					ref.videos = data.videos;
-					// prevent the publish date to be overridden
-					ref.published = SelectPublishedDate(ref, data);
-					// time the post has been last modified
-					ref.updated = mm();
-					ref.author = (data.author ? data.author.trim() : '');
-					ref.commentsURL = data.comments || '';
-					ref.categories = data.categories || undefined;
-					// if feeds post variable doesn't exist, make it an array
-					feed.posts || (feed.posts = []);
-					// add post to posts array
-					feed.posts.addToSet(ref);
-					// return successfully
-					resolve(ref.save());
+				var m = data['media:group'];
+				ref.title = (data.title ? ut.parseHtmlEntities(data.title) : 'No title');
+				ref.body = data.description ? data.description : ((m && m['media:description'] && m['media:description']['#']) ? m['media:description']['#'] : '');
+				ref.body = CleanupDescription(ref.body || '', data.images);
+				ref.summary = CleanupSummary(ref.body);
+				ref.images = data.images;
+				ref.videos = data.videos;
+				// prevent the publish date to be overridden
+				ref.published = SelectPublishedDate(ref, data);
+				// time the post has been last modified
+				ref.updated = mm();
+				ref.author = (data.author ? data.author.trim() : '');
+				ref.commentsURL = data.comments || '';
+				ref.categories = data.categories || undefined;
+				// if feeds post variable doesn't exist, make it an array
+				feed.posts || (feed.posts = []);
+				// add post to posts array
+				feed.posts.addToSet(ref);
+				// return successfully
+				resolve(ref.save());
 			});
 	});
 };
@@ -156,6 +156,8 @@ exports.AllowFetch = function (feed) {
 /** function StoreMetaData
  */
 function StoreMetaData (feed, meta) {
+	/// !don't over write the feedUrl with the meta.xmlurl as we created already with the unique feedURL,
+	/// otherwise we found need to do some feed merging
 	// if (meta.xmlurl) {
 	//	feed.feedURL = meta.xmlurl;
 	// }
