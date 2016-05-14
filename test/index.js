@@ -76,7 +76,7 @@ describe('Routing (Public)', function () {
 });
 
 // Test feeds to use for other tests
-var feeds;
+var feeds = [];
 
 /** Make sure that the routing code compiles
  */
@@ -96,12 +96,13 @@ describe('OPML', function () {
 
 	it('Add feeds to database', function (done) {
 		var queries = [];
-		var encodeUrl;
 		for (var i in opmlData) {
-			encodeUrl = encodeURIComponent(opmlData[i].xmlUrl);
+			var encodeUrl = encodeURIComponent(opmlData[i].xmlurl);
 			feeds.push(encodeUrl);
 			queries.push(sb.search(encodeUrl));
 		}
+		// extend time limit as added multiple feeds to the database could take some time
+		this.timeout(2000 * feeds.length);
 		// execute all the queries
 		rs
 			.all(queries)
