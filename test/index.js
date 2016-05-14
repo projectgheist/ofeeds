@@ -552,6 +552,13 @@ describe('Tags API', function () {
 			.end(done);
 	});
 
+	it('Tag create (No params)', function (done) {
+		rq
+			.get('/api/0/tags')
+			.expect(400)
+			.end(done);
+	});
+
 	it('Mark all as read (No params)', function (done) {
 		rq
 			.post('/api/0/tag/mark-all-as-read')
@@ -584,6 +591,37 @@ describe('Tags API', function () {
 			.post('/api/0/tags/rename')
 			.send({
 				s: ''
+			})
+			.expect(400)
+			.end(done);
+	});
+
+	it('Tag create (Invalid params)', function (done) {
+		rq
+			.get('/api/0/tags')
+			.query({
+				s: ''
+			})
+			.expect(400)
+			.end(done);
+	});
+
+	it('Tag create (Valid params)', function (done) {
+		rq
+			.get('/api/0/tags')
+			.query({
+				s: 'NewFolder'
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Tag rename (Valid params)', function (done) {
+		rq
+			.post('/api/0/tags/rename')
+			.send({
+				s: 'NewFolder',
+				dest: 'RenamedFolder'
 			})
 			.expect(400)
 			.end(done);

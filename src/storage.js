@@ -125,9 +125,18 @@ exports.renameTag = function (oldTag, newTag) {
 				}
 				// merge old and new tags together, find old tag references, point to new tag and delete old tag
 				return exports.Feed
-					.update({ tags: tags[0] }, { $addToSet: tags[1] })
+					.update({
+						tags: tags[0]
+					}, {
+						$addToSet: tags[1]
+					})
 					.then(function () {
-						return exports.Feed.update({ tags: tags[0] }, { $pullAll: tags[0] });
+						return exports.Feed
+							.update({
+								tags: tags[0]
+							}, {
+								$pullAll: tags[0]
+							});
 					})
 					.then(function () {
 						// otherwise it returns a promise

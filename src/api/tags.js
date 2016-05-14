@@ -3,19 +3,35 @@ var db = require('../storage');
 var ut = require('../utils');
 var ap = require('../app');
 
-// To mark a post as read,starred,...
+// Get a new tag, used to create folders
+ap.get('/api/0/tags', function (req, res) {
+	// is user logged in?
+	if (!req.isAuthenticated()) {
+		return res.status(401).end();
+	} else if (ut.isEmpty(req.query) || !req.query['s'] || !req.query.s.length) {
+		return res.status(400).end();
+	} else {
+		db
+			.findOrCreate(db.Tag, {
+				user: req.user,
+				name: req.query.s,
+				type: (req.query.t || 'label')
+			})
+			.then(function (data) {
+				res.status(200).end();
+			});
+	}
+});
+
+// To mark a post as read, starred,...
 ap.post('/api/0/tags/edit', function (req, res) {
 	// is user logged in?
 	if (!req.isAuthenticated()) {
 		return res.status(401).end();
-	} else if (ut.isEmpty(req.body)) {
+	} else if (ut.isEmpty(req.body) || !req.body['i']) {
 		return res.status(400).end();
 	} else {
 		var arg = req.body;
-		// Valid post index?
-		if (!arg['i']) {
-			return res.status(400).end(); // Invalid item
-		}
 		// tags to add to the item
 		var at = ut.parseTags(arg['a'] || 0, req.user);
 		// tags to remove from the item
