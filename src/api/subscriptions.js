@@ -64,13 +64,16 @@ var actions = {
 			});
 	},
 	/** function subscribe
+	 * @param ctx: used to access the cached, authenticated user
 	 * @param url: encoded
 	 */
 	subscribe: function (ctx, url) {
+		// create the reading-list tag
+		var readingList = ut.parseTags('user/-/state/reading-list', ctx.user);
 		// Find or create feed for this URL in the database
 		var feed = db.Feed.find({ feedURL: url });
 		// Find or create a tag to add this feed to the users reading-list
-		var tag = db.findOrCreate(db.Tag, ut.parseTags('user/-/state/reading-list', ctx.user)[0]);
+		var tag = db.findOrCreate(db.Tag, ut.arrayToObject(readingList));
 		// wait for all results to return before continuing
 		return rs
 			.all([feed, tag])

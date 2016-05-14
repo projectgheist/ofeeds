@@ -77,7 +77,7 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 	} else if (ut.isEmpty(req.body)) {
 		return res.status(400).end();
 	} else {
-		var streams = ut.parseStreams(req.body.s, req.user);
+		var streams = ut.createArray(req.body.s);
 		if (!streams.length) {
 			return res.status(400).end();
 		}
@@ -98,7 +98,7 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 		return 	db
 			.getTags(ut.parseTags(['user/-/state/reading-list', 'user/-/state/read'], req.user))
 			.then(function (tagArray) {
-				options.includeTags = [tagArray[0]];
+				options.includeTags = ut.createArray(tagArray[0]);
 				readTag = tagArray[1];
 				return db.getPosts(streams, options);
 			})

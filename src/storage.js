@@ -94,17 +94,14 @@ exports.editTags = function (record, addTags, removeTags) {
 };
 
 /** function getTags
+ @return Empty array or a promise
  */
 exports.getTags = function (tags) {
-	if (tags) {
-		if (!Array.isArray(tags)) {
-			tags = [tags];
-		}
-		if (tags.length) {
-			return exports.Tag.find({ $or: tags });
-		}
+	var result = [];
+	if (Array.isArray(tags)) {
+		result = exports.Tag.find({ $or: tags });
 	}
-	return [];
+	return result;
 };
 
 /** function renameTag
@@ -193,10 +190,7 @@ exports.getPosts = function (streams, options) {
 
 		// populate the referenced model variables of the return model
 		if (options.populate) {
-			// check if already an array, else make it an array
-			if (!Array.isArray(options.populate)) {
-				options.populate = [options.populate];
-			}
+			options.populate = ut.createArray(options.populate);
 			// loop items to populate in the query
 			for (var i in options.populate) {
 				query.populate(options.populate[i]);

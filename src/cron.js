@@ -156,8 +156,8 @@ exports.AllowFetch = function (feed) {
 /** function StoreMetaData
  */
 function StoreMetaData (feed, meta) {
-	/// !don't over write the feedUrl with the meta.xmlurl as we created already with the unique feedURL,
-	/// otherwise we found need to do some feed merging
+	/* !don't over write the feedUrl with the meta.xmlurl as we created already with the unique feedURL,
+		otherwise we found need to do some feed merging */
 	// if (meta.xmlurl) {
 	//	feed.feedURL = meta.xmlurl;
 	// }
@@ -192,15 +192,11 @@ function StorePosts (stream, feed, posts, guids) {
 		}
 
 		// Used by DeviantArt
-		var thumbnails = data['media:thumbnail'] || (data['media:group'] ? data['media:group']['media:thumbnail'] : undefined);
-		if (thumbnails) {
-			if (!Array.isArray(thumbnails)) { // make array
-				thumbnails = [thumbnails];
-			}
-			for (var i in thumbnails) { // loop all found thumbnails
-				if (thumbnails[i] && thumbnails[i]['@'] && (thumbnails[i]['@'].medium === undefined || thumbnails[i]['@'].medium !== 'document')) {
-					images.small.push(thumbnails[i]['@']); // store thumbnail image
-				}
+		var thumbnails = ut.createArray(data['media:thumbnail'] || (data['media:group'] ? data['media:group']['media:thumbnail'] : undefined));
+		// loop all found thumbnails
+		for (var i in thumbnails) {
+			if (thumbnails[i] && thumbnails[i]['@'] && (thumbnails[i]['@'].medium === undefined || thumbnails[i]['@'].medium !== 'document')) {
+				images.small.push(thumbnails[i]['@']); // store thumbnail image
 			}
 		}
 

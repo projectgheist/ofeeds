@@ -42,11 +42,6 @@ exports.stringInsert = function (o, i, p) {
 	return [o.slice(0, p), i, o.slice(p)].join('');
 };
 
-// Mathematical clamp function
-exports.clamp = function (val, min, max) {
-	return Math.min(Math.max(val, min), max);
-};
-
 exports.fullURL = function (req) {
 	return [req.protocol, '://', req.headers.host, req.url].join('');
 };
@@ -66,14 +61,13 @@ exports.isUrl = function (url) {
 // check if a tag is the the 'read' one
 exports.isRead = function (user, tag) {
 	// can only be marked as read if a user is present
-	if (!user || Object.keys(user).length === 0) {
-		return false;
-	}
-	// do regex for label
-	var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tag);
-	// match found and it is the 'read' tag
-	if (match && match[1] === user._id && match[3] === 'read') {
-		return true;
+	if (user && Object.keys(user).length) {
+		// do regex for label
+		var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tag);
+		// match found and it is the 'read' tag
+		if (match && match[1] === user._id && match[3] === 'read') {
+			return true;
+		}
 	}
 	return false;
 };
@@ -85,7 +79,7 @@ exports.isArray = function (val) {
 
 // converts an array to an object by returning its first element
 exports.arrayToObject = function (val, offset) {
-	return exports.isArray(val) ? val[(offset || 0)] : val;
+	return exports.isArray(val) ? (val.length ? val[(offset || 0)] : false) : val;
 };
 
 // returns a string that points to the database url
@@ -103,35 +97,33 @@ exports.getDBConnectionURL = function (obj, noPrefix) {
 /** function parseHtmlEntities
 */
 exports.parseHtmlEntities = function (str) {
+	var result = '';
 	// early out
-	if (!str || !str.length) {
-		return '';
+	if (str && str.length) {
+		result = str
+			.replace(/&#([0-9]{1,3});/gi, function (match, numStr) {
+				return String.fromCharCode(parseInt(numStr, 10));
+			})
+			.trim();
 	}
-	return str
-		.replace(/&#([0-9]{1,3});/gi, function (match, numStr) {
-			var num = parseInt(numStr, 10);// read num as normal number
-			return String.fromCharCode(num);
-		})
-		.trim();
+	return result;
 };
 
 /** function parseTags
 */
 exports.parseTags = function (tags, user) {
+	// make array
+	var arr = exports.createArray(tags);
 	// if empty variable, early out
-	if (!tags) {
+	if (!arr.length) {
 		return [];
-	}
-	// check if already an array, else make it an array
-	if (!exports.isArray(tags)) {
-		tags = [tags];
 	}
 	// declare return object
 	var results = [];
 	// loop all tags
-	for (var i = 0; i < tags.length; i++) {
+	for (var i = 0; i < arr.length; i++) {
 		// match 'user/<userId>/state/foo' AND 'user/-/state/foo'
-		var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tags[i]);
+		var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(arr[i]);
 		// no regex matches found OR mismatched user ID
 		if (!match || (match[1] !== '-' && match[1] !== user._id)) {
 			continue;
@@ -146,17 +138,17 @@ exports.parseTags = function (tags, user) {
 	return results;
 };
 
-/** function parseStreams
+/** function createArray
 */
-exports.parseStreams = function (streams, user) {
+exports.createArray = function (obj) {
 	// if empty variable, early out
-	if (!streams) {
+	if (!obj) {
 		return [];
 	}
 	// check if already an array, else make it an array
-	if (!exports.isArray(streams)) {
-		streams = [streams];
+	if (!exports.isArray(obj)) {
+		obj = [obj];
 	}
 	// return results
-	return streams;
+	return obj;
 };
