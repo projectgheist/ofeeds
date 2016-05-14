@@ -16,7 +16,7 @@ exports.FindOrCreatePost = function (feed, guid, data) {
 	// return a new promise
 	return new rs.Promise(function (resolve, reject) {
 		db
-			.findOrCreate(db.Post, {'feed': feed, 'guid': guid})
+			.findOrCreate(db.Post, {'feed': feed, 'url': guid})
 			.then(function (post) {
 				var ref = post;
 				try {
@@ -32,7 +32,6 @@ exports.FindOrCreatePost = function (feed, guid, data) {
 					// time the post has been last modified
 					ref.updated = mm();
 					ref.author = (data.author ? data.author.trim() : '');
-					ref.url = data.link || (data['atom:link'] ? data['atom:link']['@'].href : '');
 					ref.commentsURL = data.comments || '';
 					ref.categories = data.categories || undefined;
 					// if feeds post variable doesn't exist, make it an array
@@ -89,52 +88,52 @@ function CleanupSummary (data, debug) {
  */
 function CleanupDescription (data, images, debug) {
 	// early escape on no string
-	if (!data || data.length <= 0) {
-		return '';
-	}
+	if (data && data.length) {
+		data = data
+			.replace(/<\/img>|<hr>|<\/*h\d>/gi, '') // remove headings OR separator
+			.replace(/<br[\s\S]*?>/gi, ' ') // remove new lines
+			.replace(/(<script)[\s\S]*?(<\/script>)/gi, '') // remove scripts
+			.replace(/(<iframe)[\s\S]*?(\/iframe>)/gi, ''); // remove iframes
 
-	data = data
-		.replace(/<\/img>|<hr>|<\/*h\d>/gi, '') // remove headings OR separator
-		.replace(/<br[\s\S]*?>/gi, ' ') // remove new lines
-		.replace(/(<script)[\s\S]*?(<\/script>)/gi, '') // remove scripts
-		.replace(/(<iframe)[\s\S]*?(\/iframe>)/gi, ''); // remove iframes
+		// p: needs to be a separate variable otherwise it will be an infinite loop
+		var p, e;
+		var i = [];// array of image urls to remove
 
-	// p: needs to be a separate variable otherwise it will be an infinite loop
-	var p, e;
-	var i = [];// array of image urls to remove
-
-	// remove thumbnails
-	if (images) {
-		if (images.small.length) {
-			i = i.concat(images.small);
-		}
-		if (images.other.length) {
-			i.push(images.other[0]);
-		}
-		if (i.length) {
-			p = /<img\s.*?src="(.*?)"[\s\S][^>]*>/gi;
-			while ((e = p.exec(data)) !== null) {
-				for (var j in i) { // loop all urls
-					if (e[1] === i[j].url) { // compare image src urls
-						data = data.replace(e[0], ''); // do string replace
+		// remove thumbnails
+		if (images) {
+			if (images.small.length) {
+				i = i.concat(images.small);
+			}
+			if (images.other.length) {
+				i.push(images.other[0]);
+			}
+			if (i.length) {
+				p = /<img\s.*?src="(.*?)"[\s\S][^>]*>/gi;
+				while ((e = p.exec(data)) !== null) {
+					for (var j in i) { // loop all urls
+						if (e[1] === i[j].url) { // compare image src urls
+							data = data.replace(e[0], ''); // do string replace
+						}
 					}
 				}
 			}
 		}
+
+		data = data
+			.replace(/(<img\s)(.*?)((height|width)="1"\s*)+(.*?>)/gi, '') // remove ad images
+			.replace(/<a\s?.*?>[\s\n]*<\/a>/gi, ''); // remove empty links
+
+		// add new tab to all links
+		p = /<a\s/gi;
+		while ((e = p.exec(data)) !== null) {
+			data = ut.stringInsert(data, 'target="_blank"', e.index + 3);
+		}
+
+		// trim empty space
+		data = data.trim();
 	}
-
-	data = data
-		.replace(/(<img\s)(.*?)((height|width)="1"\s*)+(.*?>)/gi, '') // remove ad images
-		.replace(/<a\s?.*?>[\s\n]*<\/a>/gi, ''); // remove empty links
-
-	// add new tab to all links
-	p = /<a\s/gi;
-	while ((e = p.exec(data)) !== null) {
-		data = ut.stringInsert(data, 'target="_blank"', e.index + 3);
-	}
-
 	// return values
-	return data.trim();
+	return data;
 }
 
 /** function UpdateFeed
@@ -267,12 +266,8 @@ function StorePosts (stream, feed, posts, guids) {
 		data.images = images;
 		// store videos in object
 		data.videos = videos;
-		// get the GUID of the post
-		var guid = (data.guid || data.link);
-		// does GUID already exist? else create a new unique one from the article information available
-		guid += (guids.indexOf(guid) <= -1) ? '' : [';', (data.title || data.pubdate)].join('');
-		// add to array
-		guids.push(guid);
+		// find post unique identifier
+		var guid = data.link || (data['atom:link'] ? data['atom:link']['@'].href : '');
 		// store data as ref
 		posts.push(exports.FindOrCreatePost(feed, guid, data));
 	}
@@ -284,7 +279,6 @@ function StorePosts (stream, feed, posts, guids) {
 function PingFeed (feed, debug) {
 	return new rs.Promise(function (resolve, reject) {
 		// pre-define variables
-		var postGUIDs = [];
 		var posts = [];
 		var fp = new FeedParser();
 		var fp_err;
@@ -299,7 +293,7 @@ function PingFeed (feed, debug) {
 			})
 			// when a post is detected
 			.on('readable', function () {
-				StorePosts(this, feed, posts, postGUIDs);
+				StorePosts(this, feed, posts);
 			})
 			// when the end of the feed is reached
 			.on('end', function () {
@@ -332,9 +326,6 @@ function PingFeed (feed, debug) {
 				}
 			})
 			.on('error', function (ignore) {
-				if (debug) {
-					console.log('ERROR: ', feed.feedURL);
-				}
 				feed.lastModified = feed.failedCrawlTime = new Date();
 				feed.lastFailureWasParseFailure = true;
 				resolve(feed.save());

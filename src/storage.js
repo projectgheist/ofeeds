@@ -30,16 +30,6 @@ if (!mg.connection || !mg.connection.db) {
 	});
 }
 
-/** function emptyPromise
- * @param val : default value to return
- */
-exports.emptyPromise = function (val) {
-	// return a new promise
-	return new rs.Promise(function (resolve, reject) {
-		resolve(val);
-	});
-};
-
 /** function all
  */
 exports.all = function (model, options) {

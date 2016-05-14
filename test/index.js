@@ -478,6 +478,21 @@ describe('Routes', function () {
 			.end(done);
 	});
 
+	it('Rename feed (Invalid params)', function (done) {
+		rq
+			.post('/api/0/feed/title')
+			.send({
+				q: feeds[1],
+				n: 'Polygon'
+			})
+			.expect(200)
+			.end(function (ignore, res) {
+				if (res.body) {
+					done();
+				}
+			});
+	});
+
 	it('Rename feed (Valid params)', function (done) {
 		rq
 			.post('/api/0/feed/title')

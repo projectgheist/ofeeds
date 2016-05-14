@@ -9,8 +9,6 @@ var ut = require('../utils');
 var Post = mg.Schema({
 	// reference to the feed this post belongs to
 	feed: ut.ref('Feed'),
-	// unique post identifier for this post (usually the post url or similar)
-	guid: String,
 	// unique short id
 	shortid: { type: String, default: sh.generate },
 	// post title
@@ -24,7 +22,7 @@ var Post = mg.Schema({
 	// array of found video URLs
 	videos: [String],
 	// URL to original post location
-	url: String,
+	url: { type: String, required: true, sparse: true },
 	// timestamp of post publish date
 	published: Date,
 	// timestamp of post update date
@@ -36,13 +34,7 @@ var Post = mg.Schema({
 	categories: [String],
 	// array of tags that are attached to this post
 	tags: { type: [ut.ref('Tag')], default: [] }
-}, {
-	autoIndex: false
 });
-
-/** Make sure that posts have unique indices
- */
-Post.index({guid: 1, shortid: 1}, {unique: true});
 
 /** Export
  */
