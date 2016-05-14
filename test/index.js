@@ -102,7 +102,7 @@ describe('OPML', function () {
 			queries.push(sb.search(encodeUrl));
 		}
 		// extend time limit as added multiple feeds to the database could take some time
-		this.timeout(2000 * feeds.length);
+		this.timeout(5000 * feeds.length);
 		// execute all the queries
 		rs
 			.all(queries)
