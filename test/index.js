@@ -140,6 +140,13 @@ describe('Tags API (No user)', function () {
 			.end(done);
 	});
 
+	it('Tag create', function (done) {
+		rq
+			.get('/api/0/tags')
+			.expect(401)
+			.end(done);
+	});
+
 	it('Tag rename', function (done) {
 		rq
 			.post('/api/0/tags/rename')
@@ -620,10 +627,10 @@ describe('Tags API', function () {
 		rq
 			.post('/api/0/tags/rename')
 			.send({
-				s: 'NewFolder',
-				dest: 'RenamedFolder'
+				s: 'user/-/label/NewFolder',
+				dest: 'user/-/label/RenamedFolder'
 			})
-			.expect(400)
+			.expect(200)
 			.end(done);
 	});
 
