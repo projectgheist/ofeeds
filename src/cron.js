@@ -19,7 +19,6 @@ exports.FindOrCreatePost = function (feed, guid, data) {
 			.findOrCreate(db.Post, {'feed': feed, 'url': guid})
 			.then(function (post) {
 				var ref = post;
-				try {
 					var m = data['media:group'];
 					ref.title = (data.title ? ut.parseHtmlEntities(data.title) : 'No title');
 					ref.body = data.description ? data.description : ((m && m['media:description'] && m['media:description']['#']) ? m['media:description']['#'] : '');
@@ -40,11 +39,6 @@ exports.FindOrCreatePost = function (feed, guid, data) {
 					feed.posts.addToSet(ref);
 					// return successfully
 					resolve(ref.save());
-				} catch (ex) {
-					reject(ex);
-				}
-			}, function (ignore) {
-				reject(ignore);
 			});
 	});
 };

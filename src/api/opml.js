@@ -37,11 +37,6 @@ exports.import = function (fileName, done) {
 		}
 	});
 
-	pr.on('error', function (ignore) {
-		// always handle errors
-		done(ignore, null);
-	});
-
 	pr.on('end', function () {
 		done(null, data);
 	});

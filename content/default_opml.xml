@@ -8,5 +8,6 @@
 		<outline title="Imgur: The most awesome images on the Internet" text="Imgur is the best place to share and enjoy the most awesome images on the Internet. Every day, millions of people use Imgur to be entertained and inspired by funny, heartwarming and helpful images and stories from all around the world." type="rss" xmlUrl="http://feeds.feedburner.com/ImgurGallery?format=xml" htmlUrl="http://imgur.com/"/>
 		<outline title="Lifehacker" text="Tips and downloads for getting things done" type="rss" xmlUrl="http://www.lifehacker.com/index.xml" htmlUrl="http://lifehacker.com"/>
 		<outline title="Jimmy Kimmel Live" text="" type="rss" xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=UCa6vGFO9ty8v5KZJXQxdhaw" htmlUrl="http://www.youtube.com/channel/UCa6vGFO9ty8v5KZJXQxdhaw"/>
+		<outline title="The Mary Sue" text="The Nexus of Pop Culture and the Uncharted Universe" type="rss" xmlUrl="http://www.themarysue.com/feed/" htmlUrl="http://www.themarysue.com/feed/"/>
 	</body>
 </opml>
