@@ -111,44 +111,37 @@ exports.renameTag = function (oldTag, newTag) {
 	// find old and new tag names
 	return exports.Tag
 		.find({ $or: [oldTag, newTag] })
-		.then(function (tags) { // !tags are not in order
-			// any tags exist?
-			if (tags.length) {
-				// old or new tag found?
-				if (tags.length === 1) {
-					// rename the old tag
-					if (tags[0].name === oldTag.name) {
-						tags[0].name = newTag.name;
-						return tags[0].save();
-					} else {
-						// no need to rename tag or else we would do an unnecessary rename
-						return true;
-					}
+		.then(function (tags) {
+			// old or new tag found?
+			if (tags.length === 1) {
+				// rename the old tag
+				if (tags[0].name === oldTag.name) {
+					tags[0].name = newTag.name;
+					return tags[0].save();
 				}
-				var ot = tags[0].name === oldTag.name ? tags[0] : tags[1];
-				var nt = tags[0].name !== oldTag.name ? tags[0] : tags[1];
-				// merge old and new tags together, find old tag references, point to new tag and delete old tag
-				return exports.Feed
-					.update({
-						tags: ot
-					}, {
-						$addToSet: nt
-					})
-					.then(function (data) {
-						return exports.Feed
-							.update({
-								tags: ot
-							}, {
-								$pull: ot
-							});
-					})
-					.then(function (data) {
-						// otherwise it returns a promise
-						return true;
-					});
-			} else {
-				return false;
 			}
+			// !tags are not returned in order that you want them to be found
+			var ot = tags[0].name === oldTag.name ? tags[0] : tags[1];
+			var nt = tags[0].name !== oldTag.name ? tags[0] : tags[1];
+			// merge old and new tags together, find old tag references, point to new tag and delete old tag
+			return exports.Feed
+				.update({
+					tags: ot
+				}, {
+					$addToSet: nt
+				})
+				.then(function (data) {
+					return exports.Feed
+						.update({
+							tags: ot
+						}, {
+							$pull: ot
+						});
+				})
+				.then(function (data) {
+					// otherwise it returns a promise
+					return true;
+				});
 		});
 };
 
@@ -222,14 +215,13 @@ exports.formatPosts = function (user, posts) {
 	return posts.map(function (post) {
 		// Flag to indicate if post has been marked as read
 		var isRead = 0;
-		var pts = post.tags.map(function (ref) {
-			var r = ref.stringID;
+		for (var i in post.tags) {
 			// Not already flagged as read (optimization), do read tag check
-			if (!isRead && r && ut.isRead(user, r)) {
+			if (!isRead && post.tags[i].name === 'read') {
 				isRead = 1;
+				break;
 			}
-			return r;
-		});
+		}
 		return {
 			uid: post.shortid.toString(),
 			title: post.title,
@@ -248,7 +240,7 @@ exports.formatPosts = function (user, posts) {
 			author: post.author,
 			published: (post.published || 0),
 			updated: (post.updated || 0),
-			categories: pts.concat(post.categories),
+			categories: post.categories,
 			origin: {
 				streamId: post.feed.stringID,
 				title: post.feed.title,

@@ -58,20 +58,6 @@ exports.isUrl = function (url) {
 	return vd.isURL(url);
 };
 
-// check if a tag is the the 'read' one
-exports.isRead = function (user, tag) {
-	// can only be marked as read if a user is present
-	if (user && Object.keys(user).length) {
-		// do regex for label
-		var match = /^user\/(.+)\/(state|label)\/(.+)$/.exec(tag);
-		// match found and it is the 'read' tag
-		if (match && match[1] === user._id && match[3] === 'read') {
-			return true;
-		}
-	}
-	return false;
-};
-
 // checks if value is an array
 exports.isArray = function (val) {
 	return Array.isArray(val);
@@ -100,11 +86,7 @@ exports.parseHtmlEntities = function (str) {
 	var result = '';
 	// early out
 	if (str && str.length) {
-		result = str
-			.replace(/&#([0-9]{1,3});/gi, function (match, numStr) {
-				return String.fromCharCode(parseInt(numStr, 10));
-			})
-			.trim();
+		result = str.replace(/&#([0-9]{1,3});/gi, function (match, numStr) { return String.fromCharCode(parseInt(numStr, 10)); }).trim();
 	}
 	return result;
 };

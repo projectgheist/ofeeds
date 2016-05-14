@@ -10,26 +10,16 @@ var mm = require('moment');
 function formatPosts (user, feed, posts, tags, obj) {
 	// creates a new array with the posts
 	var items = db.formatPosts(user, posts);
-	if (!feed) {
-		if (tags && tags.length > 0) {
-			obj.title = tags[0].name;
-			obj.id = 'user/' + obj.title;
-			obj.showOrigin = true;
-			// can't subscribe to this feed
-			obj.subscribed = -1;
-		}
-	} else {
-		for (var i in tags) {
-			obj.subscribed = (feed.tags.indexOf(tags[i].id) > -1) ? 1 : 0;
-			// If subscribed is flagged, break
-			if (obj.subscribed) {
-				break;
-			}
+	for (var i in tags) {
+		obj.subscribed = (feed.tags.indexOf(tags[i].id) > -1) ? 1 : 0;
+		// If subscribed is flagged, break
+		if (obj.subscribed) {
+			break;
 		}
 	}
 	// url to current api fetch call
-	obj.self = {href: (feed ? feed.self : '')};
-	obj.alternate = (feed && feed.siteURL) ? [{ href: feed.siteURL, type: 'text/html' }] : '';
+	obj.self = { href: feed.self };
+	obj.alternate = [{ href: feed.siteURL, type: 'text/html' }];
 	obj.items = items;
 	return obj;
 }
@@ -71,7 +61,6 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 		.then(function (item) {
 			item.query
 				.then(function (posts) {
-					// console.log('stream/contents (B)')
 					var isFeed = (params.type === 'feed'); // boolean: TRUE if feed
 					var value = params.value; // string: site URL
 					var hasPosts = (posts.length > 0 && posts[0]); // boolean: TRUE if feed object
@@ -102,7 +91,6 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 							items: []
 						});
 					} else {
-						// console.log('stream/contents (Y)')
 						if (req.user) {
 							return db
 								.getTags(ut.parseTags('user/-/state/reading-list', req.user))
