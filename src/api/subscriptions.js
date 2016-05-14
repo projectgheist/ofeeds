@@ -6,44 +6,52 @@ var mm = require('moment');
 var ut = require('../utils');
 var ag = require('../wait');
 
+/** function search
+ * @param url: encoded
+ */
+exports.search = function (url) {
+	// decode url for title search
+	var actualURL = decodeURIComponent(url);
+	// Find or create feed for this URL in the database
+	return db.Feed
+		.find({
+			$or: [{
+				title: { $regex: new RegExp('.*' + actualURL + '.*', 'i') }
+			}, {
+				feedURL: { $regex: url }
+			}]
+		})
+		.limit(6)
+		.then(function (results) {
+			// feeds found that match the search expression (used by typeahead)
+			if (results.length > 0) {
+				return results;
+			}
+			// make sure it starts with a certain prefix (isn't necessary for find)
+			if (!ut.startsWith(actualURL, ['http://', 'https://'])) {
+				// add prefix to the front of the string
+				actualURL = 'http://' + actualURL;
+			}
+			// is valid url?
+			if (ut.isUrl(actualURL)) {
+				return db
+					.findOrCreate(db.Feed, { feedURL: encodeURIComponent(actualURL) })
+					.then(function (feed) {
+						// retrieve all posts of the feed
+						return cr.FetchFeed(feed);
+					})
+					.then(function (f) {
+						// return feed as array
+						return [f];
+					});
+			} else {
+				return [];
+			}
+		});
+};
+
 // @todo: functions need to be merged
 var actions = {
-	/** function search
-	 * @param url: encoded
-	 */
-	search: function (ctx, url) {
-		var actualURL = decodeURIComponent(url);
-		// Find or create feed for this URL in the database
-		return db.Feed
-			.find({ $or: [{ title: { $regex: new RegExp('.*' + actualURL + '.*', 'i') } }, { feedURL: { $regex: url } }] })
-			.limit(6)
-			.then(function (results) {
-				// feeds found that match the search expression (used by typeahead)
-				if (results.length > 0) {
-					return results;
-				}
-				// make sure it starts with a certain prefix (isn't necessary for find)
-				if (!ut.startsWith(actualURL, ['http://', 'https://'])) {
-					// add prefix to the front of the string
-					actualURL = 'http://' + actualURL;
-				}
-				// is valid url?
-				if (ut.isUrl(actualURL)) {
-					return db
-						.findOrCreate(db.Feed, { feedURL: encodeURIComponent(actualURL) })
-						.then(function (feed) {
-							// retrieve all posts of the feed
-							return cr.FetchFeed(feed);
-						})
-						.then(function (f) {
-							// return feed as array
-							return [f];
-						});
-				} else {
-					return [];
-				}
-			});
-	},
 	/** function refresh
 	 * @param url: encoded
 	 */
@@ -268,8 +276,8 @@ ap.get('/api/0/subscription/search', function (req, res) {
 		res.status(400).end();
 	} else {
 		// create or find URL in db
-		actions
-			.search(req, req.query.q)
+		exports
+			.search(req.query.q)
 			.then(function (feeds) {
 				if (feeds.length) {
 					var a = feeds.map(function (val) {

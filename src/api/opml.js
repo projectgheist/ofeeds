@@ -14,7 +14,6 @@ var Parser = require('opmlparser');
 */
 exports.import = function (fileName, done) {
 	var stream = fs.createReadStream(fileName);
-
 	// create parser
 	var pr = new Parser();
 	// count of feeds included in the data
@@ -31,6 +30,7 @@ exports.import = function (fileName, done) {
 		var self = this;
 		var outline;
 		while ((outline = self.read()) !== null) {
+			// add data to output array
 			data.push(outline);
 			// increment counter
 			++counter;
@@ -43,7 +43,6 @@ exports.import = function (fileName, done) {
 	});
 
 	pr.on('end', function () {
-		console.log('All done. Found %d feeds.', counter);
 		done(null, data);
 	});
 };

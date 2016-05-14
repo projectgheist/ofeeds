@@ -10,12 +10,13 @@ require('../src/strategies/local');
 var sr = ap.listen(cf.Port(), cf.IpAddr());
 require('../src/routes');
 // Include API
-require('../src/api/subscriptions');
+var sb = require('../src/api/subscriptions');
 require('../src/api/streams');
 require('../src/api/posts');
 require('../src/api/tags');
 var op = require('../src/api/opml');
 var rq = require('supertest').agent(sr);
+var rs = require('rsvp');
 
 /** Make sure that the routing code compiles
  */
@@ -74,16 +75,41 @@ describe('Routing (Public)', function () {
 	});
 });
 
+// Test feeds to use for other tests
+var feeds;
+
 /** Make sure that the routing code compiles
  */
-describe('Import OPML', function () {
-	it('Default feeds', function (done) {
+describe('OPML', function () {
+	// Test feeds to use for other tests
+	var opmlData;
+
+	it('File - Import default feeds', function (done) {
 		// load file from content
 		op.import('./content/default_opml.xml', function (ignore, data) {
 			if (data.length) {
+				opmlData = data;
 				done();
 			}
 		});
+	});
+
+	it('Add feeds to database', function (done) {
+		var queries = [];
+		var encodeUrl;
+		for (var i in opmlData) {
+			encodeUrl = encodeURIComponent(opmlData[i].xmlUrl);
+			feeds.push(encodeUrl);
+			queries.push(sb.search(encodeUrl));
+		}
+		// execute all the queries
+		rs
+			.all(queries)
+			.then(function (results) {
+				if (results.length === feeds.length) {
+					done();
+				}
+			});
 	});
 });
 
@@ -97,20 +123,15 @@ describe('Routing (No user)', function () {
 			.end(done);
 	});
 
-	it('Quickadd feed', function (done) {
-		rq
-			.post('/api/0/subscription/quickadd')
-			.expect(401)
-			.end(done);
-	});
-
 	it('Retrieve OPML', function (done) {
 		rq
 			.get('/api/0/opml')
 			.expect(401)
 			.end(done);
 	});
+});
 
+describe('Tags API (No user)', function () {
 	it('Tag post', function (done) {
 		rq
 			.post('/api/0/tags/edit')
@@ -133,13 +154,18 @@ describe('Routing (No user)', function () {
 	});
 });
 
-/** Make sure that the routing code compiles
- */
-describe('Feeds API', function () {
-	it('Search for feed (No params)', function (done) {
+describe('Feeds API (No user)', function () {
+	it('Quickadd feed', function (done) {
 		rq
-			.get('/api/0/subscription/search')
-			.expect(400)
+			.post('/api/0/subscription/quickadd')
+			.expect(401)
+			.end(done);
+	});
+
+	it('Refresh feed', function (done) {
+		rq
+			.get('/api/0/subscription/refresh')
+			.expect(401)
 			.end(done);
 	});
 
@@ -149,14 +175,20 @@ describe('Feeds API', function () {
 			.expect(401)
 			.end(done);
 	});
+});
 
-	it('Refresh feed (No params)', function (done) {
+describe('Feeds API (No params)', function () {
+	it('Search for feed', function (done) {
 		rq
-			.get('/api/0/subscription/refresh')
-			.expect(401)
+			.get('/api/0/subscription/search')
+			.expect(400)
 			.end(done);
 	});
+});
 
+/** Make sure that the routing code compiles
+ */
+describe('Feeds API', function () {
 	it('Search feed (Invalid params)', function (done) {
 		rq
 			.get('/api/0/subscription/search')
@@ -182,7 +214,7 @@ describe('Feeds API', function () {
 		rq
 			.get('/api/0/subscription/search')
 			.query({
-				q: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+				q: feeds[0]
 			})
 			.expect(200)
 			.end(function (ignore, res) {
@@ -208,7 +240,7 @@ describe('Feeds API', function () {
 
 	it('Route feed', function (done) {
 		rq
-			.get('/feed/' + encodeURIComponent('http://www.polygon.com/rss/index.xml'))
+			.get('/feed/' + feeds[0])
 			.expect(200)
 			.end(done);
 	});
@@ -225,7 +257,7 @@ describe('Feeds API', function () {
 			.get('/api/0/stream/contents')
 			.query({
 				type: 'feed',
-				value: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+				value: feeds[0]
 			})
 			.expect(200)
 			.end(done);
@@ -289,6 +321,7 @@ describe('Feeds API', function () {
 	});
 });
 
+// Test posts to use for other tests
 var posts = [];
 
 /** Make sure that the routing code compiles
@@ -407,7 +440,7 @@ describe('Routes', function () {
 		rq
 			.get('/api/0/subscription/refresh')
 			.query({
-				q: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+				q: feeds[0]
 			})
 			.expect(200)
 			.end(done);
@@ -431,7 +464,7 @@ describe('Routes', function () {
 		rq
 			.post('/api/0/subscription/quickadd')
 			.send({
-				q: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+				q: feeds[0]
 			})
 			.expect(200)
 			.end(done);
@@ -448,7 +481,7 @@ describe('Routes', function () {
 		rq
 			.post('/api/0/feed/title')
 			.send({
-				q: encodeURIComponent('http://www.polygon.com/rss/index.xml'),
+				q: feeds[0],
 				n: 'Polygon'
 			})
 			.expect(200)
@@ -478,7 +511,7 @@ describe('Stream API', function () {
 			.get('/api/0/stream/contents')
 			.query({
 				type: 'feed',
-				value: encodeURIComponent('http://www.polygon.com/rss/index.xml'),
+				value: feeds[0],
 				xt: 'InvalidTag'
 			})
 			.expect(400)
@@ -576,7 +609,7 @@ describe('Tags API', function () {
 		rq
 			.post('/api/0/tag/mark-all-as-read')
 			.send({
-				s: [encodeURIComponent('http://www.polygon.com/rss/index.xml')],
+				s: [feeds[0]],
 				ts: ''
 			})
 			.expect(200)
@@ -597,7 +630,7 @@ describe('Routes WITH tags', function () {
 			.get('/api/0/stream/contents')
 			.query({
 				type: 'feed',
-				value: encodeURIComponent('http://www.polygon.com/rss/index.xml')
+				value: feeds[0]
 			})
 			.expect(200)
 			.end(done);

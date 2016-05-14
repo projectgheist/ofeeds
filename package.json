@@ -1,6 +1,6 @@
 {
   "name": "ofeeds",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Minimal RSS reader",
   "main": "index.js",
   "directories": {
