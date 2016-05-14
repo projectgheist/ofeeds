@@ -36,6 +36,8 @@ var Post = mg.Schema({
 	categories: [String],
 	// array of tags that are attached to this post
 	tags: { type: [ut.ref('Tag')], default: [] }
+}, {
+	autoIndex: false
 });
 
 /** Make sure that posts have unique indices

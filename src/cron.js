@@ -18,31 +18,34 @@ exports.FindOrCreatePost = function (feed, guid, data) {
 		db
 			.findOrCreate(db.Post, {'feed': feed, 'guid': guid})
 			.then(function (post) {
-				return post.save();
-			})
-			.then(function (post) {
 				var ref = post;
-				var m = data['media:group'];
-				ref.title = (data.title ? ut.parseHtmlEntities(data.title) : 'No title');
-				ref.body = data.description ? data.description : ((m && m['media:description'] && m['media:description']['#']) ? m['media:description']['#'] : '');
-				ref.body = CleanupDescription(ref.body || '', data.images);
-				ref.summary = CleanupSummary(ref.body);
-				ref.images = data.images;
-				ref.videos = data.videos;
-				// prevent the publish date to be overridden
-				ref.published = SelectPublishedDate(ref, data);
-				// time the post has been last modified
-				ref.updated = mm();
-				ref.author = (data.author ? data.author.trim() : '');
-				ref.url = data.link || (data['atom:link'] ? data['atom:link']['@'].href : '');
-				ref.commentsURL = data.comments || '';
-				ref.categories = data.categories || undefined;
-				// if feeds post variable doesn't exist, make it an array
-				feed.posts || (feed.posts = []);
-				// add post to posts array
-				feed.posts.addToSet(ref);
-				// return successfully
-				resolve(ref.save());
+				try {
+					var m = data['media:group'];
+					ref.title = (data.title ? ut.parseHtmlEntities(data.title) : 'No title');
+					ref.body = data.description ? data.description : ((m && m['media:description'] && m['media:description']['#']) ? m['media:description']['#'] : '');
+					ref.body = CleanupDescription(ref.body || '', data.images);
+					ref.summary = CleanupSummary(ref.body);
+					ref.images = data.images;
+					ref.videos = data.videos;
+					// prevent the publish date to be overridden
+					ref.published = SelectPublishedDate(ref, data);
+					// time the post has been last modified
+					ref.updated = mm();
+					ref.author = (data.author ? data.author.trim() : '');
+					ref.url = data.link || (data['atom:link'] ? data['atom:link']['@'].href : '');
+					ref.commentsURL = data.comments || '';
+					ref.categories = data.categories || undefined;
+					// if feeds post variable doesn't exist, make it an array
+					feed.posts || (feed.posts = []);
+					// add post to posts array
+					feed.posts.addToSet(ref);
+					// return successfully
+					resolve(ref.save());
+				} catch (ex) {
+					reject(ex);
+				}
+			}, function (ignore) {
+				reject(ignore);
 			});
 	});
 };
@@ -136,7 +139,7 @@ function CleanupDescription (data, images, debug) {
 
 /** function UpdateFeed
  */
-exports.UpdateFeed = function (feed, posts) {
+exports.UpdateFeed = function (feed, posts, debug) {
 	// wait for posts to finish saving then mark crawl success or failure
 	return rs
 		.all(posts)
@@ -176,7 +179,6 @@ function StoreMetaData (feed, meta) {
 /** function StorePosts
  */
 function StorePosts (stream, feed, posts, guids) {
-	// console.log("StorePosts (A)");
 	// data contains all the post information
 	var data;
 	var ignoreImages = false;
@@ -187,7 +189,6 @@ function StorePosts (stream, feed, posts, guids) {
 		};
 		var videos = [];
 
-		// console.log("StorePosts (B)");
 		// Store original thumbnail url
 		if (data.image !== undefined &&
 			data.image.url &&
@@ -195,7 +196,6 @@ function StorePosts (stream, feed, posts, guids) {
 			images.small.push({ 'url': data.image.url });
 		}
 
-		// console.log("StorePosts (C)");
 		// Used by DeviantArt
 		var thumbnails = data['media:thumbnail'] || (data['media:group'] ? data['media:group']['media:thumbnail'] : undefined);
 		if (thumbnails) {
@@ -209,7 +209,6 @@ function StorePosts (stream, feed, posts, guids) {
 			}
 		}
 
-		// console.log("StorePosts (D)");
 		// Used by DeviantArt, Youtube, Imgur
 		var m = data['media:content'] || (data['media:group'] ? data['media:group']['media:content'] : undefined);
 		if (m && m['@']) {
@@ -221,7 +220,6 @@ function StorePosts (stream, feed, posts, guids) {
 			}
 		}
 
-		// console.log("StorePosts (E)");
 		// Retrieve all the images from the post description
 		if (data.description !== null) {
 			pr.onopentag = function (tag) {
@@ -283,8 +281,7 @@ function StorePosts (stream, feed, posts, guids) {
 /** function PingFeed
  @param feed: the database feed object
 */
-function PingFeed (feed) {
-	// console.log("PingFeed - " + feed.title);
+function PingFeed (feed, debug) {
 	return new rs.Promise(function (resolve, reject) {
 		// pre-define variables
 		var postGUIDs = [];
@@ -318,14 +315,14 @@ function PingFeed (feed) {
 						resolve(feed.save());
 					}
 				} else {
-					resolve(exports.UpdateFeed(feed, posts));
+					resolve(exports.UpdateFeed(feed, posts, debug));
 				}
 			});
 
 		// !NOTE: Fake set header as some websites will give 'Forbidden 403' errors, if not set
 		rq
 			.get({
-				timeout: (1000 * 3),
+				timeout: 3000,
 				url: decodeURIComponent(feed.feedURL),
 				headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 			}, function (err, res, user) {
@@ -335,6 +332,9 @@ function PingFeed (feed) {
 				}
 			})
 			.on('error', function (ignore) {
+				if (debug) {
+					console.log('ERROR: ', feed.feedURL);
+				}
 				feed.lastModified = feed.failedCrawlTime = new Date();
 				feed.lastFailureWasParseFailure = true;
 				resolve(feed.save());
@@ -345,9 +345,9 @@ function PingFeed (feed) {
 
 /** function FetchFeed
  */
-exports.FetchFeed = function (feed) {
+exports.FetchFeed = function (feed, debug) {
 	// is feed fetching allowed?
-	return exports.AllowFetch(feed) ? PingFeed(feed) : feed;
+	return exports.AllowFetch(feed) ? PingFeed(feed, debug) : feed;
 };
 
 /** function UpdateAllFeeds

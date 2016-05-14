@@ -9,7 +9,7 @@ var ag = require('../wait');
 /** function search
  * @param url: encoded
  */
-exports.search = function (url) {
+exports.search = function (url, debug) {
 	// decode url for title search
 	var actualURL = decodeURIComponent(url);
 	// Find or create feed for this URL in the database
@@ -38,7 +38,7 @@ exports.search = function (url) {
 					.findOrCreate(db.Feed, { feedURL: encodeURIComponent(actualURL) })
 					.then(function (feed) {
 						// retrieve all posts of the feed
-						return cr.FetchFeed(feed);
+						return cr.FetchFeed(feed, debug);
 					})
 					.then(function (f) {
 						// return feed as array

@@ -99,7 +99,7 @@ describe('OPML', function () {
 		for (var i in opmlData) {
 			var encodeUrl = encodeURIComponent(opmlData[i].xmlurl);
 			feeds.push(encodeUrl);
-			queries.push(sb.search(encodeUrl));
+			queries.push(sb.search(encodeUrl, true));
 		}
 		// extend time limit as added multiple feeds to the database could take some time
 		this.timeout(5000 * feeds.length);
