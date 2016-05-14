@@ -17,6 +17,7 @@ require('../src/api/tags');
 var op = require('../src/api/opml');
 var rq = require('supertest').agent(sr);
 var rs = require('rsvp');
+var cr = require('../src/cron');
 
 /** Make sure that the routing code compiles
  */
@@ -623,12 +624,33 @@ describe('Tags API', function () {
 			.end(done);
 	});
 
-	it('Tag rename (Valid params)', function (done) {
+	it('Tag create (Valid params)', function (done) {
+		rq
+			.get('/api/0/tags')
+			.query({
+				s: 'SecondNewFolder'
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Tag rename - 1 existing (Valid params)', function (done) {
 		rq
 			.post('/api/0/tags/rename')
 			.send({
 				s: 'user/-/label/NewFolder',
 				dest: 'user/-/label/RenamedFolder'
+			})
+			.expect(200)
+			.end(done);
+	});
+
+	it('Tag rename - 2 existing (Valid params)', function (done) {
+		rq
+			.post('/api/0/tags/rename')
+			.send({
+				s: 'user/-/label/RenamedFolder',
+				dest: 'user/-/label/SecondNewFolder'
 			})
 			.expect(200)
 			.end(done);
@@ -671,7 +693,7 @@ describe('Tags API', function () {
 			.post('/api/0/tag/mark-all-as-read')
 			.send({
 				s: [feeds[0]],
-				ts: ''
+				ts: Date.now()
 			})
 			.expect(200)
 			.end(done);
@@ -708,3 +730,12 @@ describe('End authentication', function () {
 			.end(done);
 	});
 });
+
+/** Some extra things to test
+ */
+describe('Extra', function () {
+	it('Force update feeds', function (done) {
+		cr.UpdateAllFeeds(done);
+	});
+});
+

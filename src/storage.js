@@ -111,34 +111,38 @@ exports.renameTag = function (oldTag, newTag) {
 	// find old and new tag names
 	return exports.Tag
 		.find({ $or: [oldTag, newTag] })
-		.then(function (tags) {
+		.then(function (tags) { // !tags are not in order
 			// any tags exist?
 			if (tags.length) {
 				// old or new tag found?
 				if (tags.length === 1) {
 					// rename the old tag
-					if (tags[0] === oldTag) {
-						tags[0].rename(newTag).save();
+					if (tags[0].name === oldTag.name) {
+						tags[0].name = newTag.name;
+						return tags[0].save();
+					} else {
+						// no need to rename tag or else we would do an unnecessary rename
+						return true;
 					}
-					// no need to rename tag or we renamed the old tag
-					return true;
 				}
+				var ot = tags[0].name === oldTag.name ? tags[0] : tags[1];
+				var nt = tags[0].name !== oldTag.name ? tags[0] : tags[1];
 				// merge old and new tags together, find old tag references, point to new tag and delete old tag
 				return exports.Feed
 					.update({
-						tags: tags[0]
+						tags: ot
 					}, {
-						$addToSet: tags[1]
+						$addToSet: nt
 					})
-					.then(function () {
+					.then(function (data) {
 						return exports.Feed
 							.update({
-								tags: tags[0]
+								tags: ot
 							}, {
-								$pullAll: tags[0]
+								$pull: ot
 							});
 					})
-					.then(function () {
+					.then(function (data) {
 						// otherwise it returns a promise
 						return true;
 					});

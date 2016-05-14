@@ -39,11 +39,13 @@ Feed.virtual('stringID').get(function () {
 });
 
 // Gets the tags for a user, assuming they have already been populated
+/*
 Feed.methods.tagsForUser = function (user) {
 	return this.tags.filter(function (tag) {
 		return (tag.user === user._id) && (tag.type === 'label');
 	});
 };
+*/
 
 Feed.methods.titleForUser = function (user) {
 	return this.userTitles[user._id] || this.title || '(title unknown)';

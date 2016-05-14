@@ -80,8 +80,6 @@ ap.post('/api/0/tags/rename', function (req, res) {
 			.renameTag(orig, dest)
 			.then(function () {
 				res.status(200).end();
-			}, function (ignore) {
-				res.status(500).end();
 			});
 	}
 });
@@ -103,7 +101,7 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 
 		// Check if the timestamp parameter is set.
 		if (req.body.ts) {
-			options.maxTime = req.body.ts;
+			options.maxTime = parseFloat(req.body.ts);
 		}
 
 		// Declare read-tag
@@ -128,12 +126,9 @@ ap.post('/api/0/tag/mark-all-as-read', function (req, res) {
 								return post.save();
 							}));
 						}
-						return [];
 					})
-					.then(function (posts) {
+					.then(function () {
 						res.status(200).end();
-					}, function (ignore) {
-						res.status(500).send(ignore);
 					});
 			});
 	}
