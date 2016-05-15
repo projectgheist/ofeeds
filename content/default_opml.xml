@@ -10,5 +10,7 @@
 		<outline title="Jimmy Kimmel Live" text="" type="rss" xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=UCa6vGFO9ty8v5KZJXQxdhaw" htmlUrl="http://www.youtube.com/channel/UCa6vGFO9ty8v5KZJXQxdhaw"/>
 		<outline title="The Mary Sue" text="The Nexus of Pop Culture and the Uncharted Universe" type="rss" xmlUrl="http://www.themarysue.com/feed/" htmlUrl="http://www.themarysue.com"/>
 		<outline title="UnrealEngine RSS Feed" text="UnrealEngine RSS Feed" type="rss" xmlUrl="https://www.unrealengine.com/rss" htmlUrl="https://www.unrealengine.com"/>
+		<outline title="reddit: the front page of the internet" text="" type="rss" xmlUrl="https://www.reddit.com/.rss" htmlUrl="https://www.reddit.com/"/>
+		<outline title="Dodger" text="I’m a YouTuber with detective cats and a caffeine problem" type="rss" xmlUrl="http://dexbonus.tumblr.com/rss" htmlUrl="http://dexbonus.tumblr.com/"/>
 	</body>
 </opml>
