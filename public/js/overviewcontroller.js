@@ -5,18 +5,19 @@
 		'$scope',
 		'$timeout',
 		'$interval',
+		'services',
 	];
 
 	angular
         .module('webapp')
         .controller('overviewController', overviewController);
 
-	function overviewController($scope, $timeout, $interval) {
+	function overviewController($scope, $timeout, $interval, services) {
 		/** function fetch
 		 * Retrieve all feeds
 		 */
 		$scope.fetch = function () {
-			overviewService.getElements().query(function (data) {
+			services.getSubscriptions().query({}, function (data) {
 				// store retrieved data
 				$scope.subs = data.feeds;
 				// store retrieved next cron runtime
