@@ -4,46 +4,46 @@
 	/**
 	 * Global variables
 	 */
-	var g_Layzr = {};
-
+	/** Create instance of lazy image loading */
+	const g_Layzr = new Layzr({ 
+		normal: 'data-layzr',
+		retina: 'data-retina',
+		srcset: 'data-srcset',
+		threshold: 0
+	})
+	.on('src:before', (element) => {
+		var self = $(element);
+		// remove holderjs attributes
+		self.removeAttr('data-src');
+		self.removeAttr('data-holder-rendered');
+	})
+	.on('src:after', (element) => {
+		var self = $(element);
+		// has holderjs attribute?
+		if (self.attr('holderjs').length) {
+			// convert json to js-object
+			obj = JSON.parse(self.attr('holderjs'));
+			if (obj.height) {
+				self.parent().css('height', obj.height);
+			}
+		} else {
+			self.height('0'); // ignore current image height
+			var img = self.parent(),
+				panel = img.parent();
+			img.css('height',panel.parent().height() - panel.height());
+			self.height('100%'); // fill parent container
+		}
+		// fit image to parent
+		fit(self[0], self.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
+	});
+	
 	/**
 	 * On page load ready, only load images that are currently visible in the view area
 	 */
 	jQuery(document).ready(function ($) {
-		/** Create instance of lazy image loading */
-		g_Layzr = new Layzr({ 
-			attr: 'data-layzr',
-			threshold: 50,
-			callback: function (node) {
-				var self = $(this);
-				// wait for the image to finish loading
-				self.bind('load', function () {	
-					// remove holderjs attributes
-					self.removeAttr('data-src');
-					self.removeAttr('data-holder-rendered');
-					// remove layzr attributes
-					self.removeAttr('data-layzr');
-					var obj = {};
-					// has holderjs attribute?
-					if (self.attr('holderjs').length) {
-						// convert json to js-object
-						obj = JSON.parse(self.attr('holderjs'));
-						if (obj.height) {
-							self.parent().css('height', obj.height);
-						}
-					} else {
-						self.height('0'); // ignore current image height
-						var img = self.parent(),
-							panel = img.parent();
-						img.css('height',panel.parent().height() - panel.height());
-						self.height('100%'); // fill parent container
-					}
-					// fit image to parent
-					fit(self[0], self.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
-				});
-			}
-		});
-		
+		// bind scroll and resize handlers
+		g_Layzr.handlers(true);
+
 		// have some nice font scaling.
 		$('.alert').flowtype({
 			minFont:12,
@@ -154,7 +154,7 @@
 							element.css('width', '');
 							element.css('height', '');
 							// force image lazy loading update
-							g_Layzr.update();
+							g_Layzr.update().check();
 						} else {
 							element.removeAttr('data-layzr');
 						}
