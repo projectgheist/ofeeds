@@ -7,7 +7,7 @@
     "test": "test"
   },
   "dependencies": {
-    "agenda": "^0.8.0",
+    "agenda": "^0.8.1",
     "body-parser": "^1.15.1",
     "express": "^4.13.4",
     "express-session": "^1.13.0",
@@ -15,7 +15,7 @@
     "jade": "^1.11.0",
     "moment": "^2.13.0",
     "mongoomise": "0.0.8",
-    "mongoose": "^4.4.15",
+    "mongoose": "^4.4.17",
     "opml-generator": "^1.1.1",
     "opmlparser": "^0.8.0",
     "passport": "^0.3.2",
