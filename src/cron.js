@@ -178,6 +178,7 @@ function StorePosts (stream, feed, posts, guids) {
 	var data;
 	var ignoreImages = false;
 	while ((data = stream.read()) !== null) {
+		// declare variables
 		var images = {
 			small: [],
 			other: []

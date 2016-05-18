@@ -19,7 +19,7 @@
 	/** Declare controller */
 	function panelController($rootScope, $scope, $http, $location, $route, $routeParams, $anchorScroll, $sce, $timeout, $window, services) {
 		/** Type of template to use */
-		$scope.templateID = '';
+		$scope.templateID = 'list';
 		
 		/** Declare templates */
 		$scope.templates = {
@@ -338,9 +338,6 @@
 				// old last index (don't want to re-iterate over old values)
 				var idx = 0;
 
-				// default template
-				$scope.templateID = 'list';
-				
 				// information about previous post's
 				var prev = {
 					// how much space we have used on the row
@@ -350,10 +347,10 @@
 				};
 				
 				// what to do with the retrieved data
-				if ($scope.stream && 
-					($scope.stream.title && $scope.stream.title === data.title) &&
+				if ($scope.stream &&
 					(($scope.stream.items && $scope.stream.items.length === 0) || (data.items.length <= 0) || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))
 					) {
+					// has retrieved posts?
 					if (data.items.length > 0) {
 						// new start index
 						idx = $scope.stream.items.length;
@@ -363,10 +360,12 @@
 						// append end of stream reached
 						$scope.eof = true;
 					}
+					// possible to retrieve more posts?
 					if (!$scope.eof) {
 						// continue from last column?
 						var lastRow = $scope.groups[$scope.groups.length - 1];
-						for (var k = 0; k < lastRow.length; ++k) { // loop columns
+						// loop columns
+						for (var k in lastRow) {
 							prev.colnum += lastRow[k].size;
 						}
 						// over column count?
