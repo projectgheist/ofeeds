@@ -17,6 +17,7 @@ mixin PanelText()
 		.panel-label
 			if user
 				span.label.label-primary(ng-if="!post.read") Unread
+		.panel-heading(ng-if="stream.showOrigin")
 			h4
 				a(href='#')
 					i.fa.fa-tag
