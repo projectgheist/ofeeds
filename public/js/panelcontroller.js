@@ -338,14 +338,6 @@
 				// old last index (don't want to re-iterate over old values)
 				var idx = 0;
 
-				// information about previous post's
-				var prev = {
-					// how much space we have used on the row
-					colnum: 0,
-					// kind of article to render
-					type: $scope.templateID || 'none'
-				};
-				
 				// what to do with the retrieved data
 				if ($scope.stream &&
 					(($scope.stream.items && $scope.stream.items.length === 0) || (data.items.length <= 0) || (data.items[0].timestampUsec <= $scope.stream.items[$scope.stream.items.length-1].timestampUsec))
@@ -360,25 +352,6 @@
 						// append end of stream reached
 						$scope.eof = true;
 					}
-					// possible to retrieve more posts?
-					if (!$scope.eof) {
-						// continue from last column?
-						var lastRow = $scope.groups[$scope.groups.length - 1];
-						// loop columns
-						for (var k in lastRow) {
-							prev.colnum += lastRow[k].size;
-						}
-						// over column count?
-						if (prev.colnum >= 12) {
-							// start new row
-							prev.colnum = 0;
-						} else {
-							// set last row as current row
-							$scope.row = lastRow;
-							// remove last row from groups
-							$scope.groups.splice($scope.groups.length - 1, 1);
-						}
-					}
 				} else {
 					// copy retrieved articles to stream
 					$scope.stream = data;
@@ -388,14 +361,14 @@
 					$scope.resetColumn();
 				}
 				
-				// how often a list should appear
-				var listfreq = 6;
-
 				// loop all articles/items
 				for (var i = idx; !$scope.eof && i < $scope.stream.items.length; ++i) {
 					// local reference to item
 					var ref = $scope.stream.items[i];
-										
+					
+					// set template
+					ref.template = $scope.templates[$scope.templateID][0];
+					
 					// format date
 					ref.formatted = $scope.formatTime(ref.published);
 					
@@ -416,152 +389,8 @@
 						// Post HTML content needs to be set as TRUSTED to Angular otherwise it will not be rendered
 						ref.content.content = $sce.trustAsHtml(str);
 					}
-					
-					// !Setup for templating posts
-					// 	group = [row] (used as a way to iterate over the rows)
-					// 	row = [column]
-					// 	column = {template, size, [element]}
-					// 	element = object
-					
-					// local reference to item
-					var ref = $scope.stream.items[i];
-					
-					// when not a list, do other stuff
-					if (prev.type !== 'list') {
-						// add to element to column
-						$scope.column.items.push(ref);
-						// set column template
-						$scope.column.template = $scope.templates['tile'][0];
-						// retrieve video image
-						if (ref.content.videos.length) {
-							// declare variable
-							var e;
-							// loop videos and find thumbnail
-							for (var j in ref.content.videos) {
-								// contains youtube video?
-								if ((e = /(?:youtube.com\/[\s\S]+|youtu.be)\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) {
-									// replace url for embedded
-									ref.content.videos[j] = ['https://www.youtube.com/embed/',e[1]].join('');
-									// add video as thumbnail
-									ref.content.images.other.splice(0, 0, {
-										url: ['http://img.youtube.com/vi/', e[1], '/hqdefault.jpg'].join('')
-									});
-								}
-							}
-							// calculate column size
-							$scope.column.size = (ref.content.images.other.length ? (((prev.colnum % 6) === 0) ? 6 : (12 - prev.colnum)) : 4);
-							// increment column count
-							prev.colnum = Math.min(prev.colnum + $scope.column.size, 12);
-							// adds column to row and resets
-							$scope.addColumnToRowAndReset();
-							// end of row reached?
-							if (prev.colnum === 12) {
-								// reset number
-								prev.colnum = 0;
-								// set what the next type of column is going to be
-								prev.type = ((i % listfreq) === 0) ? 'list' : 'none';
-								// add to row to groups and reset
-								$scope.addRowToGroupsAndReset();
-							} else {
-								// set what the next type of column is going to be
-								prev.type = ((prev.colnum % 6 === 0) && (i % listfreq === 0)) ? 'list' : 'video';
-							}
-						} else if (ref.content.images.other.length) {
-							var c = 4;
-							if (prev.colnum) {
-								c = ((prev.colnum % 6) === 0) ? 6 : 4;
-							} else {
-								if (prev.type === 'none' || prev.type === 'image') {
-									var j = ($scope.groups.length % 3);
-									if (prev.colnum === 0 && j === 0) {
-										c = 12;
-									} else {
-										c = (j === 1) ? 6 : 4;
-									}
-								}
-							}
-							// calculate column size
-							$scope.column.size = c;
-							// increment column count
-							prev.colnum = Math.min(prev.colnum + $scope.column.size, 12);
-							// adds column to row and resets
-							$scope.addColumnToRowAndReset();
-							// end of row reached?
-							if (prev.colnum === 12) {
-								// reset number
-								prev.colnum = 0;
-								// decide if the next time we get a list or decide on the item when we see it
-								prev.type = ((i % listfreq) === 0) ? 'list' : 'none';
-								// add to row to groups and reset
-								$scope.addRowToGroupsAndReset();
-							} else {
-								// set type
-								prev.type = ((prev.colnum % 6 === 0) && (i % listfreq === 0)) ? 'list' : 'image';
-							}
-						} else { // text only article
-							// calculate column size
-							$scope.column.size = ((prev.colnum > 0 || $scope.groups.length !== 0) && (prev.colnum % 6) === 0) ? 6 : 4;
-							// increment column count
-							prev.colnum = Math.min(prev.colnum + $scope.column.size, 12);
-							// adds column to row and resets
-							$scope.addColumnToRowAndReset();
-							// end of row reached?
-							if (prev.colnum === 12) {
-								// reset number
-								prev.colnum = 0;
-								// decide if the next time we get a list or decide on the item when we see it
-								prev.type = ((i % listfreq) === 0) ? 'list' : 'none';
-								// add to row to groups and reset
-								$scope.addRowToGroupsAndReset();
-							} else { 
-								// set type
-								prev.type = ((prev.colnum % 6 === 0) && (i % listfreq === 0)) ? 'list' : 'text';
-							}
-						}
-					} else { // render a list
-						// calculate column size
-						$scope.column.size = (prev.colnum === 0) ? 6 : (12 - prev.colnum);
-						// set column template
-						$scope.column.template = $scope.templates['list'][0];
-						// add to element to column
-						$scope.column.items.push(ref);
-						// reached maximum size of list?
-						if ($scope.column.items.length === 6) {
-							// reset type
-							prev.type = 'none';
-							// increment
-							prev.colnum += $scope.column.size;
-							// adds column to row and resets
-							$scope.addColumnToRowAndReset();
-							// end of row reached?
-							if (prev.colnum === 12) {
-								// reset number
-								prev.colnum = 0;
-								// add to row to groups and reset
-								$scope.addRowToGroupsAndReset();
-							}
-						} else {
-							// keep the type
-							prev.type = 'list';
-						}
-					}
-					
-					/*
-					// set article's template
-					if ($scope.cp && ref.uid === $scope.cp.uid) { // has currentpost and id's are the same
-						$scope.expand($scope.stream.items[i]);
-					} else if ($scope.templateID !== '') { // template id specified
-						ref.template = $scope.templates[$scope.templateID][0];
-					} else { // no template id specified, default to tile template
-						$scope.templateID = 'tile';
-						ref.template = $scope.templates[$scope.templateID][0];
-					}
-					*/
 				}
 				
-				// add to row to groups and reset
-				$scope.addRowToGroupsAndReset();
-			
 				// is message present?
 				if (m) {
 					$scope.showAlert(m.t, m.m); // show message

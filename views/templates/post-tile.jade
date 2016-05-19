@@ -28,7 +28,7 @@ mixin PanelText()
 //- Video/multimedia post layout
 .panel-post(ng-if="post.content.videos.length")
 	.panel.panel-default
-		.panel-heading
+		.panel-heading(ng-if="stream.showOrigin")
 			h4
 				a(href='#')
 					i.fa.fa-tag
