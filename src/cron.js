@@ -40,9 +40,8 @@ exports.FindOrCreatePost = function (feed, guid, data) {
 				feed.posts || (feed.posts = []);
 				// add post to posts array
 				feed.posts.addToSet(post);
-				// return successfully
+				// return succesfully
 				resolve();
-			}, function (ignore) {
 			});
 	});
 };

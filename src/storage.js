@@ -56,7 +56,7 @@ exports.findOrCreate = function (model, item, debug) {
  */
 exports.updateOrCreate = function (model, item, update, debug) {
 	// upsert: bool - creates the object if it doesn't exist. Defaults to false.
-	var q = model.findOneAndUpdate(item, update, {upsert: true, 'new': true});
+	var q = model.findOneAndUpdate(item, update, {upsert: true, 'new': true, setDefaultsOnInsert: true});
 	if (debug) console.log(q);
 	return q;
 };
