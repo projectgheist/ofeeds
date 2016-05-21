@@ -1,3 +1,20 @@
+body {
+	overflow: hidden;
+}
+
+#panel {
+	padding: 0;
+	position: absolute;
+	right: 0;
+	background-color: rgb(238, 238, 238);
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+#panel .container-fluid {
+	padding-top: 10px;
+}
+
 .v-offset {
 	margin-top: 7%;
 }
@@ -174,28 +191,9 @@ ng-Textoverflow {
 	margin-bottom: 15px;
 }
 
-/* CSS for TextFit.js */
-.textfit {
-	width: 100%;
-	height: 100%;
-	font-size: 16px;
-}
-
-.label.textfit {
+/* CSS for TextTailor.js */
+[ng-textfit] {
 	display: inline-block;
-}
-
-.textfit img, .textfit i {
-	width: 16px;
-	margin-right: 15px;
-}
-
-/* set image to favicon size */
-.textfit img {
-	height: auto;
-}
-
-.textfit i {
 }
 
 /* Side notes for calling out things
@@ -292,13 +290,6 @@ hbinclude .bs-callout {
 	background-image: linear-gradient(to bottom, #0088cc, #0077b3);
 	background-repeat: repeat-x;
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0)
-}
-
-#panel {
-	padding: 0;
-	position: absolute;
-	right: 0;
-	background-color: rgb(238, 238, 238);
 }
 
 .panel-image .panel-text {

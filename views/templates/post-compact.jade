@@ -1,13 +1,10 @@
 .row
-	.col-lg-2(ng-if="!stream || stream.showOrigin")
-		.textfit(ng-textfit='false')
-			a(href="{{post.origin.url}}")
-				span.label.label-primary {{post.origin.title}}
-	.col-xs-10(ng-class="{'col-lg-8':(!stream || stream.showOrigin)}")
-		.textfit(ng-textfit='false')
-			a(href='/post/{{post.uid}}') {{post.title}}
-	.col-xs-2
-		span.label.pull-right {{post.formatted}}
+	.col-lg-2(ng-if="stream.showOrigin", style='height:32px')
+		a(href="{{item.origin.url}}", ng-textfit='', ng-tt-max-font=24)
+			span.label.label-primary {{item.origin.title}}
+	.col-xs-12(ng-class="{'col-lg-10':stream.showOrigin}")
+		span.label.pull-right {{item.formatted}}
+		a(href='/post/{{item.uid}}', ng-textfit='', ng-tt-max-font=24, style='height:32px') {{item.title}}
 .row
 	.col-xs-12
 		hr(ng-hide="$last", style='margin:5px 0 5px 0')

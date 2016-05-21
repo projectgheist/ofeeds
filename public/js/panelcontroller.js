@@ -208,14 +208,21 @@
 			$scope.post = undefined;
 			// execute external calls
 			services.getPost().query($scope.params, function (data) {
+				// set new height
+				$('#panel').height($('#menu').height());
+
 				// turn off refresh
 				$scope.rf = false;
+
 				// no data retrieved
 				if (!data) {
 					return;
 				}
+
 				// local reference to item
-				var ref = $scope.post = data;
+				var ref = data;
+				// set post data
+				$scope.post = ref;
 				// format date
 				ref.formatted = $scope.formatTime(ref.published);
 				// shorten the author name
@@ -317,14 +324,22 @@
 			if ($scope.ignoreReadArticles) {
 				$scope.params.xt = 'user/-/state/read';
 			}
+
 			// retrieve from database
 			services.getElements().query($scope.params, function (data) {
+				// set new height
+				$('#panel').height($('#menu').height());
+
 				// turn off refresh
 				$scope.rf = false;
+
 				// make sure variables exist
 				if (!data) {
 					return;
 				}
+
+				// reset post data
+				$scope.post = undefined;
 				
 				// clear the title from the search box
 				if (data.title && data.title.length > 0) {
@@ -696,7 +711,7 @@
 				}
 			}
 		});
-
+		
 		// single keys
 		/** Move to article below (previous) in stream
 		 */

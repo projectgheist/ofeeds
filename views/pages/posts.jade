@@ -1,4 +1,4 @@
-.container-fluid
+.container-fluid(infinite-scroll='loadMore()',infinite-scroll-distance='2')
 	.row(ng-if="false")
 		.col-xs-12
 			table.table.shadow-z-1(ng-if="stream !== undefined")
@@ -21,8 +21,7 @@
 					tr
 						td Visible articles
 						td {{stream.items.length}}
-	div(infinite-scroll='loadMore()',infinite-scroll-distance='2')
-		.row(ng-repeat='item in stream.items', ng-include='item.template')
+	div(ng-repeat='item in stream.items', ng-include='item.template')
 	.row(ng-if="stream.items.length <= 0")
 		.col-xs-12
 			h1 Feed/stream doesn't contain any articles!

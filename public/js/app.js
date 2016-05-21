@@ -46,9 +46,9 @@
 
 		// have some nice font scaling.
 		$('.alert').flowtype({
-			minFont:12,
-			maxFont:36,
-			fontRatio:96
+			minFont: 12,
+			maxFont: 36,
+			fontRatio: 96
 		});
 		
 		// set sidebar height
@@ -58,13 +58,15 @@
 		
 		// set the internal height of the sidebar
 		$.fn.matchHeight._afterUpdate = function (event, groups) {
-			// Reduce height by navbar height
-			var h = $('#menu').height() - 60;
+			// calc reduced height by navbar height
+			var h = $('#menu').height() - $('.navbar-static-top').height();
+			// set new height
 			$('#menu').height(h);
 			
-			// 
+			// calc sidebar body height
 			var a = $('#sidebar-header').height() + 10,
 				b = $('#sidebar-footer').height() + 10;
+			// set new height
 			$('#sidebar-body').height(h - (a + b));
 		};
 	});
@@ -164,16 +166,6 @@
 		}
 	};
 
-	function ngTextoverflow() {
-		return {
-			restrict: 'E', // class
-			link: function (scope, element, attrs) {
-				setTimeout(function () {
-				}, 1);
-			}
-		};
-	};
-	
 	/**
 	*/
 	function withripple(rootScope, window, location) {
@@ -194,18 +186,6 @@
 			}
 		};
 	};
-
-	/**
-	*/
-	function onLastRepeat() {
-		return function (scope, element, attrs) {
-			if (scope.$last) {
-				setTimeout(function () {
-					scope.$emit('onRepeatLast', element, attrs);
-				}, 1);
-			}
-		}
-	};
 	
 	/**
 	*/
@@ -213,18 +193,22 @@
 		return {
 			restrict: 'A', // attribute
 			link: function (scope, element, attrs) {
-				scope.$watch(function () {
-					return scope.isNavVisible();
-				}, function () {
-					setTimeout(function () { // requires a 1ms delay for some reason
+				scope.$parent.$watchGroup([
+					function (_scope) {
+						return _scope.isNavVisible();
+					},
+					'rf'
+				], function (newValues, oldValues, _scope) {
+					if (newValues[0] !== oldValues[0] || newValues[1] === undefined || newValues[1] !== oldValues[1]) {
 						var b = ((attrs.ngTextfit.length === 0) || (attrs.ngTextfit === 'true'));
 						element.textTailor({
 							fit: b, // fit the text to the parent's height and width
-							ellipsis: true,
-							minFont: 16,
+							minFont: parseFloat(attrs.ngTtMinFont) || 16,
+							maxFont: parseFloat(attrs.ngTtMaxFont) || 40,
+							ellipsis: attrs.ngTtEllipsis || true,
 							justify: b 	// adds css -> text-align: justify
 						});
-					}, 1);
+					}
 				});
 			}
 		};
