@@ -15,52 +15,53 @@ var FeedParser = require('feedparser');
 exports.FindOrCreatePost = function (feed, guid, data) {
 	// return a new promise
 	return new rs.Promise(function (resolve, reject) {
+		var m = data['media:group'];
+		var d = data.description ? data.description : ((m && m['media:description'] && m['media:description']['#']) ? m['media:description']['#'] : '');
 		db
-			.findOrCreate(db.Post, {'feed': feed, 'url': guid})
-			.then(function (post) {
-				var ref = post;
-				var m = data['media:group'];
-				ref.title = (data.title ? ut.parseHtmlEntities(data.title) : 'No title');
-				ref.body = data.description ? data.description : ((m && m['media:description'] && m['media:description']['#']) ? m['media:description']['#'] : '');
-				ref.body = CleanupDescription(ref.body || '', data.images);
-				ref.summary = CleanupSummary(ref.body);
-				ref.images = data.images;
-				ref.videos = data.videos;
+			.updateOrCreate(db.Post, {
+				'feed': feed,
+				'url': guid
+			}, {
+				title: (data.title ? ut.parseHtmlEntities(data.title) : 'No title'),
+				body: CleanupDescription(d || '', data.images),
+				summary: CleanupSummary(d),
+				images: data.images,
+				videos: data.videos,
 				// prevent the publish date to be overridden
-				ref.published = SelectPublishedDate(ref, data);
+				published: SelectPublishedDate(data),
 				// time the post has been last modified
-				ref.updated = mm();
-				ref.author = (data.author ? data.author.trim() : '');
-				ref.commentsURL = data.comments || '';
-				ref.categories = data.categories || undefined;
+				updated: mm(),
+				author: (data.author ? data.author.trim() : ''),
+				commentsURL: data.comments || '',
+				categories: data.categories || undefined
+			})
+			.then(function (post) {
 				// if feeds post variable doesn't exist, make it an array
 				feed.posts || (feed.posts = []);
 				// add post to posts array
-				feed.posts.addToSet(ref);
+				feed.posts.addToSet(post);
 				// return successfully
-				resolve(ref.save());
+				resolve();
+			}, function (ignore) {
 			});
 	});
 };
 
 /** function SelectPublishedDate
  */
-function SelectPublishedDate (prev, data, debug) {
+function SelectPublishedDate (data, debug) {
 	if (data['rss:pubdate'] && data['rss:pubdate']['#']) {
 		if (debug) console.log('rss:pubdate: ' + data['rss:pubdate']['#']);
 		return mm(new Date(data['rss:pubdate']['#']).toISOString());
 	} else if (data.pubdate) {
 		if (debug) console.log('pubdate: ' + data.pubdate);
 		return mm(new Date(data.pubdate).toISOString());
-	} else if (!prev.published && data.meta && data.meta.pubdate) {
+	} else if (data.meta && data.meta.pubdate) {
 		if (debug) console.log('meta.pubdate: ' + data.meta.pubdate);
 		return mm(new Date(data.meta.pubdate).toISOString());
-	} else if (!prev.published) {
+	} else {
 		if (debug) console.log('now');
 		return mm();
-	} else {
-		if (debug) console.log('prev');
-		return prev.published;
 	}
 }
 
@@ -143,6 +144,7 @@ exports.UpdateFeed = function (feed, posts, debug) {
 			feed.lastModified = mm();
 			// save feed in db and return
 			return feed.save();
+		}, function (ignore) {
 		});
 };
 
@@ -164,7 +166,7 @@ function StoreMetaData (feed, meta) {
 	feed.favicon = meta.favicon || (meta['atom:icon'] && meta['atom:icon']['#']) || (meta.image && meta.image.url) || '';
 	feed.siteURL = meta.link || '';
 	feed.title = meta.title ? ut.parseHtmlEntities(meta.title).trim() : '';
-	feed.description = meta.description || '';
+	feed.description = CleanupSummary(meta.description) || '';
 	feed.author = meta.author || '';
 	feed.language = meta.language || '';
 	feed.copywrite = meta.copywrite || '';

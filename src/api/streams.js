@@ -10,6 +10,7 @@ var mm = require('moment');
 function formatPosts (user, feed, posts, tags, obj) {
 	// creates a new array with the posts
 	obj.items = db.formatPosts(user, posts);
+	// feed exists?
 	if (feed) {
 		// assign tag
 		for (var i in tags) {
