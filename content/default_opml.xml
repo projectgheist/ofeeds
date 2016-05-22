@@ -12,5 +12,11 @@
 		<outline title="UnrealEngine RSS Feed" text="UnrealEngine RSS Feed" type="rss" xmlUrl="https://www.unrealengine.com/rss" htmlUrl="https://www.unrealengine.com"/>
 		<outline title="reddit: the front page of the internet" text="" type="rss" xmlUrl="https://www.reddit.com/.rss" htmlUrl="https://www.reddit.com/"/>
 		<outline title="Dodger" text="I’m a YouTuber with detective cats and a caffeine problem" type="rss" xmlUrl="http://dexbonus.tumblr.com/rss" htmlUrl="http://dexbonus.tumblr.com/"/>
+		<outline title="Dragon's Burn" text="Updates on weekends. Don’t panic if it doesn’t." type="rss" xmlUrl="http://dragonsburn.tumblr.com/rss" htmlUrl="http://dragonsburn.tumblr.com/"/>
+		<outline title="Eurogamer.net" text="Eurogamer is the largest independent gaming website in Europe, providing news, reviews, previews, and more." type="rss" xmlUrl="http://www.eurogamer.net/?format=rss" htmlUrl="http://www.eurogamer.net"/>
+		<outline title="Rock, Paper, Shotgun" text="" type="rss" xmlUrl="http://feeds.feedburner.com/RockPaperShotgun" htmlUrl="https://www.rockpapershotgun.com"/>
+		<outline title="DeviantArt: What's Hot" text="DeviantArt RSS for What's Hot" type="rss" xmlUrl="http://backend.deviantart.com/rss.xml?order=67108864" htmlUrl="http://www.deviantart.com/browse/all/?order=67108865"/>
+		<outline title="DeviantArt: What's Hot" text="DeviantArt RSS for What's Hot" type="rss" xmlUrl="http://backend.deviantart.com/rss.xml?order=67108864" htmlUrl="http://www.deviantart.com/browse/all/?order=67108865"/>
+		<outline title="instagram's photos | Iconosquare - Instagram Web Viewer" text="Instagram's photos of instagram  | Iconosquare, your best Instagram Web Viewer!" type="rss" xmlUrl="http://iconosquare.com/feed/instagram" htmlUrl="http://iconosquare.com/instagram"/>
 	</body>
 </opml>

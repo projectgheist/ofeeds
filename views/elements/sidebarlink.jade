@@ -1,0 +1,7 @@
+.media.withripple(ng-repeat="feed in subs",ng-class="{'active':isActive(feed.url)}",data-target="/feed/{{feed.id}}")
+	a.media-left(href='#')
+		img.media-object(ng-if="feed.favicon", ng-src="{{feed.favicon}}", style='max-height: 16px')
+		i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon")
+	.media-body
+		span.badge.pull-right {{feed.unreadcount}}
+		span(ng-textfit='', ng-tt-max-font=24, style='height:32px') {{feed.title}}

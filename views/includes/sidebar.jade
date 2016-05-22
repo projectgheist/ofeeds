@@ -1,14 +1,5 @@
 .col-md-3#menu(ng-controller="navController")
-	#sidebar-body(style="overflow:scroll;overflow-x:hidden;overflow-y:auto")
+	#sidebar-body
 		div(ng-if="!subs")
 			include ../elements/loading
-		ul(ng-Ripple="{{subs.length}}")
-			li.withripple(ng-if="subs && subs.length <= 0")
-				a(href="#") No feeds
-			li.withripple(ng-repeat="feed in subs",ng-class="{'active':isActive(feed.url)}",data-target="/feed/{{feed.id}}") 
-				span.badge.pull-right {{feed.unreadcount}}
-				a(href="#")
-					.pull-left
-						img(ng-if="feed.favicon", ng-src="{{feed.favicon}}")
-						i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon")
-					span(ng-textfit='', ng-tt-max-font=24, style='height:32px') {{feed.title}}
+		include ../elements/sidebarlink

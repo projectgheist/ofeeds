@@ -1,6 +1,9 @@
 sudo: false
 language: node_js
 node_js:
+  - "5.1"
+  - "5"
+  - "4.2"
   - "4.1"
   - "4.0"
   - "0.12"
@@ -8,6 +11,8 @@ node_js:
   - "0.10"
 services:
 - mongodb
+env:
+- NODE_ENV=production
 addons:
   apt:
     sources:

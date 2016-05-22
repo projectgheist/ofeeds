@@ -2,14 +2,14 @@ include ../includes/header
 .container-fluid(ng-controller="panelController")
 	.row
 		include ../includes/nav
-	.row
+	.row(style='display: none')
 		.col-xs-12.no-padding
 			.text-center
 				#alert.alert.alert-dismissible.no-margin.hidden(role="alert",ng-class="alertType")
 					button.close(data-dismiss="alert",aria-label="Close")
 						span(aria-hidden="true") &times;
 					p(ng-bind-html="alertMessage")
-	.row
+	.row#myContent
 		include ../includes/sidebar
 		#panel(ng-class="isNavVisible() ? 'col-xs-9' : 'col-xs-12'", ng-view="")
 	.modal.fade#myModal(ng-controller="modalController", tabindex="-1", role="dialog", aria-labelledby="myModalLabel", aria-hidden="true")

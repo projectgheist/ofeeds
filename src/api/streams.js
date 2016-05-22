@@ -80,7 +80,7 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 							self: ut.fullURL(req),
 							subscribed: 0,
 							continuation: 'TODO',
-							showOrigin: false,
+							showOrigin: false
 						};
 						if (params.type === 'feed') {
 							// reference to feed db obj

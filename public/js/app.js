@@ -52,22 +52,24 @@
 		});
 		
 		// set sidebar height
-		$('#menu').matchHeight({
+		$('#myContent').matchHeight({
 			target: $(window)
 		});
 		
 		// set the internal height of the sidebar
 		$.fn.matchHeight._afterUpdate = function (event, groups) {
 			// calc reduced height by navbar height
-			var h = $('#menu').height() - $('.navbar-static-top').height();
+			var h = $('#myContent').height() - $('.navbar-full').outerHeight();
 			// set new height
-			$('#menu').height(h);
+			$('#myContent').height(h);
 			
 			// calc sidebar body height
+			/*
 			var a = $('#sidebar-header').height() + 10,
 				b = $('#sidebar-footer').height() + 10;
 			// set new height
 			$('#sidebar-body').height(h - (a + b));
+			*/
 		};
 	});
 
@@ -99,8 +101,7 @@
 		// directive names are only allowed to have one capitalized letter in them
 		.directive('holderjs', holderjs)
 		.directive('withripple', ['$rootScope','$window','$location',withripple])
-		.directive('ngTextfit', ngTextfit)
-		.directive('ngInclude', ['$compile',ngInclude]);
+		.directive('ngTextfit', ngTextfit);
 
 	/** function appConfig
 	 */
@@ -173,12 +174,13 @@
 			restrict: 'C', // class
 			link: function (scope, element, attrs) {
 				element.bind('click', function () {
+					// checks to make sure that the current path isn't the target path
 					if (location.path() !== element.attr('data-target')) {
 						if (element.attr('data-target').indexOf('https://') !== 0) {
-							rootScope.$apply(function () {
-								location.path(element.attr('data-target'));
-							});
+							// set new url
+							location.path(element.attr('data-target'));
 						} else {
+							// set new url
 							window.open(element.attr('data-target'));
 						}
 					}
@@ -214,6 +216,8 @@
 		};
 	}
 	
+	/**
+	 */
 	function ngImgLoaded() {
 		return {
 			restrict: 'A', // attribute
@@ -225,63 +229,6 @@
 		};
 	};
 	
-	function ngInclude($compile) {
-		return {
-			restrict: 'A', // attribute
-			link: function (scope, element, attrs) {
-				/*var s = scope.$parent.$parent, // scope
-					p = scope.$parent.post; // post info
-				// Trigger when number of children changes, including by directives like ng-repeat
-				scope.$watch(function () {
-					return element.children().length;
-				}, function () {
-					// Wait for templates to finish rendering
-					scope.$evalAsync(function () {
-						// set item id (can't do this in the template as it won't show up correctly in the document)
-						element.attr('id',p.uid);
-						// if a current element has been expanded
-						if (s.cp && p.uid === s.cp.uid) {
-							// set expand class
-							element.addClass('expand');
-							// mark post as read
-							s.markAsRead(p);
-							// if not infinite scrolling
-							if (!s.params.nt) {
-								// scroll to article
-								s.scrollto(s.cp.uid, -80);
-							}
-							// make all links open in a new tab
-							element.find('.article-content').find('a').each(function (e) {
-								// if tumblr site
-								var u = $(this).attr("href"),
-									r = new RegExp("(?:http:\/\/)?(?:www\.+)?([A-Za-z0-9\-]*)(\.tumblr\.com\/)"),
-									a = u.match(r);
-								// has a tumblr link?
-								if (a && a.length > 0) {
-									// give it a tooltip
-									$(this).attr("data-toggle", "popover");
-									// initialise tooltips
-									$('[data-toggle="popover"]').popover({ 
-									trigger: 'hover', 
-										delay:{hide: 3000}, 
-										html: true, 
-										'content': function () { return $compile(['<a ng-click="gotoFeed(\'',a[0].trim(),'rss\')">',a[1],'</a>'].join(''))(scope); }
-									});
-								}
-							});
-							// don't have iframes that are larger then the article width
-							element.find('iframe').each(function (e) {
-								if ($(this).width() > element.width()) {
-									$(this).width('100%');
-								}
-							});
-						}
-					});
-				});*/
-			}
-		}
-	};
-
 	function onResize($window) {
 		return function (scope, element, attr) {
 			var w = angular.element($window);

@@ -3,7 +3,7 @@
 		a(href="{{item.origin.url}}", ng-textfit='', ng-tt-max-font=24)
 			span.label.label-primary {{item.origin.title}}
 	.col-xs-12(ng-class="{'col-lg-10':stream.showOrigin}")
-		span.label.pull-right {{item.formatted}}
+		span.label.label-primary.pull-right {{item.formatted}}
 		a(href='/post/{{item.uid}}', ng-textfit='', ng-tt-max-font=24, style='height:32px') {{item.title}}
 .row
 	.col-xs-12

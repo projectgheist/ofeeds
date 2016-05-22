@@ -1,59 +1,42 @@
-.navbar.navbar-default.navbar-static-top(style='margin-bottom: 0')
+nav.navbar.navbar-full.navbar-light.bg-primary
 	.container-fluid
-		.navbar-header
-			ul.nav.navbar-nav
-				li
-					a(href="#", ng-click='nt()')
-						i.fa.fa-align-justify.fa-fw
+		.navbar-header.col-lg-3
 			a.navbar-brand(href='#') OFeeds
-			span(ng-if='stream.items.length')
-				i.fa.fa-angle-right.navbar-brand
-				a.navbar-brand(href='/') {{stream.title}}
-		.navbar-collapse.collapse
-			form.navbar-form.navbar-left
-				.form-group
-					input.form-control.typeahead#nrss(type="text", placeholder="Fetch a feed")
-			ul.nav.navbar-right
-				li.dropdown
-					a.text-right.dropdown-toggle(href="#",role="button",data-toggle="dropdown")
-						i.fa.fa-ellipsis-v.fa-fw
-					ul.dropdown-menu.pull-right
-						li(ng-click="updateStyle('list')")
-							a(href="#")
-								i.fa.fa-bars.fa-fw
-								| &nbsp;Minimal
-						li(ng-click="updateStyle('tile')")
-							a(href="#")
-								i.fa.fa-th.fa-fw
-								| &nbsp;Excerpt
-						li(ng-click="updateStyle('mini')")
-							a(href="#")
-								i.fa.fa-th-large.fa-fw
-								| &nbsp;Full
-						li.divider
-						li
-							a(href="/manage")
-								i.fa.fa-bar-chart.fa-fw
-								| &nbsp;Management		
-						li.divider
-						li
-							a(href="https://github.com/projectgheist/ofeeds", target="_blank")
-								i.fa.fa-github.fa-fw
-								| &nbsp;View on Github
-						if user
-							li
-								a(href="#")
-									i.fa.fa-cog.fa-fw
-									| &nbsp;Settings
-								a(href="#", ng-click='')
-									i.fa.fa-cloud-download.fa-fw
-									| &nbsp;Export OPML
-							li
-								a(href="#")
-									i.fa.fa-sign-out.fa-fw
-									| &nbsp;Logout
-						else
-							li
-								a(href="/auth/google", target="_self")
-									i.fa.fa-google-plus.fa-fw
-									| &nbsp;Sign in
+		.col-lg-4
+			form
+				input.form-control.typeahead#nrss(type="text", placeholder="Fetch a feed")
+		.col-lg-5
+			.dropdown.pull-right
+				a.btn.btn-secondary.dropdown-toggle(id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false")
+				.dropdown-menu(aria-labelledby="dropdownMenu1")
+					a.dropdown-item(href="#", ng-click="updateStyle('list')")
+						i.fa.fa-bars.fa-fw
+						| &nbsp;Minimal
+					a.dropdown-item(href="#", ng-click="updateStyle('tile')")
+						i.fa.fa-th.fa-fw
+						| &nbsp;Excerpt
+					a.dropdown-item(href="#", ng-click="updateStyle('mini')")
+						i.fa.fa-th-large.fa-fw
+						| &nbsp;Full
+					.dropdown-divider
+					a.dropdown-item(href="/manage")
+						i.fa.fa-bar-chart.fa-fw
+						| &nbsp;Management		
+					.dropdown-divider
+					a.dropdown-item(href="https://github.com/projectgheist/ofeeds", target="_blank")
+						i.fa.fa-github.fa-fw
+						| &nbsp;View on Github
+					if user
+						a.dropdown-item(href="#")
+							i.fa.fa-cog.fa-fw
+							| &nbsp;Settings
+						a.dropdown-item(href="#", ng-click='')
+							i.fa.fa-cloud-download.fa-fw
+							| &nbsp;Export OPML
+						a.dropdown-item(href="#")
+							i.fa.fa-sign-out.fa-fw
+							| &nbsp;Logout
+					else
+						a.dropdown-item(href="/auth/google", target="_self")
+							i.fa.fa-google-plus.fa-fw
+							| &nbsp;Sign in

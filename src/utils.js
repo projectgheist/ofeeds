@@ -86,7 +86,10 @@ exports.parseHtmlEntities = function (str) {
 	var result = '';
 	// early out
 	if (str && str.length) {
-		result = str.replace(/&#([0-9]{1,3});/gi, function (match, numStr) { return String.fromCharCode(parseInt(numStr, 10)); }).trim();
+		result = str
+			.replace(/&#([0-9]{1,3});/gi, function (match, numStr) { return String.fromCharCode(parseInt(numStr, 10)); })
+			.replace(/\n/g, ' ')
+			.trim();
 	}
 	return result;
 };

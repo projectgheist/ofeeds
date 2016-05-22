@@ -1,8 +1,7 @@
 li(style="height:24px")
-	.textfit(ng-textfit='false')
-		a(href="{{feed.url}}")
-			.pull-left
-				i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon")
-				img(ng-if="feed.favicon", ng-src="{{feed.favicon}}")
-			| {{feed.title}}
-			span.badge.pull-right {{feed.unreadcount}}
+	a(href="{{feed.url}}")
+		.pull-left
+			i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon")
+			img(ng-if="feed.favicon", ng-src="{{feed.favicon}}", style='max-width:32px; max-height:32px')
+		span(ng-textfit='', ng-tt-max-font=24, style='height:32px') {{feed.title}}
+		span.badge.pull-right {{feed.unreadcount}}

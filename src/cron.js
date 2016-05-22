@@ -341,8 +341,6 @@ exports.UpdateAllFeeds = function (done) {
 	// retrieve all feeds
 	db
 		.all(db.Feed, {
-			// get oldest updated feeds
-			query: {},
 			// oldest feeds first
 			sort: {lastModified: 1},
 			// limit the amount of feeds
