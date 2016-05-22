@@ -2,7 +2,7 @@
  */
 var rq = require('request');
 var rs = require('rsvp');
-var pr = require('../node_modules/feedparser/node_modules/sax/lib/sax.js').parser(false);
+var pr = require('sax').parser(false);
 var db = require('./storage');
 var mm = require('moment');
 var ut = require('./utils');

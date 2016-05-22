@@ -22,6 +22,7 @@
     "passport-google-oauth": "^1.0.0",
     "request": "^2.72.0",
     "rsvp": "^3.2.1",
+    "sax": "^1.2.1",
     "shortid": "^2.2.6",
     "validator": "^5.2.0"
   },
