@@ -12,7 +12,7 @@ node_js:
 services:
 - mongodb
 env:
-- NODE_ENV=production
+- NODE_ENV=test
 addons:
   apt:
     sources:

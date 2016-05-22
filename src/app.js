@@ -8,9 +8,7 @@ var ap = ex();
  */
 ap.set('views', cf.Dir() + 'views');
 ap.set('view engine', 'jade');
-if (process.env.NODE_ENV === 'production') {
-	ap.set('view cache', true);
-}
+ap.set('view cache', (process.env.NODE_ENV === 'production'));
 ap.use(ex.static(cf.Dir() + 'public'));
 
 /** Export reference
