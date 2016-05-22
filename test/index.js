@@ -735,6 +735,7 @@ describe('End authentication', function () {
  */
 describe('Extra', function () {
 	it('Force update feeds', function (done) {
+		this.timeout(5000 * feeds.length);
 		cr.UpdateAllFeeds(done);
 	});
 });
