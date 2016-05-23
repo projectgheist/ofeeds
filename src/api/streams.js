@@ -8,8 +8,10 @@ var mm = require('moment');
  * @param feed: information related to the feed
  */
 function formatPosts (user, feed, posts, tags, obj) {
-	// creates a new array with the posts
-	obj.items = db.formatPosts(user, posts);
+	if (posts.length) {
+		// creates a new array with the posts
+		obj.items = db.formatPosts(user, posts);
+	}
 	// feed exists?
 	if (feed) {
 		// assign tag
@@ -66,50 +68,41 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 				.then(function (posts) {
 					// string: site URL
 					var value = params.value;
-					if (!posts.length) {
-						// Google Reader returns 404 response, we need a valid json response for infinite scrolling
-						return res.json({
-							feedURL: value,
-							updated: '',
-							title: 'Unknown (' + value + ')',
-							items: []
-						});
+					var obj = {
+						feedURL: value,
+						title: 'Unknown (' + value + ')',
+						updated: '',
+						direction: 'ltr',
+						self: ut.fullURL(req),
+						subscribed: 0,
+						continuation: 'TODO',
+						showOrigin: false,
+						items: []
+					};
+					if (params.type === 'feed') {
+						// reference to feed db obj
+						var feed = item.feeds[0];
+						// assign variables
+						obj.id = feed.stringID;
+						obj.feedURL = decodeURIComponent(feed.feedURL);
+						obj.title = feed.title;
+						obj.siteURL = feed.siteURL;
+						obj.updated = feed.lastModified;
+						obj.creation = feed.creationTime;
 					} else {
-						var obj = {
-							direction: 'ltr',
-							self: ut.fullURL(req),
-							subscribed: 0,
-							continuation: 'TODO',
-							showOrigin: false
-						};
-						if (params.type === 'feed') {
-							// reference to feed db obj
-							var feed = item.feeds[0];
-							// assign variables
-							obj.id = feed.stringID;
-							obj.feedURL = decodeURIComponent(feed.feedURL);
-							obj.title = feed.title;
-							obj.siteURL = feed.siteURL;
-							obj.updated = feed.lastModified;
-							obj.creation = feed.creationTime;
-						} else {
-							obj.feedURL = decodeURIComponent(value);
-							obj.title = 'Custom stream';
-							obj.showOrigin = true;
-						}
-						// has user?
-						if (req.user) {
-							return db
-								.getTags(ut.parseTags('user/-/state/reading-list', req.user))
-								.then(function (tags) {
-									return res.json(formatPosts(req.user, feed, posts, tags, obj));
-								});
-						} else {
-							return res.json(formatPosts({}, feed, posts, [], obj));
-						}
+						obj.feedURL = decodeURIComponent(value);
+						obj.showOrigin = true;
 					}
-				}, function (ignore) {
-					return res.status(500).end();
+					// has user?
+					if (req.user) {
+						return db
+							.getTags(ut.parseTags('user/-/state/reading-list', req.user))
+							.then(function (tags) {
+								return res.json(formatPosts(req.user, feed, posts, tags, obj));
+							});
+					} else {
+						return res.json(formatPosts({}, feed, posts, [], obj));
+					}
 				});
 		});
 });

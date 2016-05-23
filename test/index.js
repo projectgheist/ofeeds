@@ -735,6 +735,7 @@ describe('End authentication', function () {
  */
 describe('Extra', function () {
 	it('Force update feeds', function (done) {
+		// extend time limit as updating multiple feeds could take some time
 		this.timeout(5000 * feeds.length);
 		cr.UpdateAllFeeds(done);
 	});
