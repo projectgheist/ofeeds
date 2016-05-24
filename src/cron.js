@@ -49,19 +49,15 @@ exports.FindOrCreatePost = function (feed, guid, data) {
 /** function SelectPublishedDate
  */
 function SelectPublishedDate (data, debug) {
+	var result = mm();
 	if (data['rss:pubdate'] && data['rss:pubdate']['#']) {
-		if (debug) console.log('rss:pubdate: ' + data['rss:pubdate']['#']);
-		return mm(new Date(data['rss:pubdate']['#']).toISOString());
+		result = mm(new Date(data['rss:pubdate']['#']).toISOString());
 	} else if (data.pubdate) {
-		if (debug) console.log('pubdate: ' + data.pubdate);
-		return mm(new Date(data.pubdate).toISOString());
+		result = mm(new Date(data.pubdate).toISOString());
 	} else if (data.meta && data.meta.pubdate) {
-		if (debug) console.log('meta.pubdate: ' + data.meta.pubdate);
-		return mm(new Date(data.meta.pubdate).toISOString());
-	} else {
-		if (debug) console.log('now');
-		return mm();
+		result = mm(new Date(data.meta.pubdate).toISOString());
 	}
+	return result;
 }
 
 /** function CleanupSummary
