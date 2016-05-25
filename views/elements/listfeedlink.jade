@@ -1,7 +1,7 @@
-li(style="height:24px")
-	a(href="{{feed.url}}")
-		.pull-left
+li
+	a.media(href="{{feed.url}}")
+		.media-left
+			img.media-object(ng-if="feed.favicon", ng-src="{{feed.favicon}}", style='width: 21px; height: 21px')
 			i.fa.fa-fw.fa-bookmark(ng-if="!feed.favicon")
-			img(ng-if="feed.favicon", ng-src="{{feed.favicon}}", style='max-width:32px; max-height:32px')
-		span(ng-textfit='', ng-tt-max-font=24, style='height:32px') {{feed.title}}
-		span.badge.pull-right {{feed.unreadcount}}
+		.media-body
+			span(ng-textfit='', ng-tt-max-font=24, style='height: 32px') {{feed.title}}

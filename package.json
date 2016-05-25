@@ -15,7 +15,7 @@
     "jade": "^1.11.0",
     "moment": "^2.13.0",
     "mongoomise": "0.0.8",
-    "mongoose": "^4.4.17",
+    "mongoose": "^4.4.19",
     "opml-generator": "^1.1.1",
     "opmlparser": "^0.8.0",
     "passport": "^0.3.2",
@@ -36,7 +36,7 @@
     "grunt-contrib-uglify": "^1.0.1",
     "grunt-contrib-watch": "^1.0.0",
     "jshint": "^2.9.2",
-    "mocha": "^2.4.5",
+    "mocha": "^2.5.3",
     "mocha-lcov-reporter": "^1.2.0",
     "passport-local": "^1.0.0",
     "supertest": "^1.2.0"

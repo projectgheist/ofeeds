@@ -14,9 +14,9 @@
 				h1 
 					i.fa.fa-line-chart.fa-fw
 					| &nbsp;Recently added
-			div(ng-if="!rf")
+			div(ng-if="!lf")
 				include ../elements/loading
-			ul.list-unstyled(ng-repeat='feed in rf')
+			ul.list-unstyled(ng-repeat='feed in lf')
 				include ../elements/listfeedlink
 	.row
 		.col-xs-12
@@ -26,6 +26,4 @@
 					| Most recent articles&nbsp;
 			div(ng-if="!rp")
 				include ../elements/loading
-			.row(ng-if="rp")
-				include ../elements/listgroup
-				mixin template('post in rp',"'views/templates/post-compact'")
+			div(ng-repeat='item in rp', ng-include="'views/templates/post-compact'")

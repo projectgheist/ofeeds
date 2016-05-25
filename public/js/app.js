@@ -179,6 +179,8 @@
 						if (element.attr('data-target').indexOf('https://') !== 0) {
 							// set new url
 							location.path(element.attr('data-target'));
+							// sync
+							scope.$apply()
 						} else {
 							// set new url
 							window.open(element.attr('data-target'));

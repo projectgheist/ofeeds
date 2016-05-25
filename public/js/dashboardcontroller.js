@@ -7,9 +7,9 @@
 			// strip properties with leading $$ characters
 			data = JSON.parse(angular.toJson(data));
 			if (data && data.feeds && data.feeds.length > 0) {
-				$scope.rf = data.feeds;
-				for (var i in $scope.rf) {
-					$scope.rf[i].url = ['/feed/',encodeURIComponent($scope.rf[i].id),'/'].join('');
+				$scope.lf = data.feeds;
+				for (var i in $scope.lf) {
+					$scope.lf[i].url = ['/feed/',encodeURIComponent($scope.lf[i].id),'/'].join('');
 				}
 			}
 		});
