@@ -287,17 +287,10 @@ function PingFeed (feed, debug) {
 			})
 			// when the end of the feed is reached
 			.on('end', function () {
-				if (fp_err) {
-					// if url as been flagged not to be a feed
-					if (fp_err.message.match(/^Not a feed/)) {
-						// remove feed from db
-						resolve(feed.remove());
-					} else {
-						feed.lastModified = feed.failedCrawlTime = new Date();
-						feed.lastFailureWasParseFailure = true;
-						// save feed in db
-						resolve(feed.save());
-					}
+				// if url as been flagged not to be a feed
+				if (fp_err && fp_err.message.match(/^Not a feed/)) {
+					// remove feed from db
+					resolve(feed.remove());
 				} else {
 					resolve(exports.UpdateFeed(feed, posts, debug));
 				}
