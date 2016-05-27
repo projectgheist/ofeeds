@@ -236,16 +236,18 @@
 				ref.origin.url = ['/feed/',encodeURIComponent(ref.origin.url)].join('');
 				// retrieve video image
 				if (ref.content.videos.length) {
-					var e; // declare variable
+					// declare variable
+					var e;
 					// copy array into temp variable
 					var a = ref.content.videos;
 					// reset array (angularjs needs to approve it first)
 					ref.content.videos = [];
 					// loop videos
 					for (var j in a) {
-						if ((e = /(?:youtube.com\/[\s\S]+|youtu.be)\/([\s\S][^?]+)/gi.exec(ref.content.videos[j])) !== null) { // contains youtube video?
+						// contains youtube video?
+						if ((e = /(?:youtube.com\/[\s\S]+|youtu.be)\/([\s\S][^?]+)/gi.exec(a[j])) !== null) {
 							// replace url for embeded
-							ref.content.videos[j] = $sce.trustAsResourceUrl(['https://www.youtube.com/embed/',e[1]].join(''));
+							ref.content.videos[j] = $sce.trustAsResourceUrl(['https://www.youtube.com/embed/', e[1]].join(''));
 						}
 					}
 				}

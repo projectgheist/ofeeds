@@ -22,5 +22,5 @@
 					.panel-image
 						img(holderjs='',data-layzr="{{post.content.images.other[0].url}}")
 			.embed-responsive.embed-responsive-16by9(ng-if='post.content.videos.length')
-				iframe.embed-responsive-item(src="{{post.content.videos[0]}}",allowfullscreen)
+				iframe.embed-responsive-item(src="{{post.content.videos[0]}}", allowfullscreen)
 			p(ng-bind-html="post.content.content",flowtype='',min-font=16,max-font=28,minimum=320)

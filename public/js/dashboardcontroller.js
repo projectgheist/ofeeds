@@ -4,6 +4,8 @@
 	/** Declare controller */
 	function dashboardController ($scope, $sce, $interval, services) {
 		services.recentFeeds().query(function (data) {
+			// mark variable as received
+			$scope.lf = true;
 			// strip properties with leading $$ characters
 			data = JSON.parse(angular.toJson(data));
 			if (data && data.feeds && data.feeds.length > 0) {
@@ -15,6 +17,8 @@
 		});
 
 		services.popularFeeds().query(function (data) {
+			// mark variable as received
+			$scope.pf = true;
 			// strip properties with leading $$ characters
 			data = JSON.parse(angular.toJson(data));
 			if (data && data.feeds && data.feeds.length > 0) {
@@ -27,6 +31,8 @@
 		
 		$scope.recentPosts = function () {
 			services.recentPosts().query(function (data) {
+				// mark variable as received
+				$scope.rp = true;
 				// strip properties with leading $$ characters
 				data = JSON.parse(angular.toJson(data));
 				if (data.length > 0) {

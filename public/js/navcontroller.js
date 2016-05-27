@@ -7,6 +7,7 @@
 		});
 
 		$scope.gtsubs = function () {
+			$scope.subs = false;
 			services.getSubscriptions().query(function (data) {
 				// loop subscription array
 				for (var i = 0; i < data.feeds.length; ++i) {
@@ -58,7 +59,6 @@
 				}*/
 				// update subscriptions
 				$scope.subs = data.feeds;
-			}, function (err) {
 			});
 		}	
 
@@ -88,9 +88,10 @@
 		}
 
 		$scope.gotosub = function (obj) {
-			$timeout(function () {
-				$location.path(['/subscription/feed/',obj.value,'/'].join(''));
-			});
+			// set new url
+			$location.path(['/subscription/feed/',obj.value,'/'].join(''));
+			// sync
+			$scope.$apply()
 		}
 
 		$scope.gtsubs();

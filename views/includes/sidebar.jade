@@ -1,5 +1,5 @@
 .col-md-3#menu(ng-controller="navController")
 	#sidebar-body
-		div(ng-if="!subs")
+		div(ng-if="!subs || !subs.length")
 			include ../elements/loading
 		include ../elements/sidebarlink
