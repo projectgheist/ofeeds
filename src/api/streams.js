@@ -69,6 +69,7 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 					// string: site URL
 					var value = params.value;
 					var obj = {
+						type: params.type,
 						feedURL: value,
 						title: 'Unknown (' + value + ')',
 						updated: '',

@@ -1,32 +1,31 @@
 .container-fluid(infinite-scroll='loadMore()',infinite-scroll-distance='2')
-	.row(ng-if="false")
+	.row(ng-if="stream")
 		.col-xs-12
-			table.table.shadow-z-1(ng-if="stream !== undefined")
-				thead
-					tr
-						th(style='width:30%') Title
-						th(style='width:70%') Values
-				tbody
-					tr
-						td URL
-						td
-							a(href="{{stream.feedURL}}", target="_blank")
-								.text-left(ng-textfit='', style="height:21px") {{stream.feedURL}}
-					tr
-						td Creation
-						td {{stream.creation}}
-					tr
-						td Updated
-						td {{stream.updated}}
-					tr
-						td Visible articles
-						td {{stream.items.length}}
+			.card
+				.card-header Information
+				.card-block
+					table.table
+						tbody
+							tr.no-border
+								td URL
+								td
+									a(href="{{stream.feedURL}}", target="_blank", ng-tt-max-font=24) {{stream.feedURL}}
+								td Article count
+								td {{stream.items.length}}
+							tr
+								td Creation
+								td {{stream.creation}}
+								td Updated
+								td {{stream.updated}}
 	div(ng-repeat='item in stream.items', ng-include='item.template')
 	.row(ng-if="stream.items.length <= 0")
 		.col-xs-12
 			h1 Feed/stream doesn't contain any articles!
 	.row
 		.col-xs-12
-			h1(ng-if="eof") End of feed/stream reached!
+			.card.card-inverse.card-primary.text-xs-center(ng-if="eof")
+				.card-block
+					blockquote.card-blockquote
+						p End of {{stream.type}} reached!
 			div(ng-if="!eof")
 				include ../elements/loading
