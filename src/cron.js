@@ -215,6 +215,7 @@ function StorePosts (stream, feed, posts, guids) {
 				// NOTE: tag names and attributes are all in CAPS
 				switch (tag.name) {
 				case 'IMG':
+					// ignoreImages OR if either width OR height are 1
 					if (ignoreImages ||
 						parseInt(tag.attributes.WIDTH, 10) <= 1 ||
 						parseInt(tag.attributes.HEIGHT, 10) <= 1) {
@@ -224,6 +225,7 @@ function StorePosts (stream, feed, posts, guids) {
 					var m = tag.attributes.SRC.match(/http.*\.(gif|jpg|jpeg|tiff|png)/i);
 					// create new image object
 					var obj = {
+						'url': m[0], // returns the first match, second match is the extension
 						'width': parseInt(tag.attributes.WIDTH, 10) || 0,
 						'height': parseInt(tag.attributes.HEIGHT, 10) || 0
 					};
