@@ -16,7 +16,6 @@
 		<outline title="Eurogamer.net" text="Eurogamer is the largest independent gaming website in Europe, providing news, reviews, previews, and more." type="rss" xmlUrl="http://www.eurogamer.net/?format=rss" htmlUrl="http://www.eurogamer.net"/>
 		<outline title="Rock, Paper, Shotgun" text="" type="rss" xmlUrl="http://feeds.feedburner.com/RockPaperShotgun" htmlUrl="https://www.rockpapershotgun.com"/>
 		<outline title="DeviantArt: What's Hot" text="DeviantArt RSS for What's Hot" type="rss" xmlUrl="http://backend.deviantart.com/rss.xml?order=67108864" htmlUrl="http://www.deviantart.com/browse/all/?order=67108865"/>
-		<outline title="DeviantArt: What's Hot" text="DeviantArt RSS for What's Hot" type="rss" xmlUrl="http://backend.deviantart.com/rss.xml?order=67108864" htmlUrl="http://www.deviantart.com/browse/all/?order=67108865"/>
 		<outline title="instagram's photos | Iconosquare - Instagram Web Viewer" text="Instagram's photos of instagram  | Iconosquare, your best Instagram Web Viewer!" type="rss" xmlUrl="http://iconosquare.com/feed/instagram" htmlUrl="http://iconosquare.com/instagram"/>
 	</body>
 </opml>

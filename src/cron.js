@@ -215,16 +215,15 @@ function StorePosts (stream, feed, posts, guids) {
 				// NOTE: tag names and attributes are all in CAPS
 				switch (tag.name) {
 				case 'IMG':
-					// ignoreImages OR width and height are 1 OR isn't a valid image extension
 					if (ignoreImages ||
 						parseInt(tag.attributes.WIDTH, 10) <= 1 ||
-						parseInt(tag.attributes.HEIGHT, 10) <= 1 ||
-						!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(tag.attributes.SRC)) {
+						parseInt(tag.attributes.HEIGHT, 10) <= 1) {
 						break;
 					}
+					// has valid image extension
+					var m = tag.attributes.SRC.match(/http.*\.(gif|jpg|jpeg|tiff|png)/i);
 					// create new image object
 					var obj = {
-						'url': tag.attributes.SRC,
 						'width': parseInt(tag.attributes.WIDTH, 10) || 0,
 						'height': parseInt(tag.attributes.HEIGHT, 10) || 0
 					};
