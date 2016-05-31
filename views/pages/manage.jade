@@ -13,30 +13,31 @@
 						th Name
 						th Posts
 						th Crawl time
-						th.text-center Action
+						th Action
 				tbody
 					tr(ng-if="!subs")
 						td(colspan="5")
 							include ../elements/loading
-					tr(ng-repeat='f in subs',ng:class="{'danger':!f.crawlSuccesful}")
+					tr(ng-repeat='f in subs', ng:class="{'danger':!f.crawlSuccesful}")
 						td
 							img(ng-src="{{f.favicon}}", ng-if="f.favicon", style="height:16px")
 							i.fa.fa-fw.fa-bookmark(ng-if="!f.favicon")
-						td.col-xs-4
+						td
 							input.form-control(type="text",value="{{f.title}}",style='background-color:transparent')
 							//--br
 							//--input.form-control(type="text",value="{{f.feedURL}}",style='background-color:transparent')
-						td.text-center {{f.postCount}}
+						td {{f.postCount}}
 						td
 							p
 								i.fa.fa-fw(ng:class="{true:'fa-check', false:'fa-times'}[f.crawlSuccesful]")
 								| &nbsp;{{f.crawlTime}}
 							p(ng-if="!f.crawlSuccesful") {{f.updated}}
-						td.col-xs-4.text-center
-							a.btn.btn-primary(href="{{f.url}}",title="View")
-								i.fa.fa-external-link
-							button.btn.btn-primary(type="button",title="Refresh",ng-click="rfrsh(f.id)")
-								i.fa.fa-refresh
-							if user !== undefined && user.isAdmin
-								button.btn.btn-primary(type="button",title="Remove")
-									i.fa.fa-times
+						td
+							.btn-group
+								a.btn.btn-primary(href="{{f.url}}",title="View")
+									i.fa.fa-external-link
+								button.btn.btn-primary(type="button", title="Refresh", ng-click="refresh(f.id)")
+									i.fa.fa-refresh
+								if user !== undefined && user.isAdmin
+									button.btn.btn-primary(type="button", title="Remove", ng-click="delete(f.id)")
+										i.fa.fa-times
