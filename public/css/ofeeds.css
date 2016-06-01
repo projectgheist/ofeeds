@@ -15,6 +15,11 @@ tr.no-border > td {
 	border-top: inherit;
 }
 
+.post-content img {
+	//width: 100%;
+	height: auto;
+}
+
 /* Old CSS */
 
 .v-offset {
@@ -234,26 +239,10 @@ hbinclude .bs-callout {
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0)
 }
 
-.panel-image .panel-text {
-	background-color: rgba(255, 255, 255, 0.84);
-}
-
-.panel-text h3 {
-	margin: 0;
-}
-
-/* Panel images need a wrapper or else they overflow their bounds */
-.panel-image {
-	overflow: hidden;
-	height: 100%;
-}
-
-.panel-post {
+.post-thumbnail {
+	width: 100%;
 	height: 448px;
-}
-
-.panel-body img {
-	max-width: 100%;
+	overflow: hidden;
 }
 
 .tt-suggestion p {

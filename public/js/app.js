@@ -19,22 +19,28 @@
 	})
 	.on('src:after', (element) => {
 		var self = $(element);
-		// has holderjs attribute?
-		if (self.attr('holderjs').length) {
-			// convert json to js-object
-			obj = JSON.parse(self.attr('holderjs'));
-			if (obj.height) {
-				self.parent().css('height', obj.height);
-			}
-		} else {
-			self.height('0'); // ignore current image height
-			var img = self.parent(),
-				panel = img.parent();
-			img.css('height',panel.parent().height() - panel.height());
-			self.height('100%'); // fill parent container
-		}
-		// fit image to parent
-		fit(self[0], self.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
+		// remove width and height from holderjs
+		self.width('auto');
+		self.height('auto');
+		// requires a small delay for some reason
+		setTimeout(function () {
+			// fit image to parent
+			fit(
+				element,
+				self.parent()[0],
+				{
+					// Align to center
+					vAlign: fit.CENTER,
+					// Don't fill the area
+					cover: false,
+					// Auto resize on window change
+					watch: true,
+					// Apply the computed transformations
+					apply: true
+				},
+				fit.cssTransform
+			);
+		}, 200);
 	});
 	
 	/**
@@ -99,7 +105,7 @@
 		])
 		.config(appConfig)
 		// directive names are only allowed to have one capitalized letter in them
-		.directive('holderjs', holderjs)
+		.directive('layzr', holderjs)
 		.directive('withripple', ['$rootScope','$window','$location',withripple])
 		.directive('ngTextfit', ngTextfit);
 
@@ -142,26 +148,16 @@
 				scope.$watch(function () {
 					return scope.isNavVisible();
 				}, function () {
-					setTimeout(function () { // requires a 1ms delay for some reason
-						element.height('0'); // ignore current image height
-						var img = element.parent(), //eg. panel-image
-							panel = img.parent();
-						// set holderjs data
-						attrs.$set('data-src', ['holder.js/',element.parent().width(),'x',panel.parent().height() - panel.height(),'/grey'].join(''));
-						element.height('100%'); // fill parent container
-						// run holderjs
-						Holder.run({ images: $(element)[0] });
-						// image link detected that needs loading?
-						if (element.attr('data-layzr') && element.attr('data-layzr').length) {
-							// remove holderjs attributes
-							element.css('width', '');
-							element.css('height', '');
-							// force image lazy loading update
-							g_Layzr.update().check();
-						} else {
-							element.removeAttr('data-layzr');
-						}
-					}, 1);
+					// eg. panel-post
+					var parent = element.parent();
+					// set holderjs data
+					attrs.$set('data-src', ['holder.js/', parent.width(),'x', parent.height(), '/grey'].join(''));
+					// run holderjs
+					Holder.run({
+						images: $(element)[0]
+					});
+					// force image lazy loading update
+					g_Layzr.update().check();
 				});
 			}
 		}
@@ -225,6 +221,7 @@
 			restrict: 'A', // attribute
 			link: function (scope, element, attrs) {
 				element.bind('load', function () {
+					console.log('ngImgLoaded');
 					fit(element[0], element.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
 				});
 			}
