@@ -214,20 +214,6 @@
 		};
 	}
 	
-	/**
-	 */
-	function ngImgLoaded() {
-		return {
-			restrict: 'A', // attribute
-			link: function (scope, element, attrs) {
-				element.bind('load', function () {
-					console.log('ngImgLoaded');
-					fit(element[0], element.parent()[0], { cover: true, watch: true, apply: true }, fit.cssTransform);
-				});
-			}
-		};
-	};
-	
 	function onResize($window) {
 		return function (scope, element, attr) {
 			var w = angular.element($window);
