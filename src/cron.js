@@ -225,9 +225,9 @@ function StorePosts (stream, feed, posts, guids) {
 					var m = tag.attributes.SRC.match(/http.*\.(gif|jpg|jpeg|tiff|png)/i);
 					// create new image object
 					var obj = {
-						'url': m[0], // returns the first match, second match is the extension
-						'width': parseInt(tag.attributes.WIDTH, 10) || 0,
-						'height': parseInt(tag.attributes.HEIGHT, 10) || 0
+						url: m[0], // returns the first match, second match is the extension
+						width: parseInt(tag.attributes.WIDTH, 10) || 0,
+						height: parseInt(tag.attributes.HEIGHT, 10) || 0
 					};
 					var found = false;
 					// check if image already exists in list
@@ -243,6 +243,13 @@ function StorePosts (stream, feed, posts, guids) {
 						// add to images array
 						images.other.push(obj);
 					}
+					break;
+				case 'VIDEO':
+					images.other.push({
+						url: tag.attributes.POSTER,
+						width: parseInt(tag.attributes.WIDTH, 10) || 0,
+						height: parseInt(tag.attributes.HEIGHT, 10) || 0
+					});
 					break;
 				case 'IFRAME':
 					// add video url to array
