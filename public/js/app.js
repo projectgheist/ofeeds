@@ -102,6 +102,11 @@
 			'ngResource',
 			'infinite-scroll',
 			'ngFlowtype',
+			'com.2fdevs.videogular',
+			'com.2fdevs.videogular.plugins.controls',
+			'com.2fdevs.videogular.plugins.overlayplay',
+			'com.2fdevs.videogular.plugins.buffering',
+			'info.vietnamcode.nampnq.videogular.plugins.youtube',
 		])
 		.config(appConfig)
 		// directive names are only allowed to have one capitalized letter in them

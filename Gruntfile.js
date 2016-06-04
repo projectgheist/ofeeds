@@ -23,6 +23,11 @@ module.exports = function(grunt) {
 					'./bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
 					'./bower_components/handlebars/handlebars.js',
 					'./bower_components/holderjs/holder.js',
+					'./bower_components/videogular/videogular.js',
+					'./bower_components/videogular-controls/vg-controls.js',
+					'./bower_components/videogular-buffering/vg-buffering.js',
+					'./bower_components/videogular-overlay-play/vg-overlay-play.js',
+					'./bower_components/bower-videogular-youtube/youtube.js',
 					'./bower_components/moment/moment.js',
 					'./bower_components/typeahead.js/dist/bloodhound.js',
 					'./bower_components/typeahead.js/dist/typeahead.jquery.js',
@@ -49,7 +54,7 @@ module.exports = function(grunt) {
 					'./bower_components/font-awesome/css/font-awesome.css',
 					'./bower_components/bootstrap/dist/css/bootstrap.css',
 					'./bower_components/angular-bootstrap/ui-bootstrap-csp.css',
-					'./bower_components/tether/dist/css/tether.css'
+					'./bower_components/tether/dist/css/tether.css',
 				],
 				dest: './public/css/<%= pkg.name %>.min.css'
 			}
@@ -63,6 +68,38 @@ module.exports = function(grunt) {
 				src: './public/js/<%= pkg.name %>.js',
 				dest: './public/js/<%= pkg.name %>.min.js'
 			}
+		},
+		copy: {
+			dist: {
+				files: [
+					// includes files within path and its sub-directories
+					{
+						expand: true,
+						flatten: true,
+						src: [
+							'./bower_components/font-awesome/fonts/*',
+							'./bower_components/bootstrap/dist/fonts/*',
+							'./bower_components/videogular-themes-default/fonts/*',
+						], 
+						dest: './public/fonts'
+					},
+					{
+						expand: true,
+						flatten: true,
+						src: [
+						], 
+						dest: './public/js'
+					},
+					{
+						expand: true,
+						flatten: true,
+						src: [
+							'./bower_components/videogular-themes-default/videogular.css',
+						], 
+						dest: './public/css'
+					}
+				],
+			},
 		},
 		watch: {
 			//...
@@ -84,7 +121,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-copy');
 
 	// Task definition
-	grunt.registerTask('default', ['cssmin','concat','uglify']);
+	grunt.registerTask('default', ['concat','cssmin','uglify','copy']);
 };
