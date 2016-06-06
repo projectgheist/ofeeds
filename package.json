@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "agenda": "^0.8.1",
+    "babel": "^6.5.2",
     "body-parser": "^1.15.1",
     "express": "^4.13.4",
     "express-session": "^1.13.0",
@@ -20,6 +21,8 @@
     "opmlparser": "^0.8.0",
     "passport": "^0.3.2",
     "passport-google-oauth": "^1.0.0",
+    "react": "^15.1.0",
+    "react-dom": "^15.1.0",
     "request": "^2.72.0",
     "rsvp": "^3.2.1",
     "sax": "^1.2.1",
