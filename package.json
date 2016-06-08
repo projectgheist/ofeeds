@@ -16,7 +16,7 @@
     "jade": "^1.11.0",
     "moment": "^2.13.0",
     "mongoomise": "0.0.8",
-    "mongoose": "^4.4.19",
+    "mongoose": "^4.4.20",
     "opml-generator": "^1.1.1",
     "opmlparser": "^0.8.0",
     "passport": "^0.3.2",

@@ -43351,7 +43351,7 @@ angular.module('ngResource', ['ng']).
 
 
 })(window, window.angular);
-;/*! tether 1.3.0 */
+;/*! tether 1.3.1 */
 
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -43463,8 +43463,10 @@ var getOrigin = function getOrigin() {
 };
 
 function removeUtilElements() {
-  document.body.removeChild(zeroElement);
-  zeroElement = undefined;
+  if (zeroElement) {
+    document.body.removeChild(zeroElement);
+  }
+  zeroElement = null;
 };
 
 function getBounds(el) {
@@ -43825,7 +43827,7 @@ function now() {
       return;
     }
 
-    if (typeof pendingTimeout !== 'undefined') {
+    if (pendingTimeout != null) {
       clearTimeout(pendingTimeout);
       pendingTimeout = null;
     }
