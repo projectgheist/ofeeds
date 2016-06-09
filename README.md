@@ -53,7 +53,7 @@ Note: Both require you to add a MongoDB to the application during setup
 * ~~Tag support~~
 * ~~Layout redesign~~
 * ~~Feed management~~
-* OPML importing/exporting
+* OPML importing/~~exporting~~
 * Mobile support
 
 When Openshift updates their `Node` module to 0.11.9
