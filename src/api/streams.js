@@ -70,16 +70,17 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 					var value = params.value;
 					var obj = {
 						type: params.type,
-						feedURL: value,
+						feedURL: decodeURIComponent(value),
 						title: 'Unknown (' + value + ')',
 						updated: '',
 						direction: 'ltr',
 						self: ut.fullURL(req),
 						subscribed: 0,
 						continuation: 'TODO',
-						showOrigin: false,
+						showOrigin: true,
 						items: []
 					};
+					// override when feed
 					if (params.type === 'feed') {
 						// reference to feed db obj
 						var feed = item.feeds[0];
@@ -90,9 +91,7 @@ ap.get('/api/0/stream/contents*', function (req, res) {
 						obj.siteURL = feed.siteURL;
 						obj.updated = feed.lastModified;
 						obj.creation = feed.creationTime;
-					} else {
-						obj.feedURL = decodeURIComponent(value);
-						obj.showOrigin = true;
+						obj.showOrigin = false;
 					}
 					// has user?
 					if (req.user) {
