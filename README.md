@@ -46,6 +46,13 @@ Supports 'Plug and play' code for the following hosts:
 
 Note: Both require you to add a MongoDB to the application during setup
 
+
+To update all dependencies to the latest version in addition to update the `package.json` file use the console command below:
+
+`ncu update -u -a`
+
+Copy and add `-m bower` to update the front end dependencies as well.
+
 ## Todo
 
 * ~~Fix cron jobs not running at periodic intervals~~
