@@ -46,6 +46,7 @@ Supports 'Plug and play' code for the following hosts:
 
 Note: Both require you to add a MongoDB to the application during setup
 
+### Update to latest
 
 To update all dependencies to the latest version in addition to update the `package.json` file use the console command below:
 
