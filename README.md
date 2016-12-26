@@ -50,9 +50,9 @@ Note: Both require you to add a MongoDB to the application during setup
 
 To update all dependencies to the latest version in addition to update the `package.json` file use the console command below:
 
-`ncu update -u -a`
+`ncu -u -a`
 
-Copy and add `-m bower` to update the front end dependencies as well.
+Copy and add `-m bower` to update the front-end dependencies as well.
 
 ## Todo
 
